@@ -1,0 +1,5 @@
+/*!  build: Vue Shop Vite 
+     copyright: https://vuejs-core.cn/shop-vite   
+     time: 2025-08-22 11:26:35 
+ */
+import{ae as p,af as y,ah as u,d as i,am as h,c as o,f as t,p as d,a as c,N as r,u as s,a1 as l,x as n,O as f,n as m,aE as C}from"./index-1-YBapYP.js";const S=p({header:{type:String,default:""},footer:{type:String,default:""},bodyStyle:{type:y([String,Object,Array]),default:""},headerClass:String,bodyClass:String,footerClass:String,shadow:{type:String,values:["always","hover","never"],default:"always"}}),v=i({name:"ElCard"}),b=i({...v,props:S,setup(w){const a=h("card");return(e,$)=>(t(),o("div",{class:r([s(a).b(),s(a).is("".concat(e.shadow,"-shadow"))])},[e.$slots.header||e.header?(t(),o("div",{key:0,class:r([s(a).e("header"),e.headerClass])},[l(e.$slots,"header",{},()=>[n(f(e.header),1)])],2)):d("v-if",!0),c("div",{class:r([s(a).e("body"),e.bodyClass]),style:m(e.bodyStyle)},[l(e.$slots,"default")],6),e.$slots.footer||e.footer?(t(),o("div",{key:1,class:r([s(a).e("footer"),e.footerClass])},[l(e.$slots,"footer",{},()=>[n(f(e.footer),1)])],2)):d("v-if",!0)],2))}});var g=u(b,[["__file","card.vue"]]);const N=C(g);export{N as E};

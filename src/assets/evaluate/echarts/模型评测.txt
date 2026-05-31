@@ -1,0 +1,188 @@
+// 评价指标
+const metrics = ['Precision', 'Recall', 'F1-Score', 'Accuracy'];
+
+// 不同模型的结果
+const modelResults = {
+    '巡视大模型': [0.85, 0.88, 0.86, 0.90],
+    'TF-IDF': [0.78, 0.80, 0.79, 0.82],
+    'LDA': [0.75, 0.77, 0.76, 0.80],
+    'TextRank': [0.80, 0.83, 0.81, 0.85],
+    'Word2Vec': [0.77, 0.79, 0.78, 0.81]
+};
+
+// 位置列表
+const posList = [
+    'left',
+    'right',
+    'top',
+    'bottom',
+    'inside',
+    'insideTop',
+    'insideLeft',
+    'insideRight',
+    'insideBottom',
+    'insideTopLeft',
+    'insideTopRight',
+    'insideBottomLeft',
+    'insideBottomRight'
+];
+
+// 配置参数
+app = {
+    configParameters: {
+        rotate: {
+            min: -90,
+            max: 90
+        },
+        align: {
+            options: {
+                left: 'left',
+                center: 'center',
+                right: 'right'
+            }
+        },
+        verticalAlign: {
+            options: {
+                top: 'top',
+                middle: 'middle',
+                bottom: 'bottom'
+            }
+        },
+        position: {
+            options: posList.reduce(function (map, pos) {
+                map[pos] = pos;
+                return map;
+            }, {})
+        },
+        distance: {
+            min: 0,
+            max: 100
+        }
+    },
+    config: {
+        rotate: 90,
+        align: 'left',
+        verticalAlign: 'middle',
+        position: 'insideBottom',
+        distance: 15,
+        onChange: function () {
+            const labelOption = {
+                rotate: app.config.rotate,
+                align: app.config.align,
+                verticalAlign: app.config.verticalAlign,
+                position: app.config.position,
+                distance: app.config.distance
+            };
+            myChart.setOption({
+                series: Object.keys(modelResults).map(modelName => ({
+                    name: modelName,
+                    type: 'bar',
+                    barGap: 0,
+                    label: labelOption,
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: modelResults[modelName]
+                }))
+            });
+        }
+    }
+};
+
+// 标签选项
+labelOption = {
+    show: true,
+    position: app.config.position,
+    distance: app.config.distance,
+    align: app.config.align,
+    verticalAlign: app.config.verticalAlign,
+    rotate: app.config.rotate,
+    formatter: '{c}  {name|{a}}',
+    fontSize: 16, // 加大字体大小
+    color: 'black', // 设置字体颜色为黑色
+    rich: {
+        name: {}
+    }
+};
+
+// ECharts 配置
+option = {
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+            type: 'shadow'
+        },
+        textStyle: {
+            fontSize: 16, // 加大提示框字体大小
+            color: 'black' // 设置提示框字体颜色为黑色
+        }
+    },
+    legend: {
+        data: Object.keys(modelResults),
+        textStyle: {
+            fontSize: 36, // 加大图例字体大小
+            color: 'black' // 设置图例字体颜色为黑色
+        }
+    },
+    toolbox: {
+        show: true,
+        orient: 'vertical',
+        left: 'right',
+        top: 'center',
+        feature: {
+            mark: { show: true },
+            dataView: { show: true, readOnly: false },
+            magicType: { show: true, type: ['line', 'bar', 'stack'] },
+            restore: { show: true },
+            saveAsImage: { show: true }
+        }
+    },
+    xAxis: [
+        {
+            type: 'category',
+            axisTick: { show: false },
+            data: metrics,
+            axisLabel: {
+                textStyle: {
+                    fontSize: 36, // 加大 x 轴标签字体大小
+                    color: 'black' // 设置 x 轴标签字体颜色为黑色
+                }
+            },
+            axisLine: {
+                lineStyle: {
+                    color: 'black' // 设置 x 轴线颜色为黑色
+                }
+            }
+        }
+    ],
+    yAxis: [
+        {
+            type: 'value',
+            min: 0,
+            max: 1,
+            interval: 0.1,
+            axisLabel: {
+                textStyle: {
+                    fontSize: 16, // 加大 y 轴标签字体大小
+                    color: 'black' // 设置 y 轴标签字体颜色为黑色
+                }
+            },
+            axisLine: {
+                lineStyle: {
+                    color: 'black' // 设置 y 轴线颜色为黑色
+                }
+            }
+        }
+    ],
+    series: Object.keys(modelResults).map(modelName => ({
+        name: modelName,
+        type: 'bar',
+        barGap: 0,
+        label: labelOption,
+        emphasis: {
+            focus: 'series'
+        },
+        data: modelResults[modelName]
+    }))
+};
+

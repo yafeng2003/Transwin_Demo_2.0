@@ -1,0 +1,5 @@
+/*!  build: Vue Shop Vite 
+     copyright: https://vuejs-core.cn/shop-vite   
+     time: 2025-08-22 11:26:35 
+ */
+System.register(["./index-legacy-BPfjIIJl.js","./index-legacy-CmomwzCQ.js","./index-legacy-Cwi3RgMc.js"],(function(e,t){"use strict";var l,n,a,s,d,i,r,c,u,g,o,f;return{setters:[e=>{l=e._},e=>{n=e.d,a=e.o,s=e.T,d=e.g,i=e.f,r=e.w,c=e.b,u=e.a,g=e.u,o=e.e,f=e._},null],execute:function(){var m=document.createElement("style");m.textContent=".right-img[data-v-f948fd12]{width:100%}\n/*$vite$:1*/",document.head.appendChild(m);const h=""+new URL("../png/2-CSAKnWgX.png",t.meta.url).href,p=["src"],y=n({name:"Score",__name:"list",props:{title:{type:String,default:""},isShow:{type:Boolean,default:!1}},setup:e=>(a((()=>{})),s((()=>{})),(t,n)=>{const a=l,s=o;return i(),d(s,{lg:12,md:12,sm:24,xl:12,xs:24},{default:r((()=>[c(a,{"body-style":{height:"70vh"},class:"my-vab-card",skeleton:"",title:e.title},{default:r((()=>[u("img",{alt:"",class:"right-img",src:g(h)},null,8,p)])),_:1},8,["title"])])),_:1})})});e("default",f(y,[["__scopeId","data-v-f948fd12"]]))}}}));

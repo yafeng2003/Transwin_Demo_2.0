@@ -1,0 +1,53 @@
+option = {
+  backgroundColor: '#fff',
+  title: {
+    text: '预测预警评估结果',
+    left: 'center',
+    textStyle: { color: '#000', fontSize: 40, fontWeight: 'bold' }
+  },
+  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+  legend: {
+    top: 'bottom',
+    data: ['MSE', 'MAE', 'R²', '综合得分'],
+    textStyle: { color: '#000', fontWeight: 'bold', fontSize: 18 }
+  },
+  xAxis: { type: 'category', data: ['预测预警'], axisLabel: { show: false } },
+  yAxis: {
+    type: 'value', min: 50, max: 100,
+    axisLabel: { color: '#000', fontSize: 14, fontWeight: 'bold' }
+  },
+  series: [
+    {
+      name: 'MSE',
+      type: 'bar',
+      barWidth: '20%',
+      itemStyle: { color: '#5470C6' },
+      label: { show: true, position: 'top', fontSize: 16, fontWeight: 'bold', color: '#000' },
+      data: [94.1]
+    },
+    {
+      name: 'MAE',
+      type: 'bar',
+      barWidth: '20%',
+      itemStyle: { color: '#91CC75' },
+      label: { show: true, position: 'top', fontSize: 16, fontWeight: 'bold', color: '#000' },
+      data: [95.2]
+    },
+    {
+      name: 'R²',
+      type: 'bar',
+      barWidth: '20%',
+      itemStyle: { color: '#FAC858' },
+      label: { show: true, position: 'top', fontSize: 16, fontWeight: 'bold', color: '#000' },
+      data: [96.5]
+    },
+    {
+      name: '综合得分',
+      type: 'bar',
+      barWidth: '20%',
+      itemStyle: { color: '#EE6666' },
+      label: { show: true, position: 'top', fontSize: 16, fontWeight: 'bold', color: '#000' },
+      data: [95.3]
+    }
+  ]
+};

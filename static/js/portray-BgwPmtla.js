@@ -1,0 +1,5 @@
+/*!  build: Vue Shop Vite 
+     copyright: https://vuejs-core.cn/shop-vite   
+     time: 2025-08-15 13:02:45 
+ */
+import u from"./suggest1-D5gl8_8p.js";import d from"./suggest2-DYeAhXDd.js";import{E as p}from"./index-CcWyV35S.js";import{d as f,r as n,c as r,f as l,p as g,a as e,b as t,w as c,E as v,_ as h}from"./index-BZplGa9b.js";import"./index-CW88g3tK.js";import"./index-C2JtjoHr.js";import"./index-CP3tvYrQ.js";import"./isEqual-DcS9PdOj.js";const w={key:0,class:"fullscreen-loading"},E={class:"loader-container"},I={class:"suggestion-container"},k=f({name:"Import",__name:"portray",setup(x){const o=n(!1),s=n(!1),i=()=>{s.value=!0,setTimeout(()=>{s.value=!1,o.value=!o.value},3e3)};return(y,a)=>{const m=p,_=v;return l(),r("div",null,[s.value?(l(),r("div",w,[e("div",E,[t(m,{indeterminate:!0,percentage:100,"stroke-width":20},{default:c(()=>a[0]||(a[0]=[e("span",null,"AI正在生成...",-1)])),_:1,__:[0]})])])):g("",!0),e("div",I,[e("div",null,[t(_,{gutter:20},{default:c(()=>[t(u,{title:"AI发现问题",onToggle:i}),t(d,{"show-element":o.value,title:"AI生成建议"},null,8,["show-element"])]),_:1})])])])}}}),P=h(k,[["__scopeId","data-v-d569c353"]]);export{P as default};

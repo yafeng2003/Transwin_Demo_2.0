@@ -1,0 +1,5 @@
+/*!  build: Vue Shop Vite 
+     copyright: https://vuejs-core.cn/shop-vite   
+     time: 2025-08-15 13:02:45 
+ */
+System.register(["./index-legacy-CpATUTBe.js","./index-legacy-Cqstv5ZE.js"],(function(e,t){"use strict";var s,l,o,i,c,n,a,r,f,d,p;return{setters:[e=>{s=e.E},e=>{l=e.d,o=e.g,i=e.f,c=e.aQ,n=e.w,a=e.a8,r=e.x,f=e.N,d=e.af,p=e.u}],execute:function(){e("_",l({name:"VabAlert",__name:"index",props:{...s.props,closable:{type:Boolean,default:!1}},setup(e){const t=e;return(e,l)=>(i(),o(p(s),d({center:t.center,closable:t.closable,"close-text":t.closeText,description:t.description,effect:t.effect,"show-icon":t.showIcon,title:t.title,type:t.type},e.$attrs),c({_:2},[t.title||e.$slots.title?{name:"title",fn:n((()=>[a(e.$slots,"title",{},(()=>[r(f(t.title),1)]))])),key:"0"}:void 0,e.$slots.default||t.description?{name:"default",fn:n((()=>[a(e.$slots,"default",{},(()=>[r(f(t.description),1)]))])),key:"1"}:void 0]),1040,["center","closable","close-text","description","effect","show-icon","title","type"]))}}))}}}));

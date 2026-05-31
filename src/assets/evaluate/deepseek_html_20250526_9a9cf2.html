@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>3D散点图示例</title>
+    <!-- 引入 ECharts 主库 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <!-- 引入 ECharts GL（3D图表需要） -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #chart-container {
+            width: 90%;
+            height: 90%;
+            max-width: 1200px;
+            max-height: 800px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 为图表准备一个具备大小的DOM容器 -->
+    <div id="chart-container"></div>
+    
+    <script>
+        // 初始化ECharts实例
+        var myChart = echarts.init(document.getElementById('chart-container'));
+        
+        // 生成数据
+        function generateData() {
+          const data = [];
+          for (let i = 0; i <= 10; i++) {
+            for (let j = 0; j <= 9; j++) { // y轴范围0-9对应2016-2025
+              for (let k = 0; k <= 10; k++) {
+                const value = Math.random() * 4 + 2;
+                data.push([i, j, k, value]);
+              }
+            }
+          }
+          return data;
+        }
+
+        const data = generateData();
+
+        // 配置项
+        var option = {
+          backgroundColor: '#000',
+          visualMap: {
+            show: false,
+            min: 2,
+            max: 6,
+            inRange: {
+              symbolSize: [2, 10],
+              color: [
+                '#313695', '#4575b4', '#74add1', '#abd9e9',
+                '#e0f3f8', '#ffffbf', '#fee090', '#fdae61',
+                '#f46d43', '#d73027', '#a50026'
+              ],
+              colorAlpha: [0.4, 1]
+            }
+          },
+
+          xAxis3D: {
+            type: 'value',
+            name: '单位',
+            nameTextStyle: { 
+              color: '#fff',
+              fontWeight: 'bold'
+            },
+            axisLine: { 
+              lineStyle: { 
+                color: '#fff'
+              }
+            },
+            axisLabel: { 
+              color: '#fff'
+            },
+            axisPointer: {
+              show: true,
+              lineStyle: {
+                color: 'rgba(255, 165, 0, 0.9)',
+                width: 3,
+                shadowColor: 'rgba(255,165,0,0.8)',
+                shadowBlur: 12
+              },
+              handle: {
+                show: true,
+                color: '#FFA500',
+                size: 60
+              }
+            }
+          },
+
+          yAxis3D: {
+            type: 'value',
+            name: '时间',
+            min: 0,
+            max: 9,
+            nameTextStyle: { 
+              color: '#fff',
+              fontWeight: 'bold'
+            },
+            axisLine: { 
+              lineStyle: { 
+                color: '#fff'
+              }
+            },
+            axisLabel: {
+              color: '#fff',
+              formatter: function(value) {
+                return 2016 + parseInt(value);
+              }
+            },
+            axisPointer: {
+              show: true,
+              lineStyle: {
+                color: 'rgba(255, 165, 0, 0.9)',
+                width: 3,
+                shadowColor: 'rgba(255,165,0,0.8)',
+                shadowBlur: 12
+              },
+              label: {
+                show: false
+              },
+              handle: {
+                show: true,
+                color: '#FFA500',
+                size: 60
+              }
+            }
+          },
+
+          zAxis3D: {
+            type: 'value',
+            name: '问题',
+            nameTextStyle: { 
+              color: '#fff',
+              fontWeight: 'bold'
+            },
+            axisLine: { 
+              lineStyle: { 
+                color: '#fff'
+              }
+            },
+            axisLabel: { 
+              color: '#fff'
+            },
+            axisPointer: {
+              show: true,
+              lineStyle: {
+                color: 'rgba(255, 165, 0, 0.9)',
+                width: 3,
+                shadowColor: 'rgba(255,165,0,0.8)',
+                shadowBlur: 12
+              },
+              handle: {
+                show: true,
+                color: '#FFA500',
+                size: 60
+              }
+            }
+          },
+
+          grid3D: {
+            boxWidth: 80,
+            boxHeight: 60,
+            boxDepth: 80,
+            axisPointer: {
+              lineStyle: {
+                color: 'rgba(255,165,0,0.6)',
+                width: 3
+              }
+            },
+            viewControl: {
+              autoRotate: true,
+              autoRotateSpeed: 15,
+              damping: 0.8,
+              distance: 150,
+              projection: 'perspective'
+            },
+            axisLine: { 
+              lineStyle: { 
+                color: '#fff'
+              }
+            },
+            boxMaterial: {
+              color: 'rgba(0, 0, 0, 0.03)',
+              borderColor: '#fff'
+            },
+            light: {
+              main: { 
+                intensity: 1.2,
+                shadow: false
+              },
+              ambient: { 
+                intensity: 0.4
+              }
+            }
+          },
+
+          series: [{
+            type: 'scatter3D',
+            symbol: 'rect',
+            data: data,
+            itemStyle: {
+              borderWidth: 0.5,
+              borderColor: '#333'
+            },
+            emphasis: {
+              itemStyle: {
+                color: 'rgba(255,165,0,0.8)',
+                borderColor: '#FFA500',
+                shadowColor: 'rgba(255,165,0,0.5)',
+                shadowBlur: 10,
+                opacity: 1
+              }
+            }
+          }]
+        };
+
+        // 使用配置项显示图表
+        myChart.setOption(option);
+
+        // 响应式调整
+        window.addEventListener('resize', function() {
+            myChart.resize();
+        });
+    </script>
+</body>
+</html>

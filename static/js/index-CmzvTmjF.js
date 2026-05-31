@@ -1,0 +1,5 @@
+/*!  build: Vue Shop Vite 
+     copyright: https://vuejs-core.cn/shop-vite   
+     time: 2025-08-22 10:57:39 
+ */
+import a from"./SegmentedCustomStyle-DRehlniV.js";import{_ as i}from"./SegmentedCustomContent.vue_vue_type_script_setup_true_lang-S4WX_SqB.js";import{_ as r}from"./SegmentedBlock.vue_vue_type_script_setup_true_lang-BJIi3uyU.js";import{_ as p}from"./SegmentedDisabled.vue_vue_type_script_setup_true_lang-C6dZv9Ni.js";import{_ as d}from"./index-CiE8O60D.js";import{_ as l}from"./SegmentedBasic.vue_vue_type_script_setup_true_lang-BBpKSgNa.js";import{d as f,c as u,f as g,b as t,w as n}from"./index-C5ztgtHd.js";import"./index-BSbO5-NR.js";import"./index-CluqNFGf.js";const b={class:"segmented-container no-background-container"},V=f({name:"Segmented",__name:"index",setup(k){return(x,$)=>{const o=l,e=d,_=p,m=r,s=i,c=a;return g(),u("div",b,[t(e,{title:"基础用法"},{default:n(()=>[t(o)]),_:1}),t(e,{title:"禁用状态"},{default:n(()=>[t(_)]),_:1}),t(e,{title:"Block 分段选择器"},{default:n(()=>[t(m)]),_:1}),t(e,{title:"自定义内容"},{default:n(()=>[t(s)]),_:1}),t(e,{title:"自定义样式"},{default:n(()=>[t(c)]),_:1})])}}});export{V as default};

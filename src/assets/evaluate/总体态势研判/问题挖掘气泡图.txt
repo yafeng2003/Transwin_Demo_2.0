@@ -1,0 +1,206 @@
+const dataTechSupervision = [
+  [2015, 35, 12],
+  [2016, 42, 15],
+  [2017, 50, 20],
+  [2018, 40, 16],
+  [2019, 60, 22],
+  [2020, 55, 18],
+  [2021, 65, 24],
+  [2022, 58, 20],
+  [2023, 68, 23],
+  [2024, 52, 17]
+];
+
+const dataDeptResponsibility = [
+  [2015, 40, 14],
+  [2016, 30, 10],
+  [2017, 45, 16],
+  [2018, 38, 13],
+  [2019, 48, 17],
+  [2020, 35, 11],
+  [2021, 42, 15],
+  [2022, 32, 10],
+  [2023, 40, 14],
+  [2024, 30, 10]
+];
+
+const dataBusinessAssessment = [
+  [2015, 50, 18],
+  [2016, 55, 20],
+  [2017, 45, 16],
+  [2018, 60, 22],
+  [2019, 52, 18],
+  [2020, 63, 23],
+  [2021, 50, 17],
+  [2022, 62, 22],
+  [2023, 53, 18],
+  [2024, 65, 24]
+];
+
+const dataEmployeeCommunication = [
+  [2015, 48, 16],
+  [2016, 40, 13],
+  [2017, 52, 18],
+  [2018, 45, 15],
+  [2019, 55, 19],
+  [2020, 42, 14],
+  [2021, 58, 20],
+  [2022, 48, 16],
+  [2023, 56, 19],
+  [2024, 45, 15]
+];
+
+const dataOverseasInspection = [
+  [2015, 30, 10],
+  [2016, 38, 13],
+  [2017, 28, 9],
+  [2018, 36, 12],
+  [2019, 32, 10],
+  [2020, 40, 14],
+  [2021, 34, 11],
+  [2022, 39, 13],
+  [2023, 31, 10],
+  [2024, 37, 12]
+];
+
+const itemStyle = {
+  opacity: 0.8,
+  shadowBlur: 10,
+  shadowOffsetX: 0,
+  shadowOffsetY: 0,
+  shadowColor: 'rgba(0,0,0,0.3)'
+};
+
+option = {
+  color: ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6'],
+  legend: {
+    top: 10,
+    data: ['新兴技术监管薄弱', '跨部门整改责任不清', '新兴业务考核滞后', '员工沟通渠道不畅', '海外业务巡视短板'],
+    textStyle: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: '#ffffff'
+    }
+  },
+  grid: {
+    left: '10%',
+    right: '15%',
+    top: '18%',
+    bottom: '10%'
+  },
+  tooltip: {
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    formatter: function (param) {
+      return '<div style="border-bottom: 1px solid #eee; font-size: 16px;padding-bottom: 7px;margin-bottom: 7px">'
+                + param.seriesName + ' - ' + param.value[0] + '年：热度指数 ' + param.value[1]
+                + '</div>'
+                + '气泡大小：' + param.value[2];
+    }
+  },
+  xAxis: {
+    type: 'value',
+    name: '年份',
+    nameGap: 20,
+    nameTextStyle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: '#ffffff'
+    },
+    axisLabel: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: '#ffffff'
+    },
+    min: 2015,
+    max: 2024,
+    interval: 1,
+    splitLine: {
+      lineStyle: {
+        color: '#ffffff'
+      }
+    }
+  },
+  yAxis: {
+    type: 'value',
+    name: '热度指数',
+    nameLocation: 'end',
+    nameGap: 30,
+    nameTextStyle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: '#ffffff'
+    },
+    axisLabel: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: '#ffffff'
+    },
+    splitLine: {
+      show: true,
+      lineStyle: {
+        type: 'dashed',
+        color: '#ffffff'
+      }
+    }
+  },
+  visualMap: [
+    {
+      show: false,
+      dimension: 2,
+      min: 0,
+      max: 60,
+      inRange: {
+        symbolSize: [30, 80]
+      }
+    }
+  ],
+  series: [
+    {
+      name: '新兴技术监管薄弱',
+      type: 'scatter',
+      symbolSize: function(data) {
+        return data[2] * 2;
+      },
+      itemStyle: itemStyle,
+      data: dataTechSupervision
+    },
+    {
+      name: '跨部门整改责任不清',
+      type: 'scatter',
+      symbolSize: function(data) {
+        return data[2] * 2;
+      },
+      itemStyle: itemStyle,
+      data: dataDeptResponsibility
+    },
+    {
+      name: '新兴业务考核滞后',
+      type: 'scatter',
+      symbolSize: function(data) {
+        return data[2] * 2;
+      },
+      itemStyle: itemStyle,
+      data: dataBusinessAssessment
+    },
+    {
+      name: '员工沟通渠道不畅',
+      type: 'scatter',
+      symbolSize: function(data) {
+        return data[2] * 2;
+      },
+      itemStyle: itemStyle,
+      data: dataEmployeeCommunication
+    },
+    {
+      name: '海外业务巡视短板',
+      type: 'scatter',
+      symbolSize: function(data) {
+        return data[2] * 2;
+      },
+      itemStyle: itemStyle,
+      data: dataOverseasInspection
+    }
+  ]
+};

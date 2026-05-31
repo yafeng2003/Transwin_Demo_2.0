@@ -1,0 +1,5 @@
+/*!  build: Vue Shop Vite 
+     copyright: https://vuejs-core.cn/shop-vite   
+     time: 2025-08-22 10:57:39 
+ */
+import{_ as n}from"./index-CiE8O60D.js";import{d as c,o as l,T as m,g as _,f as t,w as o,b as r,c as i,p as d,e as p,_ as u}from"./index-C5ztgtHd.js";import"./index-CluqNFGf.js";const f={key:0,class:"count-text"},y=c({name:"Aisummary",__name:"aisummary",props:{title:{type:String,default:""},isShow:{type:Boolean,default:!1}},setup(e){return l(()=>{}),m(()=>{}),(x,h)=>{const a=n,s=p;return t(),_(s,{lg:24,md:12,sm:24,xl:24,xs:24},{default:o(()=>[r(a,{"body-style":{height:"130px"},class:"my-vab-card",skeleton:"",title:e.title},{default:o(()=>[e.isShow?(t(),i("div",f,' 该党委认真学习贯彻习近平总书记关于巡视整改的重要指示精神，切实履行主体责任，研究制定巡视整改"一方案三清单"，截至5月22日，巡视反馈的125个具体问题（含立行立改问题），已完成整改121个；制定的235条整改措施，已完成200条，共出台10项制度机制。巡视移交的26件问题线索（含边巡边查问题线索），已办结26件，其中，立案审查调查1人，党纪政务处分1人，组织处理2人，移送检察机关0人。巡视移交的55件群众信访事项，已办结55件。 ')):d("",!0)]),_:1},8,["title"])]),_:1})}}}),B=u(y,[["__scopeId","data-v-8906b7aa"]]);export{B as default};

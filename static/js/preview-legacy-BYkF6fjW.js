@@ -1,0 +1,5 @@
+/*!  build: Vue Shop Vite 
+     copyright: https://vuejs-core.cn/shop-vite   
+     time: 2025-08-22 10:57:39 
+ */
+System.register(["./index-legacy-L7qbE4w6.js","./index-legacy-uOaXdKfA.js","./index-legacy-BrJfnR4g.js"],(function(e,t){"use strict";var l,a,n,s,i,d,c,r,u,o,g,f,m;return{setters:[e=>{l=e._},e=>{a=e.d,n=e.o,s=e.T,i=e.g,d=e.f,c=e.w,r=e.b,u=e.c,o=e.p,g=e.u,f=e.e,m=e._},null],execute:function(){var p=document.createElement("style");p.textContent=".imageRef[data-v-85f3429b]{width:100%;height:100%}\n/*$vite$:1*/",document.head.appendChild(p);const h=""+new URL("../png/33-BJiJQFlT.png",t.meta.url).href,y=["src"],v=a({name:"Score",__name:"preview",props:{title:{type:String,default:""},isShow:{type:Boolean,default:!1}},setup:e=>(n((()=>{})),s((()=>{})),(t,a)=>{const n=l,s=f;return d(),i(s,{lg:12,md:12,sm:24,xl:12,xs:24},{default:c((()=>[r(n,{"body-style":{height:"70vh"},class:"my-vab-card",skeleton:"",title:e.title},{default:c((()=>[e.isShow?(d(),u("img",{key:0,alt:"",class:"imageRef",src:g(h)},null,8,y)):o("",!0)])),_:1},8,["title"])])),_:1})})});e("default",m(v,[["__scopeId","data-v-85f3429b"]]))}}}));

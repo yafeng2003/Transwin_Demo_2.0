@@ -1,0 +1,5 @@
+/*!  build: Vue Shop Vite 
+     copyright: https://vuejs-core.cn/shop-vite   
+     time: 2025-08-15 13:02:45 
+ */
+System.register(["./index-legacy-Cqstv5ZE.js"],(function(e,t){"use strict";var r,i,s,n,o,a,l,d,c,u,v,f,y,p;return{setters:[e=>{r=e.al,i=e.am,s=e.ao,n=e.d,o=e.at,a=e.a3,l=e.c,d=e.f,c=e.p,u=e.M,v=e.u,f=e.a8,y=e.n,p=e.aK}],execute:function(){const t=r({direction:{type:String,values:["horizontal","vertical"],default:"horizontal"},contentPosition:{type:String,values:["left","center","right"],default:"center"},borderStyle:{type:i(String),default:"solid"}}),g=n({name:"ElDivider"}),S=n({...g,props:t,setup(e){const t=e,r=o("divider"),i=a((()=>r.cssVar({"border-style":t.borderStyle})));return(e,t)=>(d(),l("div",{class:u([v(r).b(),v(r).m(e.direction)]),style:y(v(i)),role:"separator"},[e.$slots.default&&"vertical"!==e.direction?(d(),l("div",{key:0,class:u([v(r).e("text"),v(r).is(e.contentPosition)])},[f(e.$slots,"default")],2)):c("v-if",!0)],6))}});e("E",p(s(S,[["__file","divider.vue"]])))}}}));

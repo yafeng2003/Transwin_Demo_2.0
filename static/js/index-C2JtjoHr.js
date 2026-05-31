@@ -1,0 +1,5 @@
+/*!  build: Vue Shop Vite 
+     copyright: https://vuejs-core.cn/shop-vite   
+     time: 2025-08-15 13:02:45 
+ */
+import{al as p,am as y,ao as u,d as f,at as h,c as o,f as t,p as d,a as c,M as r,u as s,a8 as l,x as n,N as i,n as m,aK as C}from"./index-BZplGa9b.js";const S=p({header:{type:String,default:""},footer:{type:String,default:""},bodyStyle:{type:y([String,Object,Array]),default:""},headerClass:String,bodyClass:String,footerClass:String,shadow:{type:String,values:["always","hover","never"],default:"always"}}),v=f({name:"ElCard"}),b=f({...v,props:S,setup(w){const a=h("card");return(e,$)=>(t(),o("div",{class:r([s(a).b(),s(a).is("".concat(e.shadow,"-shadow"))])},[e.$slots.header||e.header?(t(),o("div",{key:0,class:r([s(a).e("header"),e.headerClass])},[l(e.$slots,"header",{},()=>[n(i(e.header),1)])],2)):d("v-if",!0),c("div",{class:r([s(a).e("body"),e.bodyClass]),style:m(e.bodyStyle)},[l(e.$slots,"default")],6),e.$slots.footer||e.footer?(t(),o("div",{key:1,class:r([s(a).e("footer"),e.footerClass])},[l(e.$slots,"footer",{},()=>[n(i(e.footer),1)])],2)):d("v-if",!0)],2))}});var g=u(b,[["__file","card.vue"]]);const k=C(g);export{k as E};

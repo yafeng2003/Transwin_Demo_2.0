@@ -1,0 +1,5 @@
+/*!  build: Vue Shop Vite 
+     copyright: https://vuejs-core.cn/shop-vite   
+     time: 2025-08-22 10:57:39 
+ */
+System.register(["./myChatGPT-legacy-nbj_sm6G.js","./index-legacy-uOaXdKfA.js","./index-legacy-L7qbE4w6.js","./index-legacy-BrJfnR4g.js","./index-legacy-gwFU0phZ.js","./index.es-legacy-MQ5zPZ5z.js","./user-legacy-BM-Ljrv3.js","./uniqueId-legacy-DP5ya-V3.js"],(function(e,t){"use strict";var a,n,s,l,i,d,c;return{setters:[e=>{a=e.default},e=>{n=e.d,s=e.c,l=e.f,i=e.a,d=e.b,c=e._},null,null,null,null,null,null],execute:function(){var t=document.createElement("style");t.textContent=".top-title[data-v-161467d9]{margin-bottom:1%;font-size:1rem;font-weight:800;text-align:center}.assistant-container[data-v-161467d9]{display:flex;flex-direction:column;height:80vh}.right-img[data-v-161467d9]{width:100%}\n/*$vite$:1*/",document.head.appendChild(t);const u={class:"assistant-container"};e("default",c(n({name:"Assitant",__name:"assistant",setup:e=>(e,t)=>(l(),s("div",u,[t[0]||(t[0]=i("div",{class:"top-title"},"Hi 我是博雅智巡，助力实现巡视工作",-1)),d(a,{class:"chat"})]))}),[["__scopeId","data-v-161467d9"]]))}}}));

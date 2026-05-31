@@ -1,0 +1,94 @@
+// prettier-ignore
+const xAxisData = [
+    '党委主体责任', '第一责任人责任', '班子成员一岗双责',
+    '巡视反馈问题整改', '专项/集中治理', '巡视移交信访办理',
+    '改期后常态化推进', '政治生态情况', '企业改革发展情况', '群众满意度情况'
+];
+// prettier-ignore
+const yAxisData = [
+    '党中央各部门', '党中央直属事业单位', '国务院下属机构、直属事业单位',
+    '全国政协机关', '31个省区市', '中管金融企业', '中管企业', '中管高校'
+];
+
+// 生成随机数据
+const data = [];
+for (let i = 0; i < yAxisData.length; i++) {
+    for (let j = 0; j < xAxisData.length; j++) {
+        data.push([j, i, Math.floor(Math.random() * 101)]); // 随机生成0到100之间的数值
+    }
+}
+
+option = {
+  tooltip: {
+    position: 'top',
+    formatter: function (params) {
+      return params.seriesName + '<br/>' + xAxisData[params.value[0]] + ' - ' + yAxisData[params.value[1]] + ': ' + params.value[2];
+    }
+  },
+  grid: {
+    height: '50%',
+    top: '10%',
+    left: '3%',
+    right: '3%', // 调整左右间距，增加宽度
+    containLabel: true
+  },
+  xAxis: {
+    type: 'category',
+    data: xAxisData,
+    splitArea: {
+      show: true
+    },
+    axisLabel: {
+      textStyle: {
+        color: '#000', // 字体颜色为黑色
+        fontWeight: 'bold', // 字体加粗
+        fontSize: 12 // 字体大小
+      },
+      rotate: 30 // 调整倾斜角度为30度
+    }
+  },
+  yAxis: {
+    type: 'category',
+    data: yAxisData,
+    splitArea: {
+      show: true
+    },
+    axisLabel: {
+      textStyle: {
+        color: '#000', // 字体颜色为黑色
+        fontWeight: 'bold', // 字体加粗
+        fontSize: 12 // 字体大小
+      }
+    }
+  },
+  visualMap: {
+    min: 0,
+    max: 100,
+    calculable: true,
+    orient: 'horizontal',
+    left: 'center',
+    bottom: '15%',
+    textStyle: {
+      color: '#000' // 视觉映射文字颜色为黑色
+    }
+  },
+  series: [
+    {
+      name: '巡视整改情况',
+      type: 'heatmap',
+      data: data,
+      label: {
+        show: true,
+        color: '#000', // 标签颜色为黑色
+        fontWeight: 'bold', // 标签加粗
+        fontSize: 10 // 标签字体大小
+      },
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      }
+    }
+  ]
+};

@@ -1,0 +1,189 @@
+function generateData() {
+  const data = [];
+  for (let i = 0; i <= 10; i++) {
+    for (let j = 0; j <= 9; j++) { // y轴范围0-9对应2016-2025
+      for (let k = 0; k <= 10; k++) {
+        const value = Math.random() * 4 + 2;
+        data.push([i, j, k, value]);
+      }
+    }
+  }
+  return data;
+}
+
+const data = generateData();
+
+option = {
+
+  visualMap: {
+    show: false,
+    min: 2,
+    max: 6,
+    inRange: {
+      symbolSize: [2, 10],
+      color: [
+        '#313695', '#4575b4', '#74add1', '#abd9e9',
+        '#e0f3f8', '#ffffbf', '#fee090', '#fdae61',
+        '#f46d43', '#d73027', '#a50026'
+      ],
+      colorAlpha: [0.4, 1]
+    }
+  },
+
+  xAxis3D: {
+    type: 'value',
+    name: '单位',
+    nameTextStyle: { 
+      color: '#fff',
+      fontWeight: 'bold'
+    },
+    axisLine: { 
+      lineStyle: { 
+        color: '#fff' // 白色轴线
+      }
+    },
+    axisLabel: { 
+      color: '#fff' // 白色刻度标签
+    },
+    axisPointer: {
+      show: true,
+      lineStyle: {
+        color: 'rgba(255, 165, 0, 0.9)', // 橙色高亮
+        width: 3,
+        shadowColor: 'rgba(255,165,0,0.8)',
+        shadowBlur: 12
+      },
+      handle: {
+        show: true,
+        color: '#FFA500',
+        size: 60
+      }
+    }
+  },
+
+  yAxis3D: {
+    type: 'value',
+    name: '时间',
+    min: 0, // 最小值0对应2016
+    max: 9, // 最大值9对应2025
+    nameTextStyle: { 
+      color: '#fff',
+      fontWeight: 'bold'
+    },
+    axisLine: { 
+      lineStyle: { 
+        color: '#fff' // 白色轴线
+      }
+    },
+    axisLabel: {
+      color: '#fff', // 白色刻度标签
+      formatter: function(value) {
+        return 2016 + parseInt(value); // 数值转年份
+      }
+    },
+    axisPointer: {
+      show: true,
+      lineStyle: {
+        color: 'rgba(255, 165, 0, 0.9)', // 橙色高亮
+        width: 3,
+        shadowColor: 'rgba(255,165,0,0.8)',
+        shadowBlur: 12
+      },
+      label: {
+        show: false // 关闭数值标签
+      },
+      handle: {
+        show: true,
+        color: '#FFA500',
+        size: 60
+      }
+    }
+  },
+
+  zAxis3D: {
+    type: 'value',
+    name: '问题',
+    nameTextStyle: { 
+      color: '#fff',
+      fontWeight: 'bold'
+    },
+    axisLine: { 
+      lineStyle: { 
+        color: '#fff' // 白色轴线
+      }
+    },
+    axisLabel: { 
+      color: '#fff' // 白色刻度标签
+    },
+    axisPointer: {
+      show: true,
+      lineStyle: {
+        color: 'rgba(255, 165, 0, 0.9)', // 橙色高亮
+        width: 3,
+        shadowColor: 'rgba(255,165,0,0.8)',
+        shadowBlur: 12
+      },
+      handle: {
+        show: true,
+        color: '#FFA500',
+        size: 60
+      }
+    }
+  },
+
+  grid3D: {
+    boxWidth: 80,
+    boxHeight: 60,
+    boxDepth: 80,
+    axisPointer: {
+      lineStyle: {
+        color: 'rgba(255,165,0,0.6)', // 橙色辅助线
+        width: 3
+      }
+    },
+    viewControl: {
+      autoRotate: true,
+      autoRotateSpeed: 15,
+      damping: 0.8,
+      distance: 150,
+      projection: 'perspective'
+    },
+    axisLine: { 
+      lineStyle: { 
+        color: '#fff' // 白色轴线
+      }
+    },
+    boxMaterial: {
+      color: 'rgba(0, 0, 0, 0.03)',
+      borderColor: '#fff'
+    },
+    light: {
+      main: { 
+        intensity: 1.2,
+        shadow: false
+      },
+      ambient: { 
+        intensity: 0.4
+      }
+    }
+  },
+
+  series: [{
+    type: 'scatter3D',
+    symbol: 'rect',
+    data: data,
+    itemStyle: {
+      borderWidth: 0.5,
+      borderColor: '#333'
+    },
+    emphasis: {
+      itemStyle: {
+        color: 'rgba(255,165,0,0.8)', // 橙色高亮
+        borderColor: '#FFA500',
+        shadowColor: 'rgba(255,165,0,0.5)',
+        shadowBlur: 10,
+        opacity: 1
+      }
+    }
+  }]
+};

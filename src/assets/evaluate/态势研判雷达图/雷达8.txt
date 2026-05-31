@@ -1,0 +1,82 @@
+option = {
+  color: ['#FF6347'], // 实际值颜色
+  title: {
+    text: '',
+    textStyle: {
+      color: '#fff', // 标题颜色为白色
+      fontWeight: 700, // 使用数值加粗
+      fontSize: 30 // 字体大小
+    }
+  },
+  legend: {
+    data: ['实际值'],
+    textStyle: {
+      color: '#fff', // 图例文字颜色为白色
+      fontSize: 20 // 字体大小
+    },
+    top: 0, // 调整图例位置
+    right: 50 // 调整图例位置
+  },
+  radar: [
+    {
+      indicator: [
+        { text: '政治生态情况', max: 100 },
+        { text: '企业改革发展情况', max: 100 },
+        { text: '群众满意度情况', max: 100 },
+        { text: '落实党委（党组）主体责任方面', max: 100 },
+        { text: '“一把手”落实第一责任人责任方面', max: 100 },
+        { text: '班子成员履行一岗双责方面', max: 100 },
+        { text: '纪检监察机关（机构）和组织人事部门履行整改及监督责任方面', max: 100 },
+        { text: '开展专项治理或集中整治方面', max: 100 },
+        { text: '巡视移交信访办理方面', max: 100 },
+        { text: '集中整改期后常态化推进整改方面', max: 100 },
+        { text: '巡视反馈问题整改方面', max: 100 } // 新增第11个维度
+      ],
+      center: ['50%', '50%'], // 雷达图居中
+      radius: '50%', // 增大雷达图的半径
+      axisName: {
+        textStyle: {
+          color: '#fff', // 指标名称字体颜色为白色
+          fontSize: 28, // 字体大小加大
+          fontWeight: 800 // 使用数值加粗
+        }
+      },
+      splitArea: {
+        show: false // 不显示背景色
+      },
+      axisLine: {
+        lineStyle: {
+          color: '#fff', // 轴线颜色为白色
+          width: 2, // 轴线宽度
+          type: 'solid' // 轴线类型为实线
+        }
+      },
+      splitLine: {
+        lineStyle: {
+          color: '#ccc', // 分割线颜色为浅灰色
+          width: 1.5, // 分割线宽度
+          type: 'dashed' // 分割线类型为虚线
+        }
+      }
+    }
+  ],
+  series: [
+    {
+      type: 'radar',
+      data: [
+        {
+          value: [88, 71, 77, 86, 74, 69, 82, 75, 80, 84, 79], // 新增数值82对应第11个维度
+          name: '实际值',
+          lineStyle: {
+            type: 'solid', // 实线
+            color: '#FF6347', // 实线颜色
+            width: 3 // 实线宽度
+          },
+          areaStyle: {
+            color: 'rgba(255, 0, 0, 0.3)' // 实际值区域颜色
+          }
+        }
+      ]
+    }
+  ]
+};

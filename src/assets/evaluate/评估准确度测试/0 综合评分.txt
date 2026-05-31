@@ -1,0 +1,93 @@
+option = {
+  backgroundColor: '#fff',
+  title: {
+    text: '任务综合得分雷达图',
+    left: 'center',
+    top: 20,
+    textStyle: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: '#000'
+    }
+  },
+  tooltip: {
+    trigger: 'item'
+  },
+  radar: [
+    {
+      indicator: [
+        { text: '总体研判', max: 100 },
+        { text: '细节研判', max: 100 },
+        { text: '生成建议', max: 100 },
+        { text: '报告生成', max: 100 },
+        { text: '态势研判', max: 100 },
+        { text: '问题挖掘', max: 100 },
+        { text: '预测预警', max: 100 }
+      ],
+      center: ['50%', '50%'],
+      radius: 180,
+      splitNumber: 5,
+      shape: 'circle',
+      axisName: {
+        color: '#000',
+        fontSize: 18,
+        fontWeight: 'bold'
+      },
+      splitArea: {
+        areaStyle: {
+          color: [
+            'rgba(255, 228, 225, 0.5)',
+            'rgba(255, 218, 215, 0.4)',
+            'rgba(255, 208, 205, 0.3)',
+            'rgba(255, 198, 195, 0.2)',
+            'rgba(255, 188, 185, 0.1)'
+          ]
+        }
+      },
+      splitLine: {
+        lineStyle: {
+          color: '#e8b4b8',
+          width: 1.2
+        }
+      },
+      axisLine: {
+        lineStyle: {
+          color: '#d28d93'
+        }
+      }
+    }
+  ],
+  series: [
+    {
+      name: '综合得分',
+      type: 'radar',
+      areaStyle: {
+        color: 'rgba(239, 112, 115, 0.35)'  // 淡红填充
+      },
+      lineStyle: {
+        color: '#ef7073',
+        width: 3
+      },
+      symbol: 'circle',
+      symbolSize: 8,
+      itemStyle: {
+        color: '#ef7073',
+        borderColor: '#fff',
+        borderWidth: 2
+      },
+      label: {
+        show: true,
+        formatter: '{c}',
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#000'
+      },
+      data: [
+        {
+          name: '综合得分',
+          value: [94.6, 95.6, 97.4, 96.5, 92.2, 94.5, 95.3]
+        }
+      ]
+    }
+  ]
+};

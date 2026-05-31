@@ -1,0 +1,5 @@
+/*!  build: Vue Shop Vite 
+     copyright: https://vuejs-core.cn/shop-vite   
+     time: 2025-08-22 11:26:35 
+ */
+import{_ as s}from"./index-CFSC93BR.js";import{d as l,r,o as c,T as _,g as i,f as d,w as e,b as p,a as m,u,e as f,_ as h}from"./index-1-YBapYP.js";import"./index-Cde_Y9Cx.js";const v=["innerHTML"],x=l({name:"Score",__name:"evaluate6",props:{title:{type:String,default:""},isShow:{type:Boolean,default:!1}},setup(t){const o=r('\n<div  style="font-size: 18px; line-height: 2.5rem;">1. 就业市场受损：制造业就业岗位连续减少，自4月以来累计流失约3.7万个，整体就业增长乏力，失业率预计上升。<br>\n2. 经济活动放缓：制造业采购经理指数（PMI）持续低于荣枯线，显示制造业活动萎缩。企业因政策不确定性投资意愿减弱，预计制造业投资将大幅减少<br>\n3. 通货膨胀压力加剧：关税推高了进口商品和生产成本，导致消费者价格指数（CPI）和生产者价格指数（PPI）上升。消费者或将承担大部分关税成本，未来通胀压力可能持续。<br>\n4.  居民生活成本增加：关税导致的成本上涨最终转嫁至消费者，特别是工薪阶层，必需品如汽车价格上升 4，迫使消费者削减其他开支，生活质量和购买力受到侵蚀。</div>');return c(()=>{}),_(()=>{}),(b,g)=>{const a=s,n=f;return d(),i(n,{lg:16,md:12,sm:24,xl:16,xs:24},{default:e(()=>[p(a,{"body-style":{height:"340px"},class:"my-vab-card",skeleton:"",title:t.title},{default:e(()=>[m("div",{innerHTML:u(o)},null,8,v)]),_:1},8,["title"])]),_:1})}}}),I=h(x,[["__scopeId","data-v-1989ade9"]]);export{I as default};

@@ -1,0 +1,5 @@
+/*!  build: Vue Shop Vite 
+     copyright: https://vuejs-core.cn/shop-vite   
+     time: 2025-08-22 10:57:39 
+ */
+import{d as s,r as u,c as p,f as d,b as o,w as r,x as m,A as _,a as f,u as i,y as w,L as x}from"./index-C5ztgtHd.js";import{E as V}from"./index-DYgqEAzn.js";const b=s({__name:"DrawerNoTitle",setup(y){const t=u(!1);return(B,e)=>{const n=_,l=V;return d(),p(x,null,[o(n,{type:"primary",onClick:e[0]||(e[0]=a=>t.value=!0)},{default:r(()=>e[2]||(e[2]=[m("打开")])),_:1,__:[2]}),o(l,{modelValue:i(t),"onUpdate:modelValue":e[1]||(e[1]=a=>w(t)?t.value=a:null),"append-to-body":"",size:"288px","with-header":!1},{default:r(()=>e[3]||(e[3]=[f("span",null,"我是内容",-1)])),_:1,__:[3]},8,["modelValue"])],64)}}});export{b as _};

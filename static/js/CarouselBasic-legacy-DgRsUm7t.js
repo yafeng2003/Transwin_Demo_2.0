@@ -1,0 +1,5 @@
+/*!  build: Vue Shop Vite 
+     copyright: https://vuejs-core.cn/shop-vite   
+     time: 2025-08-22 10:57:39 
+ */
+System.register(["./index-legacy-uOaXdKfA.js","./index-legacy-D15ub9fQ.js"],(function(e,t){"use strict";var a,l,c,n,r,d,o,i,u,s,_,h;return{setters:[e=>{a=e._,l=e.g,c=e.f,n=e.w,r=e.c,d=e.L,o=e.M,i=e.b,u=e.a,s=e.O},e=>{_=e.a,h=e.E}],execute:function(){var t=document.createElement("style");t.textContent="[data-v-ba208d97] .el-carousel__item{display:flex;align-items:center;justify-content:center}[data-v-ba208d97] .el-carousel__item h3{color:var(--el-color-white);text-align:center;opacity:.75}[data-v-ba208d97] .el-carousel__item:nth-child(2n){background-color:var(--el-color-success)}[data-v-ba208d97] .el-carousel__item:nth-child(odd){background-color:var(--el-color-primary)}\n/*$vite$:1*/",document.head.appendChild(t),e("default",a({},[["render",function(e,t){const a=_,v=h;return c(),l(v,{height:"180px"},{default:n((()=>[(c(),r(d,null,o(3,(e=>i(a,{key:e},{default:n((()=>[u("h3",null,s(e),1)])),_:2},1024))),64))])),_:1})}],["__scopeId","data-v-ba208d97"]]))}}}));

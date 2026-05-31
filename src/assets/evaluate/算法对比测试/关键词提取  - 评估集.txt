@@ -1,0 +1,127 @@
+option = {
+  title: {
+    text: '关键词提取',
+    left: 'center',
+    top: 10,
+    textStyle: {
+      fontSize: 22,
+      color: '#000',  
+      fontWeight: 'bold'
+    }
+  },
+  tooltip: {
+    trigger: 'item',
+    axisPointer: {
+      type: 'shadow'
+    }
+  },
+  legend: {
+    top: 50,
+    left: 'center',
+    textStyle: {
+      fontSize: 16,
+      color: '#000'  // 所有文本统一黑色
+    },
+    data: [
+      'Boya Zhixun (Peking University)',
+      'YAKE! (INESC TEC)', 
+      'IBM Watson NLU (IBM Research)', 
+      'Emvista (Emvista AI Lab)', 
+      'NLP Cloud (NLP Cloud Tech)'
+    ]
+  },
+  grid: {
+    left: '10%',
+    right: '10%',
+    bottom: '10%',
+    top: 100,
+    containLabel: true
+  },
+  xAxis: {
+    type: 'category',
+    data: [
+      ' ',
+    ],
+    // name: 'Algorithm + Institution',
+    nameLocation: 'middle',
+    nameGap: 30,
+    axisLabel: {
+      fontSize: 14,
+      lineHeight: 20
+    },
+    nameTextStyle: {
+      fontSize: 16
+    }
+  },
+yAxis: {
+  type: 'value',
+  name: '测试得分',
+  nameLocation: 'middle',
+  nameGap: 50,
+  min: 0.5,
+  max: 1,
+  axisLabel: {
+    fontSize: 18,
+    color: '#000',        // 坐标刻度字体：黑色加粗
+    fontWeight: 'bold'
+  },
+  nameTextStyle: {
+    fontSize: 22,         // 坐标名称：加大字体
+    fontWeight: 'bold',   // 加粗
+    color: '#000'         // 黑色
+  }
+},
+  series: [
+  {
+    name: 'Boya Zhixun (Peking University)',
+    type: 'boxplot',
+    data: [[0.70, 0.73, 0.75, 0.77, 0.80]],
+    itemStyle: {
+      color: '#e64b4b',
+      borderColor: '#e64b4b'
+    },
+    boxWidth: 40
+  },
+  {
+    name: 'YAKE! (INESC TEC)', 
+    type: 'boxplot',
+    data: [[0.65, 0.68, 0.70, 0.72, 0.75]],
+    itemStyle: {
+      color: '#5ab1ef',
+      borderColor: '#5ab1ef'
+    },
+    boxWidth: 40
+  },
+  {
+    name: 'IBM Watson NLU (IBM Research)', 
+    type: 'boxplot',
+    data: [[0.60, 0.63, 0.66, 0.68, 0.71]],
+    itemStyle: {
+      color: '#91cc75',
+      borderColor: '#91cc75'
+    },
+    boxWidth: 40
+  },
+  {
+    name:  'Emvista (Emvista AI Lab)', 
+    type: 'boxplot',
+    data: [[0.55, 0.58, 0.60, 0.63, 0.66]],
+    itemStyle: {
+      color: '#fac858',
+      borderColor: '#fac858'
+    },
+    boxWidth: 40
+  },
+  {
+    name:  'NLP Cloud (NLP Cloud Tech)',
+    type: 'boxplot',
+    data: [[0.62, 0.65, 0.67, 0.69, 0.72]],
+    itemStyle: {
+      color: '#9a60b4',
+      borderColor: '#9a60b4'
+    },
+    boxWidth: 40
+  }
+]
+
+};

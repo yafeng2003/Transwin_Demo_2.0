@@ -1,0 +1,5 @@
+/*!  build: Vue Shop Vite 
+     copyright: https://vuejs-core.cn/shop-vite   
+     time: 2025-06-16 10:30:48 
+ */
+System.register(["./index-legacy-c8TKrzQ-.js"],(function(e,t){"use strict";var i,r,s,n,o,a,l,d,c,u,v,f,y,p;return{setters:[e=>{i=e.ah,r=e.ai,s=e.ak,n=e.d,o=e.ap,a=e.Z,l=e.c,d=e.f,c=e.p,u=e.D,v=e.u,f=e.a4,y=e.n,p=e.aH}],execute:function(){const t=i({direction:{type:String,values:["horizontal","vertical"],default:"horizontal"},contentPosition:{type:String,values:["left","center","right"],default:"center"},borderStyle:{type:r(String),default:"solid"}}),g=n({name:"ElDivider"}),S=n({...g,props:t,setup(e){const t=e,i=o("divider"),r=a((()=>i.cssVar({"border-style":t.borderStyle})));return(e,t)=>(d(),l("div",{class:u([v(i).b(),v(i).m(e.direction)]),style:y(v(r)),role:"separator"},[e.$slots.default&&"vertical"!==e.direction?(d(),l("div",{key:0,class:u([v(i).e("text"),v(i).is(e.contentPosition)])},[f(e.$slots,"default")],2)):c("v-if",!0)],6))}});e("E",p(s(S,[["__file","divider.vue"]])))}}}));

@@ -1,0 +1,81 @@
+option = {
+  color: ['#FF6347'], // 实际值颜色
+  title: {
+    text: '',
+    textStyle: {
+      color: '#fff', // 标题颜色为黑色
+      fontWeight: 700, // 使用数值加粗
+      fontSize: 30 // 字体大小
+    }
+  },
+  legend: {
+    data: ['实际值'],
+    textStyle: {
+      color: '#fff', // 图例文字颜色为黑色
+      fontSize: 20 // 字体大小
+    },
+    top: 30, // 调整图例位置
+    right: 50 // 调整图例位置
+  },
+  radar: [
+    {
+      indicator: [
+        { text: '政治生态情况', max: 100 },
+        { text: '企业改革发展情况', max: 100 },
+        { text: '群众满意度情况', max: 100 },
+        { text: '...', max: 100 },
+        { text: '...', max: 100 },
+        { text: '...', max: 100 },
+        { text: '...', max: 100 },
+        { text: '...', max: 100 },
+        { text: '...', max: 100 },
+        { text: '...', max: 100 }
+      ],
+      center: ['50%', '50%'], // 雷达图居中
+      radius: '50%', // 增大雷达图的半径
+      axisName: {
+        textStyle: {
+          color: '#fff', // 指标名称字体颜色为白色
+          fontSize: 28, // 字体大小加大
+          fontWeight: 800 // 使用数值加粗
+        }
+      },
+      splitArea: {
+        show: false // 不显示背景色
+      },
+      axisLine: {
+        lineStyle: {
+          color: '#000', // 轴线颜色为黑色
+          width: 2, // 轴线宽度
+          type: 'solid' // 轴线类型为实线
+        }
+      },
+      splitLine: {
+        lineStyle: {
+          color: '#ccc', // 分割线颜色为浅灰色
+          width: 1.5, // 分割线宽度
+          type: 'dashed' // 分割线类型为虚线
+        }
+      }
+    }
+  ],
+  series: [
+    {
+      type: 'radar',
+      data: [
+        {
+          value: [90, 75, 78, 65, 75, 80, 70, 72, 80, 89], // 实际值
+          name: '实际值',
+          lineStyle: {
+            type: 'solid', // 实线
+            color: '#FF6347', // 实线颜色
+            width: 3 // 实线宽度
+          },
+          areaStyle: {
+            color: 'rgba(40, 250, 250, 0.3)' // 实际值区域颜色
+          }
+        }
+      ]
+    }
+  ]
+};

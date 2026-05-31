@@ -1,0 +1,127 @@
+option = {
+  title: {
+    text: '事件提取',
+    left: 'center',
+    top: 10,
+    textStyle: {
+      fontSize: 22,
+      color: '#000',  
+      fontWeight: 'bold'
+    }
+  },
+  tooltip: {
+    trigger: 'item',
+    axisPointer: {
+      type: 'shadow'
+    }
+  },
+  legend: {
+    top: 50,
+    left: 'center',
+    textStyle: {
+      fontSize: 16,
+      color: '#000'  // 所有文本统一黑色
+    },
+    data: [
+      'Boya Zhixun (Peking University)',
+      'LLM-PEE(Stanford University)', 
+      'DAT-GAT (Tsinghua University)', 
+      'SRE (University of Toronto)', 
+      'X-MTL (MIT)'
+    ]
+  },
+  grid: {
+    left: '10%',
+    right: '10%',
+    bottom: '10%',
+    top: 100,
+    containLabel: true
+  },
+  xAxis: {
+    type: 'category',
+    data: [
+      ' ',
+    ],
+    // name: 'Algorithm + Institution',
+    nameLocation: 'middle',
+    nameGap: 30,
+    axisLabel: {
+      fontSize: 14,
+      lineHeight: 20
+    },
+    nameTextStyle: {
+      fontSize: 16
+    }
+  },
+yAxis: {
+  type: 'value',
+  name: '测试得分',
+  nameLocation: 'middle',
+  nameGap: 50,
+  min: 0.5,
+  max: 1,
+  axisLabel: {
+    fontSize: 18,
+    color: '#000',        // 坐标刻度字体：黑色加粗
+    fontWeight: 'bold'
+  },
+  nameTextStyle: {
+    fontSize: 22,         // 坐标名称：加大字体
+    fontWeight: 'bold',   // 加粗
+    color: '#000'         // 黑色
+  }
+},
+series: [
+  {
+    name: 'Boya Zhixun (Peking University)',
+    type: 'boxplot',
+    data: [[0.80, 0.83, 0.85, 0.87, 0.90]],
+    itemStyle: {
+      color: '#e64b4b',
+      borderColor: '#e64b4b'
+    },
+    boxWidth: 40
+  },
+  {
+    name: 'LLM-PEE(Stanford University)', 
+    type: 'boxplot',
+    data: [[0.70, 0.73, 0.75, 0.77, 0.82]],
+    itemStyle: {
+      color: '#5ab1ef',
+      borderColor: '#5ab1ef'
+    },
+    boxWidth: 40
+  },
+  {
+    name:  'DAT-GAT (Tsinghua University)', 
+    type: 'boxplot',
+    data: [[0.75, 0.78, 0.81, 0.83, 0.86]],
+    itemStyle: {
+      color: '#91cc75',
+      borderColor: '#91cc75'
+    },
+    boxWidth: 40
+  },
+  {
+    name:  'SRE (University of Toronto)', 
+    type: 'boxplot',
+    data: [[0.70, 0.73, 0.75, 0.77, 0.80]],
+    itemStyle: {
+      color: '#fac858',
+      borderColor: '#fac858'
+    },
+    boxWidth: 40
+  },
+  {
+    name:  'X-MTL (MIT)',
+    type: 'boxplot',
+    data: [[0.68, 0.71, 0.73, 0.75, 0.78]],
+    itemStyle: {
+      color: '#9a60b4',
+      borderColor: '#9a60b4'
+    },
+    boxWidth: 40
+  }
+]
+
+};

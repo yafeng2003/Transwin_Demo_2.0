@@ -1,0 +1,5 @@
+/*!  build: Vue Shop Vite 
+     copyright: https://vuejs-core.cn/shop-vite   
+     time: 2025-06-16 10:30:48 
+ */
+System.register(["./myChatGPT-legacy-2annhz44.js","./index-legacy-c8TKrzQ-.js","./index-legacy-DggPDyf-.js","./index-legacy-nRP89l3z.js","./index.es-legacy-MQ5zPZ5z.js","./uniqueId-legacy-DZA1NS0Q.js"],(function(t,e){"use strict";var a,n,s,i,l,d,c;return{setters:[t=>{a=t.default},t=>{n=t.d,s=t.c,i=t.f,l=t.a,d=t.b,c=t._},null,null,null,null],execute:function(){var e=document.createElement("style");e.textContent=".top-title[data-v-161467d9]{margin-bottom:1%;font-size:1rem;font-weight:800;text-align:center}.assistant-container[data-v-161467d9]{display:flex;flex-direction:column;height:80vh}.right-img[data-v-161467d9]{width:100%}\n/*$vite$:1*/",document.head.appendChild(e);const o={class:"assistant-container"};t("default",c(n({name:"Assitant",__name:"assistant",setup:t=>(t,e)=>(i(),s("div",o,[e[0]||(e[0]=l("div",{class:"top-title"},"Hi 我是博雅智巡，助力实现巡视工作",-1)),d(a,{class:"chat"})]))}),[["__scopeId","data-v-161467d9"]]))}}}));

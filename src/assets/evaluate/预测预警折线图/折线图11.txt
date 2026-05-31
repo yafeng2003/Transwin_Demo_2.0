@@ -1,0 +1,212 @@
+
+// 模拟真实数据
+        var data = [
+
+            [2016, 170],
+            [2017, 162],
+            [2018, 166],
+            [2019, 155],
+            [2020, 167],
+            [2021, 162],
+            [2022, 155],
+            [2023, 187],
+            [2024, 190],
+            [2025, 195],
+        ];
+
+        // 模拟预测数据
+        var predictData = [
+            [2026, 195, 195],
+            [2027, 162, 185],
+            [2028, 183, 178],
+            [2029, 174, 175],
+            [2030, 160, 180],
+            [2031, 160, 190],
+
+
+        ];
+
+        // 定义真实数据的 x 轴和 y 轴
+        var xData = [];
+        var yData = [];
+        for (var i = 0; i < data.length; i++) {
+            xData.push(data[i][0]);
+            yData.push(data[i][1]/3);
+        }
+
+        // 定义预测数据的 x 轴和 y 轴
+        var predictXData = [];
+        var predictYData1 = [];
+        var predictYData2 = [];
+        var predictYDataAverage = [];
+        for (var i = 1; i < data.length; i++) {
+            predictYData1.push(null);
+            predictYData2.push(null);
+            predictYDataAverage.push(null);
+        }
+        for (var i = 0; i < predictData.length; i++) {
+            predictXData.push(predictData[i][0]);
+            // predictYData1.push(predictData[i][1]/3);
+            predictYData2.push(predictData[i][2]/3);
+        }
+
+        for (var i = 0; i < predictData.length; i++) {
+            predictYDataAverage.push((predictData[i][1] + predictData[i][2]) );
+        }
+        // 配置项
+        var option = {
+            // title: {
+            //     text: '舆情监控预警：社会制度',
+            // },
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: ['', '', '']
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+    type: 'category',
+    name: '日期',
+    data: xData.concat(predictXData), // 将真实数据的 x 轴数据和预测数据的 x 轴数据合并
+    axisLabel: {
+        textStyle: {
+            color: 'white', // 字体颜色
+            fontWeight: 'bold', // 加粗
+            fontSize: 16 // 字体大小
+        }
+    },
+    axisLine: {
+        lineStyle: {
+            color: 'white', // 轴线颜色
+            width: 2 // 轴线宽度
+        }
+    }
+},
+yAxis: {
+    name: "",
+    type: 'value',
+    boundaryGap: false,
+    max: 80,
+    axisLabel: {
+        textStyle: {
+            color: 'white', // 字体颜色
+            fontWeight: 'bold', // 加粗
+            fontSize: 16 // 字体大小
+        }
+    },
+    axisLine: {
+        lineStyle: {
+            color: 'white', // 轴线颜色
+            width: 2 // 轴线宽度
+        }
+    }
+},
+series: [
+    {
+        name: '真实数据',
+        type: 'line',
+        data: yData,
+        lineStyle: {
+            color: '#C00000',
+            width: 5
+        },
+        areaStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            {
+                offset: 0,
+                color: 'rgba(128, 128, 128, 0.5)'  // 灰色透明
+            },
+            {
+                offset: 1,
+                color: 'rgba(128, 128, 128, 0)'  // 全透明
+            }
+        ])
+        },
+        // markLine: {
+        //     symbol: 'none', // 去掉两端的小圆点
+        //     lineStyle: {
+        //         type: 'dashed', // 虚线
+        //         color: 'white'
+        //     },
+        //     data: yData.map((value, index) => ([
+        //         {xAxis: index, yAxis: 0},
+        //         {xAxis: index, yAxis: value}
+        //     ]))
+        // }
+    },
+    {
+        name: '整改成效趋势预测上限',
+        type: 'line',
+        data: predictYData2,
+        lineStyle: {
+            color: 'green',
+            type: 'dashed',
+            width: 3
+        },
+        areaStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            {
+                offset: 0,
+                color: 'rgba(255, 0, 0, 0.8)'  // 半透明红色
+            },
+            {
+                offset: 1,
+                color: 'rgba(255, 0, 0, 0)'  // 全透明
+            }
+        ])
+    }
+    },
+    {
+        name: '整改成效趋势预测下限',
+        type: 'line',
+        data: predictYData1,
+        lineStyle: {
+            color: 'blue',
+            width: 3,
+            type: 'dashed',
+        },
+        areaStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            {
+                offset: 0,
+                color: 'rgba(0, 255, 255, 0.7)'  // 你指定的颜色
+            },
+            {
+                offset: 1,
+                color: 'rgba(0, 255, 255, 0)'  // 全透明
+            }
+        ])
+    },
+        // markLine: {
+        //     symbol: 'none', // 去掉两端的小圆点
+        //     lineStyle: {
+        //         type: 'dashed', // 虚线
+        //         color: 'blue',
+        //         width:2
+
+        //     },
+        //     data: predictYData1.map((value, index) => ([
+        //         {xAxis: index , yAxis: 0},
+        //         {xAxis: index , yAxis: value}
+        //     ]))
+        // }
+    },
+        // {
+        //     name: '预警阈值',
+        //     type: 'line',
+        //     data: Array(predictYData1.length).fill(200),
+        //     lineStyle: {
+        //         color: 'red',
+        //         width: 2,
+        //         type: 'solid'
+        //     }
+        // }
+]
+
+        };

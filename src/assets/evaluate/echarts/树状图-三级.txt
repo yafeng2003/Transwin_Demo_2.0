@@ -1,0 +1,144 @@
+const data = /* 将下面这段粘贴到此处 */
+
+{
+  name: '巡视整改问题结构',
+  children: [
+    {
+      name: '落实整改责任方面',
+      children: [
+        {
+          name: '落实党委（党组）主体责任方面',
+          children: Array.from({ length: 13 }, (_, i) => ({
+            name: `条目${i + 1}`,
+            children: [{ name: `清单${i + 1}`, value: 1 }]
+          }))
+        },
+        {
+          name: '“一把手”落实第一责任人责任方面',
+          children: Array.from({ length: 5 }, (_, i) => ({
+            name: `条目${14 + i}`,
+            children: [{ name: `清单${14 + i}`, value: 1 }]
+          }))
+        },
+        {
+          name: '班子成员履行一岗双责方面',
+          children: Array.from({ length: 6 }, (_, i) => ({
+            name: `条目${19 + i}`,
+            children: [{ name: `清单${19 + i}`, value: 1 }]
+          }))
+        },
+        {
+          name: '纪检监察机关（机构）和组织人事部门履行整改及监督责任方面',
+          children: Array.from({ length: 7 }, (_, i) => ({
+            name: `条目${25 + i}`,
+            children: [{ name: `清单${25 + i}`, value: 1 }]
+          }))
+        }
+      ]
+    },
+    {
+      name: '完成整改任务方面',
+      children: [
+        {
+          name: '巡视反馈问题整改方面',
+          children: Array.from({ length: 18 }, (_, i) => ({
+            name: `条目${32 + i}`,
+            children: [{ name: `清单${32 + i}`, value: 1 }]
+          }))
+        },
+        {
+          name: '开展专项治理或集中整治方面',
+          children: [51, 52].map(i => ({
+            name: `条目${i}`,
+            children: [{ name: `清单${i}`, value: 1 }]
+          }))
+        },
+        {
+          name: '巡视移交信访办理方面',
+          children: [53, 54, 55, 56].map(i => ({
+            name: `条目${i}`,
+            children: [{ name: `清单${i}`, value: 1 }]
+          }))
+        },
+        {
+          name: '集中整改期后常态化推进整改方面',
+          children: Array.from({ length: 5 }, (_, i) => ({
+            name: `条目${58 + i}`,
+            children: [{ name: `清单${58 + i}`, value: 1 }]
+          }))
+        }
+      ]
+    },
+    {
+      name: '整改实际成效方面',
+      children: [
+        {
+          name: '政治生态情况',
+          children: [63, 64, 65].map(i => ({
+            name: `条目${i}`,
+            children: [{ name: `清单${i}`, value: 1 }]
+          }))
+        },
+        {
+          name: '企业改革发展情况',
+          children: [{
+            name: '条目66',
+            children: [{ name: '清单66', value: 1 }]
+          }]
+        },
+        {
+          name: '群众满意度情况',
+          children: [67, 68, 69].map(i => ({
+            name: `条目${i}`,
+            children: [{ name: `清单${i}`, value: 1 }]
+          }))
+        }
+      ]
+    }
+  ]
+};
+
+option = {
+  tooltip: {
+    trigger: 'item',
+    triggerOn: 'mousemove'
+  },
+  series: [
+    {
+      type: 'tree',
+      name: '巡视整改结构图',
+      data: [data],
+      top: '5%',
+      left: '10%',
+      bottom: '10%',
+      right: '20%',
+      symbolSize: 8,
+      edgeShape: 'polyline',
+      edgeForkPosition: '63%',
+      initialTreeDepth: 3,
+      lineStyle: {
+        width: 1.8
+      },
+      label: {
+        backgroundColor: '#fff',
+        fontSize: 13,
+        position: 'left',
+        verticalAlign: 'middle',
+        align: 'right'
+      },
+      leaves: {
+        label: {
+          position: 'right',
+          verticalAlign: 'middle',
+          align: 'left'
+        }
+      },
+      emphasis: {
+        focus: 'descendant'
+      },
+      expandAndCollapse: true,
+      animationDuration: 500,
+      animationDurationUpdate: 750
+    }
+  ]
+};
