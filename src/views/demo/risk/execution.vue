@@ -39,8 +39,17 @@
           </template>
         </el-table-column>
         <el-table-column prop="occurTime" label="发生时间" width="170" />
-        <el-table-column label="操作" width="80">
-          <template><el-button text type="primary" size="small">处理</el-button></template>
+        <el-table-column label="操作" width="100">
+          <template #default="{ row }">
+            <el-button
+              v-if="row.status === 'pending'"
+              text type="primary" size="small"
+              :loading="row._resolving"
+              @click="handleResolve(row)"
+            >处理</el-button>
+            <span v-else-if="row.status === 'resolved'" style="color:#67c23a;font-size:13px">已处理</span>
+            <span v-else style="color:#909399;font-size:13px">--</span>
+          </template>
         </el-table-column>
       </el-table>
 
@@ -55,8 +64,9 @@
 </template>
 
 <script lang="ts" setup>
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { computed, onMounted, ref } from 'vue'
-import { getRiskEvents } from '/@/api/demo/index'
+import { getRiskEvents, resolveRiskEvent } from '/@/api/demo/index'
 
 defineOptions({ name: 'DemoRiskExecution' })
 
@@ -69,8 +79,28 @@ const total = ref(0)
 
 const filteredList = computed(() => list.value.filter((i: any) => i.eventType === activeTab.value))
 
-const statusLabel = (s: string) => ({ pending: '待处理', processing: '处理中', resolved: '已解决', ignored: '已忽略' }[s] || s)
+const statusLabel = (s: string) => ({ pending: '待处理', processing: '处理中', resolved: '已处理', ignored: '已忽略' }[s] || s)
 const statusTagType = (s: string) => ({ pending: 'danger', processing: 'warning', resolved: 'success', ignored: 'info' }[s] || '')
+
+async function handleResolve(row: any) {
+  try {
+    await ElMessageBox.confirm(
+      `确认处理事件 #${row.id}（${row.eventLabel}）？处理后状态将变更为「已处理」。`,
+      '处理确认',
+      { confirmButtonText: '确认处理', cancelButtonText: '取消', type: 'warning' }
+    )
+    row._resolving = true
+    await resolveRiskEvent({ id: row.id })
+    row.status = 'resolved'
+    ElMessage.success(`事件 #${row.id} 已处理`)
+  } catch (err: any) {
+    if (err !== 'cancel' && err?.message !== 'cancel') {
+      ElMessage.error(err?.message || '处理失败')
+    }
+  } finally {
+    row._resolving = false
+  }
+}
 
 async function fetchData() {
   loading.value = true

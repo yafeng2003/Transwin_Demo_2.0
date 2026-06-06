@@ -118,12 +118,12 @@ const handleRoutes = computed(() =>
 
         .username,
         .username + i {
-          color: var(--el-color-white);
+          color: var(--el-color-black);
         }
 
         [class*='ri-'] {
           margin-left: var(--el-margin);
-          color: var(--el-color-white);
+          color: var(--el-color-black);
         }
       }
     }

@@ -1,58 +1,59 @@
 @use 'sass:color';
 
-//040d32=>010C21
+// 浅色科技主题
 html>body.vab-theme-technology {
-  --el-dialog-bg-color: #210501;
-  --el-color-black: #ffffff;
-  --el-color-white: #010C21;
-  --el-color-grey: #ffffff;
-  --el-menu-background-color: #010C21;
-  --el-menu-background-color-second: #010C21;
-  --el-background-technology: #010C21;
-  --el-menu-text-color: #fff;
-  --el-bg-color-page: #010C21;
-  --el-bg-color: #103171;
-  --el-bg-color-overlay: #103171;
-  --el-text-color-primary: #e5eaf3;
-  --el-text-color-regular: #e5eaf3;
-  --el-text-color-secondary: #e5eaf3;
-  --el-text-color-placeholder: #e5eaf3;
-  --el-text-color-disabled: #cfd3dc;
-  --el-border-color-darker: #{color.mix(#ffffff, #2c6191, 10%)};
-  --el-border-color-dark: #{color.mix(#ffffff, #2c6191, 20%)};
-  --el-border-color: #{color.mix(#ffffff, #2c6191, 10%)};
-  --el-border: 1px solid #{color.mix(#ffffff, #2c6191, 10%)};
-  --el-border-color-light: #{color.mix(#ffffff, #2c6191, 20%)};
-  --el-border-color-lighter: #{color.mix(#ffffff, #2c6191, 30%)};
-  --el-border-color-extra-light: #2c6191;
-  --el-fill-color-darker: #2c6191;
-  --el-fill-color-dark: #2c6191;
-  --el-fill-color: #103171;
-  --el-fill-color-light: #{color.mix(#ffffff, #103171, 10%)};
-  --el-fill-color-lighter: #{color.mix(#ffffff, #103171, 20%)};
-  --el-fill-color-extra-light: #{color.mix(#ffffff, #103171, 10%)};
-  --el-fill-color-blank: #{color.mix(#ffffff, #103171, 1%)};
-  --el-mask-color: rgba(16, 49, 113, 0.8);
+  --el-dialog-bg-color: #ffffff;
+  --el-color-black: rgba(0, 0, 0, 0.85);
+  --el-color-white: #f0f5ff;
+  --el-color-grey: rgba(0, 0, 0, 0.45);
+  --el-menu-background-color: #ffffff;
+  --el-menu-background-color-second: #f5f8ff;
+  --el-background-technology: #f0f5ff;
+  --el-menu-text-color: #333333;
+  --el-menu-color-text: #515a6e;
+  --el-bg-color-page: #e8f0fe;
+  --el-bg-color: #dce8fc;
+  --el-bg-color-overlay: #ffffff;
+  --el-text-color-primary: #303133;
+  --el-text-color-regular: #606266;
+  --el-text-color-secondary: #909399;
+  --el-text-color-placeholder: #a8abb2;
+  --el-text-color-disabled: #c0c4cc;
+  --el-border-color-darker: #{color.mix(#000000, #4e88f3, 30%)};
+  --el-border-color-dark: #{color.mix(#000000, #4e88f3, 20%)};
+  --el-border-color: #{color.mix(#000000, #4e88f3, 10%)};
+  --el-border: 1px solid #{color.mix(#000000, #4e88f3, 10%)};
+  --el-border-color-light: #{color.mix(#000000, #4e88f3, 6%)};
+  --el-border-color-lighter: #{color.mix(#000000, #4e88f3, 3%)};
+  --el-border-color-extra-light: #dce8fc;
+  --el-fill-color-darker: #c8daf8;
+  --el-fill-color-dark: #dce8fc;
+  --el-fill-color: #e8f0fe;
+  --el-fill-color-light: #{color.mix(#000000, #e8f0fe, 3%)};
+  --el-fill-color-lighter: #{color.mix(#000000, #e8f0fe, 1%)};
+  --el-fill-color-extra-light: #{color.mix(#000000, #e8f0fe, 5%)};
+  --el-fill-color-blank: #ffffff;
+  --el-mask-color: rgba(0, 0, 0, 0.45);
 
-  --w-e-textarea-bg-color: #103171;
-  --w-e-textarea-color: #fff;
-  --w-e-textarea-border-color: #103171;
-  --w-e-textarea-slight-border-color: #2c6191;
-  --w-e-textarea-slight-color: #010C21;
-  --w-e-textarea-slight-bg-color: #091d6e;
-  --w-e-textarea-selected-border-color: #b4d5ff;
-  --w-e-textarea-handler-bg-color: #4290f7;
-  --w-e-toolbar-color: #fff;
-  --w-e-toolbar-bg-color: #103171;
-  --w-e-toolbar-active-color: #fff;
-  --w-e-toolbar-active-bg-color: #2c6191;
-  --w-e-toolbar-disabled-color: #fff;
-  --w-e-toolbar-border-color: #2c6191;
-  --w-e-modal-button-bg-color: #2c6191;
-  --w-e-modal-button-border-color: #2c6191;
+  --w-e-textarea-bg-color: #ffffff;
+  --w-e-textarea-color: #333;
+  --w-e-textarea-border-color: #dce8fc;
+  --w-e-textarea-slight-border-color: #dce8fc;
+  --w-e-textarea-slight-color: #f0f5ff;
+  --w-e-textarea-slight-bg-color: #e8f0fe;
+  --w-e-textarea-selected-border-color: #4e88f3;
+  --w-e-textarea-handler-bg-color: #4e88f3;
+  --w-e-toolbar-color: #333;
+  --w-e-toolbar-bg-color: #ffffff;
+  --w-e-toolbar-active-color: #4e88f3;
+  --w-e-toolbar-active-bg-color: #e8f0fe;
+  --w-e-toolbar-disabled-color: #c0c4cc;
+  --w-e-toolbar-border-color: #dce8fc;
+  --w-e-modal-button-bg-color: #ffffff;
+  --w-e-modal-button-border-color: #dce8fc;
 
-  color: var(--el-color-grey) !important;
-  background-color: var(--el-color-white) !important;
+  color: var(--el-color-black) !important;
+  background-color: var(--el-bg-color-page) !important;
 
   .vab-side-bar {
     border-right: 1px solid var(--el-border-color) !important;
@@ -64,13 +65,9 @@ html>body.vab-theme-technology {
     }
   }
 
-  // .vab-nav {
-  //   background: var(--el-color-white) !important;
-  // }
-
   section>div[class*='-container'],
   .no-background-container {
-    background: var(--el-color-white) !important;
+    background: #ffffff !important;
   }
 
   .vab-column-bar {
@@ -81,11 +78,11 @@ html>body.vab-theme-technology {
       border-right: 1px solid var(--el-border-color) !important;
 
       .el-tabs__item {
-        color: var(--el-color-grey) !important;
+        color: var(--el-color-black) !important;
       }
 
       .el-tabs__nav {
-        background: var(--el-color-white) !important;
+        background: #ffffff !important;
       }
     }
 
@@ -119,7 +116,7 @@ html>body.vab-theme-technology {
 
   .vab-logo-column {
     .logo {
-      background: var(--el-color-white) !important;
+      background: #ffffff !important;
       border-right: 1px solid var(--el-border-color) !important;
     }
   }
@@ -129,17 +126,17 @@ html>body.vab-theme-technology {
   .el-message-box {
     position: relative;
     overflow: visible;
-    background: var(--el-background-technology);
-    border: 2px solid #00a1ff;
+    background: #ffffff;
+    border: 2px solid #4e88f3;
     border-radius: 8px;
 
     &__header {
       position: relative;
-      background: var(--el-background-technology) !important;
+      background: #ffffff !important;
 
       .el-dialog__title,
       .el-dialog__close {
-        color: #fff;
+        color: #333333;
       }
 
       i[class*='__close'] {
@@ -150,7 +147,7 @@ html>body.vab-theme-technology {
         transition: none;
 
         &:hover {
-          color: #00a1ff;
+          color: #4e88f3;
         }
       }
     }
@@ -164,8 +161,8 @@ html>body.vab-theme-technology {
       width: calc(100% - 60px);
       pointer-events: none;
       content: '';
-      border-top: 2px solid #016886;
-      border-bottom: 2px solid #016886;
+      border-top: 2px solid #a0c4f8;
+      border-bottom: 2px solid #a0c4f8;
     }
 
     &::after {
@@ -177,8 +174,8 @@ html>body.vab-theme-technology {
       height: calc(100% - 60px);
       pointer-events: none;
       content: '';
-      border-right: 2px solid #016886;
-      border-left: 2px solid #016886;
+      border-right: 2px solid #a0c4f8;
+      border-left: 2px solid #a0c4f8;
     }
   }
 
@@ -198,7 +195,7 @@ html>body.vab-theme-technology {
   }
 
   .el-drawer__header {
-    color: var(--el-color-grey);
+    color: var(--el-color-black);
   }
 
   .el-radio-button {
@@ -210,7 +207,7 @@ html>body.vab-theme-technology {
   .el-input {
     &.is-disabled {
       .el-input__wrapper {
-        background: #214e85 !important;
+        background: #e8f0fe !important;
       }
     }
   }
@@ -227,7 +224,7 @@ html>body.vab-theme-technology {
 
         [class*='ri-'],
         .username {
-          color: var(--el-color-grey) !important;
+          color: var(--el-color-black) !important;
         }
       }
     }
@@ -237,8 +234,8 @@ html>body.vab-theme-technology {
     .el-tabs__header {
       .el-tabs__item {
         &:hover {
-          color: var(--el-color-grey);
-          background: #123372;
+          color: var(--el-color-black);
+          background: #e8f0fe;
         }
       }
     }
@@ -251,7 +248,7 @@ html>body.vab-theme-technology {
 
   /* svg */
   [fill='#fff'] {
-    fill: var(--el-background-technology) !important;
+    fill: #ffffff !important;
   }
 
   [fill='#f2f2f2'],
@@ -261,8 +258,7 @@ html>body.vab-theme-technology {
 
   .login-container,
   .register-container {
-    background: url('/@/assets/login_images/background.png') center center fixed no-repeat !important;
-    background-size: cover !important;
+    background: #e8f0fe !important;
   }
 
   .el-button,
@@ -286,14 +282,14 @@ html>body.vab-theme-technology {
   .transition-box,
   .top-card-blue,
   .icon-panel {
-    --el-color-white: var(--el-menu-text-color);
+    --el-color-white: #ffffff;
   }
 
   .el-divider__text {
-    background-color: transparent !important;
+    background-color: #ffffff !important;
   }
 
   .vab-blockquote {
-    background-color: rgba(0, 0, 0, 0.1) !important;
+    background-color: rgba(0, 0, 0, 0.04) !important;
   }
 }

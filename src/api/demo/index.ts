@@ -62,6 +62,9 @@ export function getRiskEvents(params?: Record<string, any>) {
 export function getRiskNotifications(params?: Record<string, any>) {
   return request({ url: '/api/demo/risk/notifications', method: 'get', params })
 }
+export function resolveRiskEvent(data: { id: number }) {
+  return request({ url: '/api/demo/risk/events/resolve', method: 'post', data })
+}
 
 // ==================== 数据分析 ====================
 export function getAnalysisReturns(params?: Record<string, any>) {
@@ -80,11 +83,17 @@ export function getReports(params?: Record<string, any>) {
 }
 
 // ==================== 日志 ====================
-export function getSystemLogs(params?: Record<string, any>) {
-  return request({ url: '/api/demo/logs/system', method: 'get', params })
+// 下单日志 (trade_log)
+export function getTradeLogs(params?: Record<string, any>) {
+  return request({ url: '/api/demo/logs/trade', method: 'get', params })
 }
-export function getTradingLogs(params?: Record<string, any>) {
-  return request({ url: '/api/demo/logs/trading', method: 'get', params })
+// 订单状态日志 (order_log)
+export function getOrderLogs(params?: Record<string, any>) {
+  return request({ url: '/api/demo/logs/order', method: 'get', params })
+}
+// 错误日志 (error_log)
+export function getErrorLogs(params?: Record<string, any>) {
+  return request({ url: '/api/demo/logs/error', method: 'get', params })
 }
 
 // ==================== 人工干预 ====================

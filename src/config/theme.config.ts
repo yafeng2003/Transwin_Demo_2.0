@@ -5,7 +5,7 @@ export const themeConfig: ThemeType = {
   //布局支持：分栏布局column、纵向布局vertical、横向布局horizontal、瀑布布局fall
   layout: 'vertical',
   //主题支持：默认default、简洁plain、科技technology
-  themeName: 'technology',
+  themeName: 'default',
   //菜单宽度，仅支持px，建议大小：266px、277px、288px，其余尺寸会影响美观
   menuWidth: '266px',
   //分栏风格：横向风格horizontal、纵向风格vertical、卡片风格card、箭头风格arrow、半圆风格semicircle
@@ -43,7 +43,7 @@ export const themeConfig: ThemeType = {
   //是否开启右侧悬浮窗
   showThemeSetting: true,
   //是否开启暗黑组件
-  showDark: false,
+  showDark: true,
   //否默认收起左侧菜单
   foldSidebar: false,
   //是否开启页面动画  null、el-fade-in-linear、el-fade-in、el-zoom-in-center、el-zoom-in-top、el-zoom-in-bottom。

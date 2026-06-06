@@ -1,15 +1,17 @@
 @use 'element-plus/theme-chalk/dark/css-vars.css' as *;
 
-html.dark > body,
-html.dark > body[class*='vab-theme-'] {
+html.dark>body,
+html.dark>body[class*='vab-theme-'] {
   --el-color-black: #ffffff;
   --el-color-white: #1d1e1f;
   --el-color-grey: #ffffff;
   --el-menu-background-color-second: #1d1e1f;
   --el-border-color: #414243;
   --el-menu-background-color: #1d1e1f;
-  --el-mask-color: rgba(0, 0, 0, 0.8);
+  --el-menu-color-text: #ffffff;
+  --el-title-color: #ffffff;
   --el-background-color: #1d1e1f;
+  --el-mask-color: rgba(0, 0, 0, 0.8);
 
   --w-e-textarea-bg-color: #333;
   --w-e-textarea-color: #fff;
@@ -33,6 +35,12 @@ html.dark > body[class*='vab-theme-'] {
 
   .vab-nav {
     background: var(--el-color-white) !important;
+
+    .big-title {
+      background-image: -webkit-linear-gradient(bottom, #86919e, #ffffff) !important;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
   }
 
   [class*='-container'],
@@ -119,6 +127,7 @@ html.dark > body[class*='vab-theme-'] {
 
     .vab-main {
       .right-panel {
+
         [class*='ri-'],
         .username {
           color: var(--el-color-grey) !important;

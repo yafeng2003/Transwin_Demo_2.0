@@ -3,40 +3,40 @@
  */
 
 import {
-  persistenceTab as _persistenceTab,
-  color,
-  colorWeakness,
-  columnStyle,
-  fixedHeader,
-  foldSidebar,
-  fontSize,
-  i18n,
-  isFollow,
-  layout,
-  logo,
-  menuWidth,
-  pageTransition,
-  radius,
-  rightToolsDrag,
-  showColorPicker,
-  showDark,
-  showFontSize,
-  showFooter,
-  showFullScreen,
-  showLanguage,
-  showLock,
-  showNotice,
-  showProgressBar,
-  showRefresh,
-  showSearch,
-  showTabs,
-  showTabsIcon,
-  showTheme,
-  showThemeSetting,
-  tabDrag,
-  tabsBarStyle,
-  themeName,
-  title,
+    persistenceTab as _persistenceTab,
+    color,
+    colorWeakness,
+    columnStyle,
+    fixedHeader,
+    foldSidebar,
+    fontSize,
+    i18n,
+    isFollow,
+    layout,
+    logo,
+    menuWidth,
+    pageTransition,
+    radius,
+    rightToolsDrag,
+    showColorPicker,
+    showDark,
+    showFontSize,
+    showFooter,
+    showFullScreen,
+    showLanguage,
+    showLock,
+    showNotice,
+    showProgressBar,
+    showRefresh,
+    showSearch,
+    showTabs,
+    showTabsIcon,
+    showTheme,
+    showThemeSetting,
+    tabDrag,
+    tabsBarStyle,
+    themeName,
+    title,
 } from '/@/config'
 import { colorRgba, lightenColorChrome } from '/@/utils/lightenColor'
 import { getLocalStorage } from '/@/utils/localStorage'
@@ -180,7 +180,7 @@ export const useSettingsStore = defineStore('settings', {
       if (this.theme.isFollow) {
         useCssVar('--el-menu-background-color', el).value = lightenColorChrome(this.theme.color, 18)
       } else {
-        useCssVar('--el-menu-background-color', el).value = '#282c34'
+        useCssVar('--el-menu-background-color', el).value = '#ffffff'
       }
       //主题色处理
       useCssVar('--el-color-primary-dark-2', el).value = this.theme.color

@@ -331,6 +331,14 @@ export default [
     },
   },
   {
+    url: '/api/demo/risk/events/resolve',
+    method: 'post',
+    response: ({ body }: any) => ({
+      code: 200,
+      data: { id: body.id, status: 'resolved', message: '已处理' },
+    }),
+  },
+  {
     url: '/api/demo/risk/notifications',
     method: 'get',
     response: ({ query }: any) => {
@@ -361,23 +369,85 @@ export default [
     url: '/api/demo/analysis/returns',
     method: 'get',
     response: () => {
-      const dailyReturns = Array.from({ length: 90 }, (_, i) => ({
-        date: dayBefore(89 - i),
-        dailyReturn: randomNum(-5, 5),
-        cumulativeReturn: randomNum(-10, 40),
-        netValue: randomNum(0.95, 1.5),
+      // 生成真实的累计收益模拟数据（随机游走）
+      let nav = 1.0
+      let peak = 1.0
+      let cumReturn = 0
+      const dailyReturns: any[] = []
+      const navSeries: any[] = []
+      const drawdownSeries: any[] = []
+
+      for (let i = 0; i < 90; i++) {
+        const dailyRet = randomNum(-4, 4.5) // 日收益率
+        nav = nav * (1 + dailyRet / 100)
+        if (nav > peak) peak = nav
+        const dd = ((nav - peak) / peak) * 100 // 回撤百分比
+        cumReturn = ((nav - 1.0) * 100)
+
+        dailyReturns.push({
+          date: dayBefore(89 - i),
+          dailyReturn: parseFloat(dailyRet.toFixed(2)),
+          cumulativeReturn: parseFloat(cumReturn.toFixed(2)),
+          netValue: parseFloat(nav.toFixed(4)),
+        })
+        navSeries.push(parseFloat(nav.toFixed(4)))
+        drawdownSeries.push(parseFloat(dd.toFixed(2)))
+      }
+
+      // 月度收益（近12个月）
+      const monthlyReturns = Array.from({ length: 12 }, (_, i) => {
+        const m = ((new Date().getMonth() - 11 + i) % 12 + 12) % 12
+        const y = new Date().getFullYear() + Math.floor(((new Date().getMonth() - 11 + i) / 12))
+        return {
+          month: `${y}-${(m + 1).toString().padStart(2, '0')}`,
+          year: y,
+          monthIdx: m + 1,
+          return: parseFloat(randomNum(-8, 12).toFixed(2)),
+        }
+      })
+
+      // 日收益分布（分桶统计）
+      const buckets = ['<-4%', '-4~-3%', '-3~-2%', '-2~-1%', '-1~0%', '0~1%', '1~2%', '2~3%', '3~4%', '>4%']
+      const dist = buckets.map((label, idx) => {
+        const weights = [2, 3, 5, 8, 15, 18, 12, 8, 5, 3]
+        return { bucket: label, count: randomInt(weights[idx] * 2, weights[idx] * 5) }
+      })
+
+      // 年度收益
+      const currentYear = new Date().getFullYear()
+      const annualReturns = Array.from({ length: 5 }, (_, i) => ({
+        year: currentYear - 4 + i,
+        return: parseFloat(randomNum(-25, 55).toFixed(2)),
+        benchmark: parseFloat(randomNum(-15, 35).toFixed(2)),
       }))
+
+      const totalReturn = parseFloat(cumReturn.toFixed(2))
+      const annualReturn = parseFloat((totalReturn * 4).toFixed(2)) // 年化近似
+      const sharpeRatio = parseFloat(randomNum(0.8, 3.2).toFixed(2))
+      const maxDrawdown = parseFloat((Math.min(...drawdownSeries)).toFixed(2))
+      const calmarRatio = maxDrawdown !== 0 ? parseFloat((annualReturn / Math.abs(maxDrawdown)).toFixed(2)) : 0
+      const positiveDays = dailyReturns.filter((d: any) => d.dailyReturn > 0).length
+      const winRate = parseFloat(((positiveDays / dailyReturns.length) * 100).toFixed(1))
+
       return {
         code: 200,
         data: {
           dailyReturns,
+          navSeries,
+          drawdownSeries,
+          monthlyReturns,
+          dailyReturnDist: dist,
+          annualReturns,
           summary: {
-            totalReturn: randomNum(10, 60),
-            annualReturn: randomNum(5, 35),
-            sharpeRatio: randomNum(0.5, 3.0),
-            maxDrawdown: randomNum(-30, -5),
-            calmarRatio: randomNum(0.3, 2.5),
-            winRate: randomNum(45, 70),
+            totalReturn,
+            annualReturn,
+            sharpeRatio,
+            maxDrawdown,
+            calmarRatio,
+            winRate,
+            volatility: parseFloat(randomNum(12, 28).toFixed(2)),
+            sortinoRatio: parseFloat(randomNum(1.0, 3.5).toFixed(2)),
+            informationRatio: parseFloat(randomNum(0.5, 2.0).toFixed(2)),
           },
         },
       }
@@ -449,60 +519,146 @@ export default [
   },
 
   // ---------- 日志 ----------
+  // 下单日志 (trade_log)
   {
-    url: '/api/demo/logs/system',
+    url: '/api/demo/logs/trade',
     method: 'get',
     response: ({ query }: any) => {
       const page = parseInt(query.page || '1')
       const size = parseInt(query.size || '20')
-      const levels = ['INFO', 'INFO', 'INFO', 'WARN', 'ERROR']
-      const messages = [
-        '策略调度器启动成功',
-        '账户数据同步完成',
-        '风控检查通过',
-        '日报生成完成',
-        '数据库连接正常',
-        'API连接超时，正在重试',
-        '订单执行成功',
-        '持仓数据更新完成',
-        '定时任务执行完毕',
-        '服务心跳检测正常',
-      ]
-      const total = randomInt(100, 500)
-      const list = Array.from({ length: Math.min(size, total - (page - 1) * size) }, (_, i) => ({
-        id: 60000 + i,
-        level: randomPick(levels),
-        module: randomPick(['strategy', 'executor', 'risk', 'analysis', 'system']),
-        message: randomPick(messages),
-        detail: '详细日志信息...',
-        createdAt: dayBefore(randomInt(0, 7)) + ' ' + `${randomInt(0, 23)}:${randomInt(0, 59).toString().padStart(2, '0')}:${randomInt(0, 59).toString().padStart(2, '0')}`,
-      }))
+      const ops = ['买入', '卖出']
+      const remarks = ['batch_01_sigA', 'batch_02_sigB', 'rebalance_03', 'signal_ma_cross', 'signal_momentum', '']
+      const total = randomInt(30, 200)
+      const list = Array.from({ length: Math.min(size, total - (page - 1) * size) }, (_, i) => {
+        const s = randomPick(stocks)
+        return {
+          '时间': dayBefore(randomInt(0, 7)) + ' ' + `${randomInt(9, 15)}:${randomInt(0, 59).toString().padStart(2, '0')}:${randomInt(0, 59).toString().padStart(2, '0')}`,
+          '操作': randomPick(ops),
+          '代码': `HK.${s.code}`,
+          '名称': s.name,
+          '数量': randomInt(100, 10000),
+          '价格': 0, // 市价单固定传0
+          '订单号': String(randomInt(8000000, 8999999)),
+          '备注': randomPick(remarks),
+        }
+      })
       return { code: 200, data: { list, total, page, size } }
     },
   },
+  // 订单状态日志 (order_log)
   {
-    url: '/api/demo/logs/trading',
+    url: '/api/demo/logs/order',
     method: 'get',
     response: ({ query }: any) => {
       const page = parseInt(query.page || '1')
       const size = parseInt(query.size || '20')
-      const types = ['order', 'cancel', 'deal']
-      const typeLabels: Record<string, string> = { order: '下单', cancel: '撤单', deal: '成交' }
-      const total = randomInt(50, 300)
+      const envs = ['REAL', 'SIMULATE']
+      const ops = ['买入', '卖出']
+      const orderTypes = ['MARKET', 'LIMIT']
+      const orderStatuses = ['SUBMITTED', 'FILLED_ALL', 'FILLED_PART', 'CANCELLED_ALL', 'FAILED', 'DISABLED', 'DELETED']
+      const total = randomInt(40, 250)
       const list = Array.from({ length: Math.min(size, total - (page - 1) * size) }, (_, i) => {
-        const t = randomPick(types)
         const s = randomPick(stocks)
+        const status = randomPick(orderStatuses)
+        const qty = randomInt(100, 10000)
+        const filledQty = status === 'FILLED_ALL' ? qty : status === 'FILLED_PART' ? randomInt(1, qty - 1) : 0
+        const price = randomNum(10, 500)
+        const isFail = ['FAILED', 'DISABLED', 'DELETED'].includes(status)
+        const errMsgs = ['余额不足', '市场已关闭', '超出持仓', '接口超时', '参数无效']
+        const ts = dayBefore(randomInt(0, 7)) + ' ' + `${randomInt(9, 15)}:${randomInt(0, 59).toString().padStart(2, '0')}:${randomInt(0, 59).toString().padStart(2, '0')}`
         return {
-          id: 70000 + i,
-          type: t,
-          typeLabel: typeLabels[t],
-          symbolCode: s.code,
-          symbolName: s.name,
-          message: `${typeLabels[t]}日志：${s.name}(${s.code})，${t === 'deal' ? '成交价' : '委托价'}${randomNum(10, 500)}，数量${randomInt(100, 5000)}`,
-          status: randomPick(['success', 'success', 'success', 'failed']),
-          createdAt: dayBefore(randomInt(0, 7)) + ' ' + `${randomInt(9, 15)}:${randomInt(0, 59).toString().padStart(2, '0')}:${randomInt(0, 59).toString().padStart(2, '0')}`,
+          '记录时间': ts,
+          '交易环境': randomPick(envs),
+          '操作': randomPick(ops),
+          '订单类型': randomPick(orderTypes),
+          '订单状态': status,
+          '订单号': String(randomInt(8000000, 8999999)),
+          '代码': `HK.${s.code}`,
+          '名称': s.name,
+          '订单数量': qty,
+          '订单价格': price,
+          '已成交数量': filledQty,
+          '成交均价': filledQty > 0 ? randomNum(price * 0.98, price * 1.02) : 0,
+          '最后错误': isFail ? randomPick(errMsgs) : '',
+          '备注': randomPick(['batch_01', 'batch_02', 'signal_v1', '']),
+          '创建时间': ts,
+          '更新时间': ts,
         }
       })
+      return { code: 200, data: { list, total, page, size } }
+    },
+  },
+  // 错误日志 (error_log)
+  {
+    url: '/api/demo/logs/error',
+    method: 'get',
+    response: ({ query }: any) => {
+      const page = parseInt(query.page || '1')
+      const size = parseInt(query.size || '20')
+      const stage = query.stage
+      const action = query.action
+      const errorType = query.errorType
+
+      const stages = ['executor', 'risk', 'strategy', 'callback', 'cleanup']
+      const actions = ['BUY', 'SELL', 'POSITION', 'unlock_trade', 'order_update', 'cleanup']
+      const fixedErrorTypes = [
+        'unlock_failed', 'invalid_weight', 'account_assets_unavailable', 'price_unavailable',
+        'insufficient_cash', 'callback_failed', 'callback_exception', 'qty_below_lot',
+        'max_buy_query_failed', 'max_buy_zero', 'place_order_failed', 'no_position',
+        'fill_callback_exception', 'position_query_failed', 'buy_not_in_actual_position',
+        'position_not_in_actual_position', 'unhandled_exception',
+      ]
+      const dynamicErrorTypes = ['FAILED', 'DISABLED', 'DELETED']
+      const allErrorTypes = [...fixedErrorTypes, ...dynamicErrorTypes]
+
+      const errorDetails: Record<string, string> = {
+        unlock_failed: '交易解锁失败：前序订单未完成结算',
+        invalid_weight: '权重数据无效：目标权重为空或格式错误',
+        account_assets_unavailable: '账户资产查询失败：API 连接超时',
+        price_unavailable: '无法获取 HK.00700 最新报价',
+        insufficient_cash: '可用资金不足，需 150,000 实际可用 98,500',
+        callback_failed: '订单回调处理失败',
+        callback_exception: '订单回调异常：NullPointerException',
+        qty_below_lot: '下单数量 50 低于最小交易单位 100',
+        max_buy_query_failed: '最大可买查询失败：行情服务不可用',
+        max_buy_zero: '最大可买数量为 0，可能触及单日买入上限',
+        place_order_failed: '下单失败：交易所拒单，错误码 10012',
+        no_position: '无持仓可卖：HK.00001 当前持仓为 0',
+        fill_callback_exception: '成交回调处理异常：数据解析错误',
+        position_query_failed: '持仓查询失败：账户服务暂不可用',
+        buy_not_in_actual_position: '买入股票 HK.00700 未在实际持仓中找到',
+        position_not_in_actual_position: '目标持仓与实际持仓不一致',
+        unhandled_exception: '未处理的异常：IndexOutOfRange',
+        FAILED: '订单执行失败',
+        DISABLED: '订单已被禁用',
+        DELETED: '订单已被删除',
+      }
+
+      let rawTotal = randomInt(30, 180)
+      let filteredList = Array.from({ length: rawTotal }, (_, i) => {
+        const s = randomPick(stocks)
+        const et = randomPick(allErrorTypes)
+        return {
+          '时间': dayBefore(randomInt(0, 14)) + ' ' + `${randomInt(0, 23)}:${randomInt(0, 59).toString().padStart(2, '0')}:${randomInt(0, 59).toString().padStart(2, '0')}`,
+          '阶段': randomPick(stages),
+          '代码': Math.random() > 0.3 ? `HK.${s.code}` : '',
+          '动作': randomPick(actions),
+          '错误类型': et,
+          '错误详情': errorDetails[et] || `未知错误：${et}`,
+          '订单号': Math.random() > 0.3 ? String(randomInt(8000000, 8999999)) : '',
+          '备注': randomPick(['batch_01', 'signal_v1', 'rebalance', '']),
+        }
+      })
+
+      // 支持筛选
+      if (stage) filteredList = filteredList.filter((r: any) => r['阶段'] === stage)
+      if (action) filteredList = filteredList.filter((r: any) => r['动作'] === action)
+      if (errorType) filteredList = filteredList.filter((r: any) => r['错误类型'] === errorType)
+
+      const total = filteredList.length
+      const start = (page - 1) * size
+      const list = filteredList.slice(start, start + size)
+
       return { code: 200, data: { list, total, page, size } }
     },
   },

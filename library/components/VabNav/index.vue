@@ -2,7 +2,6 @@
   <div
     class="vab-nav"
     :class="'vab-nav-' + layout"
-    :style="{ backgroundImage: `url(${backgroundImage})` }"
   >
     <div class="left-panel">
       <vab-logo v-if="layout === 'comprehensive'" class="hidden-sm-and-down" />
@@ -43,8 +42,6 @@
 // import { translate } from '/@/i18n'
 // import { useRoutesStore } from '/@/store/modules/routes'
 import { useSettingsStore } from '/@/store/modules/settings'
-// import { isExternal } from '/@/utils/validate'
-import backgroundImage from '/@/assets/evaluate/title.png'
 
 defineOptions({
   name: 'VabNav',
@@ -157,8 +154,7 @@ watch(
   overflow: hidden;
   text-align: center;
   user-select: none;
-  // background: var(--el-color-white);
-  background-size: 100% 100%;
+  background: #ffffff;
   border-bottom: 1px solid var(--el-border-color);
 
   .left-panel {
@@ -216,7 +212,7 @@ watch(
     font-size: 40px;
     font-weight: 500;
     vertical-align: middle;
-    background-image: -webkit-linear-gradient(bottom, #86919e, #fff);
+    background-image: -webkit-linear-gradient(bottom, #4e88f3, #1a3a6e);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }

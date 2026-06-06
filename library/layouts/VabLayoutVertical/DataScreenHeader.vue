@@ -59,29 +59,28 @@ const title = computed(() => {
   width: 100%;
   height: 64px;
   margin-bottom: 20px;
-  background: #010c21;
+  background: #ffffff;
+  border-bottom: 1px solid #e8e8e8;
 }
 .data-screen-header {
   width: 100%;
-  // height: var(--el-nav-height);
   height: 64px;
   margin-bottom: 20px;
   text-align: center;
-  background: url('/@/assets/data_screen_images/bgtop.png') no-repeat center;
-  background-size: 135% 100%;
+  background: linear-gradient(180deg, #e8f4fd 0%, #ffffff 100%);
 
   span {
     position: relative;
     top: 23%;
     font-size: 1.7rem;
     font-weight: bold;
-    color: #33e6fa;
+    color: #1a5fa8;
     background: linear-gradient(
       -90deg,
-      #7cedfb 0%,
-      #2ba3ff 0%,
-      #02efff 50.2685546875%,
-      #2ea5f9 100%
+      #1a5fa8 0%,
+      #4e88f3 0%,
+      #1a7ec8 50.2685546875%,
+      #4e88f3 100%
     );
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -91,14 +90,13 @@ const title = computed(() => {
       left: 0;
       display: block;
       width: 100%;
-      color: #fff;
-      /* use attr(data-title) so pseudo elements match the dynamic title */
+      color: #1a5fa8;
       content: attr(data-title);
       background-image: linear-gradient(
         65deg,
         transparent 10%,
-        rgba(255, 255, 255, 1) 20%,
-        rgba(255, 255, 255, 1) 27.5%,
+        rgba(78, 136, 243, 0.4) 20%,
+        rgba(78, 136, 243, 0.6) 27.5%,
         transparent 30%,
         transparent 100%
       );
@@ -111,7 +109,7 @@ const title = computed(() => {
       top: 0;
       z-index: -1;
       display: block;
-      color: #fff;
+      color: #1a5fa8;
       content: attr(data-title);
     }
   }
@@ -127,13 +125,13 @@ const title = computed(() => {
       position: relative;
       font-size: var(--el-font-size-extra-large);
       font-weight: bold;
-      color: #33e6fa;
+      color: #1a5fa8;
       background: linear-gradient(
         -90deg,
-        #7cedfb 0%,
-        #2ba3ff 0%,
-        #02efff 50.2685546875%,
-        #2ea5f9 100%
+        #1a5fa8 0%,
+        #4e88f3 0%,
+        #1a7ec8 50.2685546875%,
+        #4e88f3 100%
       );
       background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -143,13 +141,13 @@ const title = computed(() => {
         left: 0;
         display: block;
         width: 100%;
-        color: #fff;
+        color: #1a5fa8;
         content: '数据大屏';
         background-image: linear-gradient(
           65deg,
           transparent 10%,
-          rgba(255, 255, 255, 1) 20%,
-          rgba(255, 255, 255, 1) 27.5%,
+          rgba(78, 136, 243, 0.4) 20%,
+          rgba(78, 136, 243, 0.6) 27.5%,
           transparent 30%,
           transparent 100%
         );
@@ -162,7 +160,7 @@ const title = computed(() => {
         top: 0;
         z-index: -1;
         display: block;
-        color: #fff;
+        color: #1a5fa8;
         content: '数据大屏';
       }
     }
