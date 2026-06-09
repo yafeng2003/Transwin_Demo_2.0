@@ -89,10 +89,11 @@ onMounted(async () => {
 .section-title { font-weight: 600; font-size: 15px; }
 .up { color: #e74c3c; }
 .down { color: #27ae60; }
-/* 绩效表 + 相关性矩阵 紧凑并排一行 */
-.compact-row { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
-.compact-row .fit-card { flex: 0 0 auto; width: fit-content; }
-.corr-matrix { overflow-x: auto; }
+/* 绩效表 + 相关性矩阵 紧凑并排一行、等高对齐 */
+.compact-row { display: flex; gap: 16px; align-items: stretch; flex-wrap: wrap; }
+.compact-row .fit-card { flex: 0 0 auto; width: fit-content; display: flex; flex-direction: column; }
+.compact-row .fit-card :deep(.el-card__body) { flex: 1; }
+.corr-matrix { overflow-x: auto; height: 100%; display: flex; flex-direction: column; justify-content: center; }
 .corr-header, .corr-row { display: flex; }
 .corr-empty, .corr-row-label { width: 102px; min-width: 102px; padding: 8px 6px; font-weight: 600; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .corr-col-label { width: 66px; min-width: 66px; padding: 8px 4px; font-weight: 600; font-size: 11px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
