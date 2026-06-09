@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <div class="page-header">
-      <h2>📉 风险分析</h2>
+      <h2>风险分析</h2>
       <p class="page-desc">从风险暴露、回撤、波动率、风险分布等维度分析策略风险特征。（使用收益分析数据交叉展示）</p>
     </div>
 
@@ -25,14 +25,14 @@
     <el-row :gutter="16" style="margin-top:16px">
       <el-col :span="12">
         <el-card>
-          <template #header><span class="section-title">📊 回撤分布</span></template>
-          <vab-chart :option="drawdownOption" style="height:250px" />
+          <template #header><span class="section-title">回撤分布</span></template>
+          <vab-chart :option="drawdownOption" class="demo-chart-sm" />
         </el-card>
       </el-col>
       <el-col :span="12">
         <el-card>
-          <template #header><span class="section-title">📊 风险热力矩阵（占位）</span></template>
-          <vab-chart :option="heatmapOption" style="height:250px" />
+          <template #header><span class="section-title">风险热力矩阵</span></template>
+          <vab-chart :option="heatmapOption" class="demo-chart-sm" />
         </el-card>
       </el-col>
     </el-row>
@@ -40,7 +40,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { getAnalysisReturns } from '/@/api/demo/index'
 
 defineOptions({ name: 'DemoAnalysisRisk' })
@@ -48,10 +48,10 @@ defineOptions({ name: 'DemoAnalysisRisk' })
 const summary = ref<any>({})
 
 const drawdownOption = computed(() => ({
-  grid: { top: 10, right: 20, bottom: 30, left: 50 },
+  grid: { top: 24, right: 24, bottom: 38, left: 44, containLabel: true },
   tooltip: { trigger: 'axis' },
-  xAxis: { type: 'category', data: ['0~2%', '2~4%', '4~6%', '6~8%', '8~10%', '10~12%', '12~14%', '14~16%'] },
-  yAxis: { type: 'value', name: '次数' },
+  xAxis: { type: 'category', data: ['0~2%', '2~4%', '4~6%', '6~8%', '8~10%', '10~12%', '12~14%', '14~16%'], axisLabel: { color: '#7a8699', fontSize: 11 } },
+  yAxis: { type: 'value', name: '次数', axisLabel: { color: '#7a8699' }, splitLine: { lineStyle: { type: 'dashed' } } },
   series: [{
     type: 'bar',
     data: Array.from({ length: 8 }, () => Math.floor(Math.random() * 15 + 2)),
@@ -63,15 +63,15 @@ const drawdownOption = computed(() => ({
 }))
 
 const heatmapOption = computed(() => ({
-  grid: { top: 10, right: 80, bottom: 30, left: 80 },
+  grid: { top: 22, right: 92, bottom: 36, left: 72, containLabel: true },
   tooltip: {},
-  xAxis: { type: 'category', data: ['金融', '科技', '消费', '医药', '能源'], axisLabel: { fontSize: 11 } },
-  yAxis: { type: 'category', data: ['策略A', '策略B', '策略C', '策略D'], axisLabel: { fontSize: 11 } },
-  visualMap: { min: 0, max: 100, calculable: true, orient: 'vertical', right: 0, inRange: { color: ['#fdecea', '#f5a092', '#e74c3c', '#8b0000'] } },
+  xAxis: { type: 'category', data: ['金融', '科技', '消费', '医药', '能源'], axisLabel: { fontSize: 11, color: '#7a8699' } },
+  yAxis: { type: 'category', data: ['策略A', '策略B', '策略C', '策略D'], axisLabel: { fontSize: 11, color: '#7a8699' } },
+  visualMap: { min: 0, max: 100, calculable: true, orient: 'vertical', right: 0, top: 'middle', itemHeight: 140, textStyle: { color: '#667085', fontSize: 11 }, inRange: { color: ['#fdecea', '#f5a092', '#e74c3c', '#8b0000'] } },
   series: [{
     type: 'heatmap',
     data: Array.from({ length: 20 }, (_, i) => [i % 5, Math.floor(i / 5), Math.floor(Math.random() * 100)]),
-    label: { show: true, fontSize: 11 },
+    label: { show: false },
   }],
 }))
 

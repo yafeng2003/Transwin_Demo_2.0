@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <div class="page-header">
-      <h2>💹 交易日志</h2>
+      <h2>交易日志</h2>
       <p class="page-desc">展示下单日志与订单状态回调日志，对应后端 trade_log / order_log。</p>
     </div>
 

@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <div class="page-header">
-      <h2>🏦 账户中心</h2>
+      <h2>账户中心</h2>
       <p class="page-desc">展示账户资产状况与历史变化记录。</p>
     </div>
 
@@ -25,13 +25,13 @@
     <el-row :gutter="16">
       <el-col :span="14">
         <el-card>
-          <template #header><span class="section-title">📈 资产净值走势（近30日）</span></template>
-          <vab-chart :option="navOption" style="height:300px" />
+          <template #header><span class="section-title">资产净值走势（近30日）</span></template>
+          <vab-chart :option="navOption" class="demo-chart-md" />
         </el-card>
       </el-col>
       <el-col :span="10">
         <el-card>
-          <template #header><span class="section-title">📋 资产变化记录</span></template>
+          <template #header><span class="section-title">资产变化记录</span></template>
           <el-table :data="history.slice(-10).reverse()" stripe size="small" max-height="360">
             <el-table-column prop="date" label="日期" width="110" />
             <el-table-column prop="totalAsset" label="总资产" width="120">
@@ -70,7 +70,7 @@ const formatMoney = (v: number) => {
 }
 
 const navOption = computed(() => ({
-  grid: { top: 20, right: 30, bottom: 40, left: 60 },
+  grid: { top: 28, right: 28, bottom: 40, left: 52, containLabel: true },
   tooltip: { trigger: 'axis' },
   xAxis: { type: 'category', data: history.value.map((h: any) => h.date), axisLabel: { rotate: 45, fontSize: 10 } },
   yAxis: { type: 'value', name: '净值' },

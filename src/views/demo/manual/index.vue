@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <div class="page-header">
-      <h2>✋ 人工干预</h2>
+      <h2>人工干预</h2>
       <p class="page-desc">手动提交买入、卖出、改单操作，后端通过 is_manual 标记区分系统成交与人工成交。</p>
     </div>
 
@@ -9,7 +9,7 @@
       <!-- 买入表单 -->
       <el-col :span="8">
         <el-card>
-          <template #header><span class="section-title">🟢 买入</span></template>
+          <template #header><span class="section-title">买入</span></template>
           <el-form :model="buyForm" label-width="80px" size="default">
             <el-form-item label="市场">
               <el-select v-model="buyForm.marketId" style="width:100%">
@@ -46,7 +46,7 @@
       <!-- 卖出表单 -->
       <el-col :span="8">
         <el-card>
-          <template #header><span class="section-title">🔴 卖出</span></template>
+          <template #header><span class="section-title">卖出</span></template>
           <el-form :model="sellForm" label-width="80px" size="default">
             <el-form-item label="市场">
               <el-select v-model="sellForm.marketId" style="width:100%">
@@ -83,7 +83,7 @@
       <!-- 改单表单 + 操作结果 -->
       <el-col :span="8">
         <el-card>
-          <template #header><span class="section-title">🔄 改单</span></template>
+          <template #header><span class="section-title">改单</span></template>
           <el-form :model="modifyForm" label-width="80px" size="default">
             <el-form-item label="订单ID">
               <el-input v-model="modifyForm.orderId" placeholder="输入要修改的订单ID" />
@@ -102,7 +102,7 @@
 
         <!-- 操作结果 -->
         <el-card v-if="lastResult" style="margin-top:16px" class="result-card">
-          <template #header><span>📋 操作结果</span></template>
+          <template #header><span class="section-title">操作结果</span></template>
           <el-descriptions :column="1" size="small" border>
             <el-descriptions-item label="订单ID">{{ lastResult.orderId }}</el-descriptions-item>
             <el-descriptions-item label="状态">

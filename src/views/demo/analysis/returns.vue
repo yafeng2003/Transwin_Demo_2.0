@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <div class="page-header">
-      <h2>💰 收益分析</h2>
+      <h2>收益分析</h2>
       <p class="page-desc">综合展示净值走势、回撤、收益分布、月度表现与年度对比等专业分析图表。</p>
     </div>
 
@@ -37,14 +37,14 @@
     <el-row :gutter="16" style="margin-top:16px">
       <el-col :span="16">
         <el-card>
-          <template #header><span class="section-title">📈 净值走势 & 回撤</span></template>
-          <vab-chart :option="navDrawdownOption" style="height:360px" />
+          <template #header><span class="section-title">净值走势 & 回撤</span></template>
+          <vab-chart :option="navDrawdownOption" class="demo-chart-lg" />
         </el-card>
       </el-col>
       <el-col :span="8">
         <el-card>
-          <template #header><span class="section-title">🗓️ 月度收益热力图</span></template>
-          <vab-chart :option="monthlyHeatmapOption" style="height:360px" />
+          <template #header><span class="section-title">月度收益热力图</span></template>
+          <vab-chart :option="monthlyHeatmapOption" class="demo-chart-lg" />
         </el-card>
       </el-col>
     </el-row>
@@ -53,22 +53,22 @@
     <el-row :gutter="16" style="margin-top:16px">
       <el-col :span="12">
         <el-card>
-          <template #header><span class="section-title">📊 日收益分布</span></template>
-          <vab-chart :option="distOption" style="height:340px" />
+          <template #header><span class="section-title">日收益分布</span></template>
+          <vab-chart :option="distOption" class="demo-chart-md" />
         </el-card>
       </el-col>
       <el-col :span="12">
         <el-card>
-          <template #header><span class="section-title">📅 年度收益对比</span></template>
-          <vab-chart :option="annualOption" style="height:340px" />
+          <template #header><span class="section-title">年度收益对比</span></template>
+          <vab-chart :option="annualOption" class="demo-chart-md" />
         </el-card>
       </el-col>
     </el-row>
 
     <!-- 第三行：累计收益曲线（保留原图） -->
     <el-card style="margin-top:16px">
-      <template #header><span class="section-title">📈 累计收益 & 日收益率</span></template>
-      <vab-chart :option="returnsOption" style="height:320px" />
+      <template #header><span class="section-title">累计收益 & 日收益率</span></template>
+      <vab-chart :option="returnsOption" class="demo-chart-md" />
     </el-card>
   </div>
 </template>
@@ -91,7 +91,7 @@ const summary = ref<any>({})
 const navDrawdownOption = computed(() => {
   const dates = dailyReturns.value.map((d: any) => d.date)
   return {
-    grid: { top: 50, right: 60, bottom: 40, left: 60 },
+    grid: { top: 58, right: 58, bottom: 44, left: 54, containLabel: true },
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'cross' },
@@ -103,16 +103,16 @@ const navDrawdownOption = computed(() => {
           ${ddItem ? `<br/>回撤：<b style="color:#27ae60">${ddItem.value.toFixed(2)}%</b>` : ''}`
       },
     },
-    legend: { data: ['净值', '回撤(%)'], top: 15 },
-    xAxis: { type: 'category', data: dates, axisLabel: { rotate: 45, fontSize: 10, interval: 8 } },
+    legend: { data: ['净值', '回撤(%)'], top: 12, itemWidth: 12, itemHeight: 8, textStyle: { fontSize: 12, color: '#526071' } },
+    xAxis: { type: 'category', data: dates, axisLabel: { rotate: 35, fontSize: 11, interval: 8, color: '#7a8699' } },
     yAxis: [
       {
         type: 'value', name: '净值', min: (v: any) => (v.min * 0.98).toFixed(4),
-        axisLabel: { formatter: '{value}' },
+        axisLabel: { formatter: '{value}', color: '#7a8699' },
       },
       {
         type: 'value', name: '回撤(%)', inverse: true,
-        axisLabel: { formatter: '{value}%' },
+        axisLabel: { formatter: '{value}%', color: '#7a8699' },
         splitLine: { show: false },
       },
     ],
@@ -161,18 +161,18 @@ const monthlyHeatmapOption = computed(() => {
   })
 
   return {
-    grid: { top: 10, right: 30, bottom: 50, left: 50 },
+    grid: { top: 24, right: 30, bottom: 72, left: 46, containLabel: true },
     tooltip: { formatter: (p: any) => `${years[p.value[1]]}年${months[p.value[0]]}：<b>${p.value[2].toFixed(2)}%</b>` },
-    xAxis: { type: 'category', data: months, axisLabel: { fontSize: 10, rotate: 30 } },
-    yAxis: { type: 'category', data: years.map(String), axisLabel: { fontSize: 11 } },
+    xAxis: { type: 'category', data: months, axisLabel: { fontSize: 11, rotate: 28, color: '#7a8699' } },
+    yAxis: { type: 'category', data: years.map(String), axisLabel: { fontSize: 11, color: '#7a8699' } },
     visualMap: {
       min: -10, max: 15, calculable: true, orient: 'horizontal', bottom: 0, left: 'center',
       inRange: { color: ['#27ae60', '#ffffff', '#e74c3c'] },
-      text: ['赚', '亏'], textStyle: { color: '#666' },
+      text: ['赚', '亏'], textStyle: { color: '#667085', fontSize: 11 },
     },
     series: [{
       type: 'heatmap', data: heatData,
-      label: { show: true, fontSize: 9, formatter: (p: any) => `${p.value[2].toFixed(1)}%` },
+      label: { show: false },
       emphasis: { itemStyle: { shadowBlur: 8, shadowColor: 'rgba(0,0,0,0.3)' } },
     }],
   }
@@ -193,11 +193,11 @@ const distOption = computed(() => {
   })
 
   return {
-    grid: { top: 30, right: 30, bottom: 40, left: 50 },
+    grid: { top: 48, right: 28, bottom: 40, left: 46, containLabel: true },
     tooltip: { trigger: 'axis' },
-    legend: { data: ['频次', '正态拟合'], top: 5 },
-    xAxis: { type: 'category', data: buckets, axisLabel: { fontSize: 10 } },
-    yAxis: { type: 'value', name: '频次' },
+    legend: { data: ['频次', '正态拟合'], top: 8, itemWidth: 12, itemHeight: 8, textStyle: { fontSize: 12, color: '#526071' } },
+    xAxis: { type: 'category', data: buckets, axisLabel: { fontSize: 11, color: '#7a8699' } },
+    yAxis: { type: 'value', name: '频次', axisLabel: { color: '#7a8699' } },
     series: [
       {
         name: '频次', type: 'bar', data: counts, barWidth: '60%',
@@ -225,11 +225,11 @@ const annualOption = computed(() => {
   const benchmarkReturns = annualReturns.value.map((d: any) => d.benchmark)
 
   return {
-    grid: { top: 30, right: 30, bottom: 40, left: 50 },
+    grid: { top: 48, right: 28, bottom: 38, left: 46, containLabel: true },
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-    legend: { data: ['策略收益(%)', '基准收益(%)'], top: 5 },
-    xAxis: { type: 'category', data: years, axisLabel: { fontSize: 11 } },
-    yAxis: { type: 'value', name: '收益率(%)', axisLabel: { formatter: '{value}%' } },
+    legend: { data: ['策略收益(%)', '基准收益(%)'], top: 8, itemWidth: 12, itemHeight: 8, textStyle: { fontSize: 12, color: '#526071' } },
+    xAxis: { type: 'category', data: years, axisLabel: { fontSize: 11, color: '#7a8699' } },
+    yAxis: { type: 'value', name: '收益率(%)', axisLabel: { formatter: '{value}%', color: '#7a8699' } },
     series: [
       {
         name: '策略收益(%)', type: 'bar', data: strategyReturns, barGap: '10%',
@@ -251,14 +251,14 @@ const returnsOption = computed(() => {
   const cumReturns = dailyReturns.value.map((d: any) => d.cumulativeReturn)
   const dayReturns = dailyReturns.value.map((d: any) => d.dailyReturn)
   return {
-    grid: { top: 45, right: 60, bottom: 40, left: 60 },
+    grid: { top: 56, right: 58, bottom: 42, left: 54, containLabel: true },
     tooltip: { trigger: 'axis' },
-    legend: { data: ['日收益率(%)', '累计收益(%)'], top: 10 },
+    legend: { data: ['日收益率(%)', '累计收益(%)'], top: 12, itemWidth: 12, itemHeight: 8, textStyle: { fontSize: 12, color: '#526071' } },
     dataZoom: [{ type: 'inside', start: 0, end: 100 }],
-    xAxis: { type: 'category', data: dates, axisLabel: { rotate: 45, fontSize: 10, interval: 8 } },
+    xAxis: { type: 'category', data: dates, axisLabel: { rotate: 35, fontSize: 11, interval: 8, color: '#7a8699' } },
     yAxis: [
-      { type: 'value', name: '日收益率(%)', axisLabel: { formatter: '{value}%' }, splitLine: { lineStyle: { type: 'dashed' } } },
-      { type: 'value', name: '累计收益(%)', axisLabel: { formatter: '{value}%' } },
+      { type: 'value', name: '日收益率(%)', axisLabel: { formatter: '{value}%', color: '#7a8699' }, splitLine: { lineStyle: { type: 'dashed' } } },
+      { type: 'value', name: '累计收益(%)', axisLabel: { formatter: '{value}%', color: '#7a8699' } },
     ],
     series: [
       {

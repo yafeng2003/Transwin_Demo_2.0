@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <div class="page-header">
-      <h2>⚠️ 执行风险监控</h2>
+      <h2>执行风险监控</h2>
       <p class="page-desc">监控交易执行过程中的下单失败、撤单失败、API异常与超时事件。</p>
     </div>
 

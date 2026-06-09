@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <div class="page-header">
-      <h2>📋 订单中心</h2>
+      <h2>订单中心</h2>
       <p class="page-desc">展示策略生成的委托订单，包括待执行、已成交、失败等各状态订单。</p>
     </div>
 

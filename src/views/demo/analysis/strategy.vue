@@ -1,13 +1,13 @@
 <template>
   <div class="demo-page">
     <div class="page-header">
-      <h2>🧠 策略分析</h2>
+      <h2>策略分析</h2>
       <p class="page-desc">多策略收益/风险对比、贡献度分析与相关性矩阵。</p>
     </div>
 
     <!-- 策略对比表格 -->
     <el-card>
-      <template #header><span class="section-title">📋 策略绩效对比</span></template>
+      <template #header><span class="section-title">策略绩效对比</span></template>
       <el-table :data="list" stripe v-loading="loading">
         <el-table-column prop="strategyName" label="策略" width="140" />
         <el-table-column prop="totalReturn" label="总收益" width="100">
@@ -35,7 +35,7 @@
 
     <!-- 相关性矩阵 -->
     <el-card style="margin-top:16px">
-      <template #header><span class="section-title">🔗 策略相关性矩阵</span></template>
+      <template #header><span class="section-title">策略相关性矩阵</span></template>
       <div class="corr-matrix" v-if="list.length > 0">
         <div class="corr-header">
           <div class="corr-empty" />

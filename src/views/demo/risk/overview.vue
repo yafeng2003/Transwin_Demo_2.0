@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <div class="page-header">
-      <h2>🛡️ 风控总览</h2>
+      <h2>风控总览</h2>
       <p class="page-desc">汇总展示当前风险等级、风险指标与趋势。</p>
     </div>
 
@@ -17,30 +17,20 @@
         </el-card>
       </el-col>
       <el-col :span="18">
-        <el-row :gutter="12">
-          <el-col :span="6">
-            <el-card shadow="hover"><div class="stat-label">今日事件</div><div class="stat-value">{{ data.todayEvents }}</div></el-card>
-          </el-col>
-          <el-col :span="6">
-            <el-card shadow="hover"><div class="stat-label">未处理事件</div><div class="stat-value" :class="data.unresolvedEvents > 0 ? 'warn' : ''">{{ data.unresolvedEvents }}</div></el-card>
-          </el-col>
-          <el-col :span="6">
-            <el-card shadow="hover"><div class="stat-label">本周事件</div><div class="stat-value">{{ data.weekEvents }}</div></el-card>
-          </el-col>
-          <el-col :span="6">
-            <el-card shadow="hover"><div class="stat-label">最大回撤</div><div class="stat-value down">{{ data.maxDrawdown?.toFixed(2) }}%</div></el-card>
-          </el-col>
-          <el-col :span="6" style="margin-top:12px">
-            <el-card shadow="hover"><div class="stat-label">日VaR</div><div class="stat-value">{{ formatMoney(data.dailyVar) }}</div></el-card>
-          </el-col>
-        </el-row>
+        <div class="risk-stats">
+          <el-card shadow="hover" class="risk-stat-item"><div class="stat-label">今日事件</div><div class="stat-value">{{ data.todayEvents }}</div></el-card>
+          <el-card shadow="hover" class="risk-stat-item"><div class="stat-label">未处理事件</div><div class="stat-value" :class="data.unresolvedEvents > 0 ? 'warn' : ''">{{ data.unresolvedEvents }}</div></el-card>
+          <el-card shadow="hover" class="risk-stat-item"><div class="stat-label">本周事件</div><div class="stat-value">{{ data.weekEvents }}</div></el-card>
+          <el-card shadow="hover" class="risk-stat-item"><div class="stat-label">最大回撤</div><div class="stat-value down">{{ data.maxDrawdown?.toFixed(2) }}%</div></el-card>
+          <el-card shadow="hover" class="risk-stat-item"><div class="stat-label">日VaR</div><div class="stat-value">{{ formatMoney(data.dailyVar) }}</div></el-card>
+        </div>
       </el-col>
     </el-row>
 
     <!-- 风险趋势 -->
     <el-card style="margin-top:16px">
-      <template #header><span class="section-title">📈 风险评分趋势（近30日）</span></template>
-      <vab-chart :option="trendOption" style="height:250px" />
+      <template #header><span class="section-title">风险评分趋势（近30日）</span></template>
+      <vab-chart :option="trendOption" class="demo-chart-sm" />
     </el-card>
 
     <!-- 快捷入口 -->
@@ -90,7 +80,7 @@ const formatMoney = (v: number) => {
 }
 
 const trendOption = computed(() => ({
-  grid: { top: 20, right: 20, bottom: 30, left: 50 },
+  grid: { top: 28, right: 28, bottom: 36, left: 46, containLabel: true },
   tooltip: { trigger: 'axis' },
   xAxis: { type: 'category', data: (data.value.trend || []).map((t: any) => t.date), axisLabel: { rotate: 45, fontSize: 10 } },
   yAxis: { type: 'value', name: '评分', min: 0, max: 100 },
@@ -115,6 +105,9 @@ onMounted(async () => {
 .page-header { margin-bottom: 16px; }
 .page-header h2 { margin: 0 0 4px 0; font-size: 20px; }
 .page-desc { color: #909399; font-size: 13px; margin: 0; }
+.risk-stats { display: flex; gap: 12px; height: 100%; }
+.risk-stats .risk-stat-item { flex: 1; min-width: 0; }
+.risk-stats .risk-stat-item :deep(.el-card__body) { height: 100%; display: flex; flex-direction: column; justify-content: center; }
 .stat-label { font-size: 13px; color: #909399; }
 .stat-value { font-size: 22px; font-weight: 700; margin-top: 4px; color: #303133; }
 .warn { color: #e67e22; }

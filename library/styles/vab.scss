@@ -1078,5 +1078,132 @@ html {
     .vab-icon {
       --el-font-size-big: var(--el-font-size-medium) !important;
     }
+
+    /* 产品化 demo 页面统一视觉微调 */
+    .demo-page,
+    .demo-dashboard {
+      min-height: var(--el-container-height);
+      padding: 20px !important;
+      background:
+        linear-gradient(180deg, rgba(245, 248, 252, 0.95), rgba(245, 248, 252, 0.78)),
+        var(--el-fill-color-extra-light);
+    }
+
+    .demo-page .page-header,
+    .demo-dashboard .page-header {
+      margin-bottom: 18px !important;
+      padding: 2px 2px 0;
+    }
+
+    .demo-page .page-header h2,
+    .demo-dashboard .page-header h2 {
+      margin: 0 0 6px !important;
+      font-size: 22px !important;
+      font-weight: 650 !important;
+      line-height: 1.25 !important;
+      color: #1f2d3d !important;
+      letter-spacing: 0 !important;
+    }
+
+    .demo-page .page-desc,
+    .demo-dashboard .page-desc {
+      max-width: 920px;
+      margin: 0 !important;
+      font-size: 13px !important;
+      line-height: 1.65 !important;
+      color: #667085 !important;
+    }
+
+    .demo-page .el-card,
+    .demo-dashboard .el-card {
+      overflow: hidden;
+      border: 1px solid #e8edf5 !important;
+      border-radius: 8px !important;
+      box-shadow: 0 10px 28px rgba(25, 40, 65, 0.055) !important;
+    }
+
+    .demo-page .el-card__header,
+    .demo-dashboard .el-card__header {
+      min-height: 48px;
+      padding: 13px 16px !important;
+      background: linear-gradient(180deg, #ffffff, #fbfcfe);
+      border-bottom: 1px solid #edf1f7 !important;
+    }
+
+    .demo-page .el-card__body,
+    .demo-dashboard .el-card__body {
+      padding: 16px !important;
+    }
+
+    .demo-page .section-title,
+    .demo-dashboard .section-title {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      font-size: 14px !important;
+      font-weight: 650 !important;
+      line-height: 1.35;
+      color: #243142;
+    }
+
+    .demo-page .stat-label,
+    .demo-dashboard .stat-label {
+      font-size: 12px !important;
+      line-height: 1.35;
+      color: #7a8699 !important;
+    }
+
+    .demo-page .stat-value,
+    .demo-dashboard .stat-value {
+      margin-top: 6px !important;
+      font-size: 20px !important;
+      font-weight: 700 !important;
+      line-height: 1.2;
+      color: #1f2d3d;
+    }
+
+    .demo-page .el-table,
+    .demo-dashboard .el-table {
+      --el-table-header-bg-color: #f7f9fc;
+      --el-table-header-text-color: #526071;
+      font-size: 13px;
+      border-radius: 6px;
+    }
+
+    .demo-page .el-table th.el-table__cell,
+    .demo-dashboard .el-table th.el-table__cell {
+      height: 42px;
+      font-weight: 650;
+    }
+
+    .demo-page .el-tag,
+    .demo-dashboard .el-tag {
+      border-radius: 999px;
+    }
+
+    .demo-chart-lg,
+    .demo-chart-lg.vab-chart {
+      height: 360px !important;
+    }
+
+    .demo-chart-md,
+    .demo-chart-md.vab-chart {
+      height: 320px !important;
+    }
+
+    .demo-chart-sm,
+    .demo-chart-sm.vab-chart {
+      height: 260px !important;
+    }
+
+    .demo-chart-mini,
+    .demo-chart-mini.vab-chart {
+      height: 112px !important;
+    }
+
+    .demo-page .el-row + .el-row,
+    .demo-dashboard .el-row + .el-row {
+      margin-top: 16px;
+    }
   }
 }

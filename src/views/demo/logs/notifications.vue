@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <div class="page-header">
-      <h2>📬 通知中心</h2>
+      <h2>通知中心</h2>
       <p class="page-desc">展示 Email、风险、系统等各类通知记录。</p>
     </div>
 

@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <div class="page-header">
-      <h2>📦 持仓中心</h2>
+      <h2>持仓中心</h2>
       <p class="page-desc">展示当前持仓明细与盈亏，支持查看历史持仓记录。</p>
     </div>
 

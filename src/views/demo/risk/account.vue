@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <div class="page-header">
-      <h2>📉 账户风险监控</h2>
+      <h2>账户风险监控</h2>
       <p class="page-desc">监控账户维度的风险指标：单日亏损、最大回撤、连续亏损。</p>
     </div>
 
@@ -59,7 +59,7 @@
 
     <!-- 风险阈值配置表 -->
     <el-card style="margin-top:16px">
-      <template #header><span class="section-title">⚙️ 风险阈值配置</span></template>
+      <template #header><span class="section-title">风险阈值配置</span></template>
       <el-table :data="thresholds" stripe size="small">
         <el-table-column prop="name" label="指标名称" width="180" />
         <el-table-column prop="threshold" label="阈值" width="150" />

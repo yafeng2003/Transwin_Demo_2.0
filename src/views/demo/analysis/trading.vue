@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <div class="page-header">
-      <h2>📊 交易分析</h2>
+      <h2>交易分析</h2>
       <p class="page-desc">分析交易胜率、盈亏比、交易频率、手续费与滑点等交易执行质量指标。</p>
     </div>
 
@@ -29,7 +29,7 @@
 
     <!-- 月度交易统计 -->
     <el-card style="margin-top:16px">
-      <template #header><span class="section-title">📅 月度交易统计</span></template>
+      <template #header><span class="section-title">月度交易统计</span></template>
       <el-table :data="data.monthlyTrades || []" stripe size="small">
         <el-table-column prop="month" label="月份" width="120" />
         <el-table-column prop="count" label="交易次数" width="120" />
@@ -43,13 +43,13 @@
     <el-row :gutter="16" style="margin-top:16px">
       <el-col :span="12">
         <el-card>
-          <template #header><span class="section-title">⏱ 交易频率（日均）</span></template>
+          <template #header><span class="section-title">交易频率（日均）</span></template>
           <div class="big-number">{{ data.tradeFrequency?.toFixed(1) }} 笔/天</div>
         </el-card>
       </el-col>
       <el-col :span="12">
         <el-card>
-          <template #header><span class="section-title">📏 滑点分析</span></template>
+          <template #header><span class="section-title">滑点分析</span></template>
           <div class="big-number">{{ data.slippage?.toFixed(2) }}%</div>
         </el-card>
       </el-col>

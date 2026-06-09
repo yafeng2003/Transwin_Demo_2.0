@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <div class="page-header">
-      <h2>📋 风险事件中心</h2>
+      <h2>风险事件中心</h2>
       <p class="page-desc">集中展示全部风险事件，支持按级别、状态筛选，查看事件详情与处理进度。</p>
     </div>
 

@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <div class="page-header">
-      <h2>⚠️ 错误日志</h2>
+      <h2>错误日志</h2>
       <p class="page-desc">展示系统运行中的错误记录，对应后端 error_log。错误类型含固定枚举与订单状态类动态值。</p>
     </div>
 

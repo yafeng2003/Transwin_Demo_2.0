@@ -1,33 +1,33 @@
 <template>
   <div class="demo-page">
     <div class="page-header">
-      <h2>📊 可视化图表</h2>
+      <h2>可视化图表</h2>
       <p class="page-desc">集中展示 K线图、收益曲线、持仓分布、风险热力图、资金曲线等可视化图表（当前为占位，待接入 ECharts）。</p>
     </div>
 
     <el-row :gutter="16">
       <el-col :span="12">
         <el-card class="chart-card">
-          <template #header><span class="section-title">📈 K线图</span></template>
-          <vab-chart :option="klineOption" style="height:220px" />
+          <template #header><span class="section-title">K 线图</span></template>
+          <vab-chart :option="klineOption" class="demo-chart-sm" />
         </el-card>
       </el-col>
       <el-col :span="12">
         <el-card class="chart-card">
-          <template #header><span class="section-title">📉 收益曲线</span></template>
-          <vab-chart :option="lineOption" style="height:220px" />
+          <template #header><span class="section-title">收益曲线</span></template>
+          <vab-chart :option="lineOption" class="demo-chart-sm" />
         </el-card>
       </el-col>
       <el-col :span="12" style="margin-top:16px">
         <el-card class="chart-card">
-          <template #header><span class="section-title">🍩 持仓分布</span></template>
-          <vab-chart :option="pieOption" style="height:220px" />
+          <template #header><span class="section-title">持仓分布</span></template>
+          <vab-chart :option="pieOption" class="demo-chart-sm" />
         </el-card>
       </el-col>
       <el-col :span="12" style="margin-top:16px">
         <el-card class="chart-card">
-          <template #header><span class="section-title">🔥 风险热力图</span></template>
-          <vab-chart :option="heatmapOption" style="height:220px" />
+          <template #header><span class="section-title">风险热力图</span></template>
+          <vab-chart :option="heatmapOption" class="demo-chart-sm" />
         </el-card>
       </el-col>
     </el-row>
@@ -54,10 +54,10 @@ const klineData = computed(() => {
 })
 
 const klineOption = computed(() => ({
-  grid: { top: 10, right: 20, bottom: 30, left: 60 },
+  grid: { top: 24, right: 22, bottom: 36, left: 54, containLabel: true },
   tooltip: { trigger: 'axis' },
-  xAxis: { type: 'category', data: Array.from({ length: klineData.value.length }, (_, i) => `D${i + 1}`), axisLabel: { interval: 9, fontSize: 10 } },
-  yAxis: { type: 'value', scale: true },
+  xAxis: { type: 'category', data: Array.from({ length: klineData.value.length }, (_, i) => `D${i + 1}`), axisLabel: { interval: 9, fontSize: 11, color: '#7a8699' } },
+  yAxis: { type: 'value', scale: true, axisLabel: { color: '#7a8699' }, splitLine: { lineStyle: { type: 'dashed' } } },
   series: [{
     type: 'candlestick',
     data: klineData.value,
@@ -75,10 +75,10 @@ const lineOption = computed(() => {
     values.push(parseFloat(cum.toFixed(2)))
   }
   return {
-    grid: { top: 10, right: 20, bottom: 30, left: 50 },
+    grid: { top: 24, right: 22, bottom: 36, left: 46, containLabel: true },
     tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: dates, axisLabel: { interval: 9, fontSize: 10 } },
-    yAxis: { type: 'value', name: '%', axisLabel: { formatter: '{value}%' } },
+    xAxis: { type: 'category', data: dates, axisLabel: { interval: 9, fontSize: 11, color: '#7a8699' } },
+    yAxis: { type: 'value', name: '%', axisLabel: { formatter: '{value}%', color: '#7a8699' }, splitLine: { lineStyle: { type: 'dashed' } } },
     series: [{
       type: 'line', data: values, smooth: true,
       lineStyle: { color: '#409EFF', width: 2 },
@@ -91,10 +91,10 @@ const lineOption = computed(() => {
 // ---- 持仓饼图 ----
 const pieOption = computed(() => ({
   tooltip: { trigger: 'item' },
-  legend: { bottom: 0, textStyle: { fontSize: 11 } },
+  legend: { bottom: 0, itemWidth: 12, itemHeight: 8, textStyle: { fontSize: 12, color: '#526071' } },
   series: [{
     type: 'pie', radius: ['45%', '75%'], center: ['50%', '45%'],
-    label: { formatter: '{b}\n{d}%', fontSize: 11 },
+    label: { formatter: '{b}\n{d}%', fontSize: 11, color: '#526071' },
     itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 },
     data: [
       { value: 35, name: '金融' },
@@ -115,12 +115,12 @@ const heatmapOption = computed(() => {
     for (let h = 0; h < 5; h++)
       data.push([h, d, Math.floor(Math.random() * 100)])
   return {
-    grid: { top: 10, right: 80, bottom: 30, left: 50 },
+    grid: { top: 20, right: 88, bottom: 34, left: 46, containLabel: true },
     tooltip: {},
-    xAxis: { type: 'category', data: hours, axisLabel: { fontSize: 10 } },
-    yAxis: { type: 'category', data: days, axisLabel: { fontSize: 10 } },
-    visualMap: { min: 0, max: 100, orient: 'vertical', right: 0, inRange: { color: ['#fdecea', '#f5a092', '#e74c3c', '#8b0000'] } },
-    series: [{ type: 'heatmap', data, label: { show: true, fontSize: 10 } }],
+    xAxis: { type: 'category', data: hours, axisLabel: { fontSize: 11, color: '#7a8699' } },
+    yAxis: { type: 'category', data: days, axisLabel: { fontSize: 11, color: '#7a8699' } },
+    visualMap: { min: 0, max: 100, orient: 'vertical', right: 0, top: 'middle', itemHeight: 138, textStyle: { color: '#667085', fontSize: 11 }, inRange: { color: ['#fdecea', '#f5a092', '#e74c3c', '#8b0000'] } },
+    series: [{ type: 'heatmap', data, label: { show: false } }],
   }
 })
 </script>

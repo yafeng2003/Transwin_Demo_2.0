@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <div class="page-header">
-      <h2>🔔 风险通知中心</h2>
+      <h2>风险通知中心</h2>
       <p class="page-desc">展示风险报警、熔断通知、异常通知与策略暂停通知记录。</p>
     </div>
 

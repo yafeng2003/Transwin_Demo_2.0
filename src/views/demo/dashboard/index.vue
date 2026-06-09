@@ -48,7 +48,7 @@
         <el-col :span="14">
           <el-card class="section-card">
             <template #header>
-              <span class="section-title">📊 持仓概览</span>
+              <span class="section-title">持仓概览</span>
               <el-button text type="primary" style="float:right" @click="$router.push('/demo/strategy/positions')">
                 查看全部 →
               </el-button>
@@ -83,8 +83,8 @@
         <!-- 右：持仓饼图 -->
         <el-col :span="10">
           <el-card class="section-card">
-            <template #header><span class="section-title">🍩 持仓分布</span></template>
-            <vab-chart :option="pieOption" style="height:340px" />
+            <template #header><span class="section-title">持仓分布</span></template>
+            <vab-chart :option="pieOption" class="demo-chart-md" />
           </el-card>
         </el-col>
       </el-row>
@@ -95,7 +95,7 @@
         <el-col :span="12">
           <el-card class="section-card">
             <template #header>
-              <span class="section-title">🛡️ 风险状态</span>
+              <span class="section-title">风险状态</span>
               <el-button text type="primary" style="float:right" @click="$router.push('/demo/risk/overview')">
                 风控详情 →
               </el-button>
@@ -123,7 +123,7 @@
           <!-- 最近交易 -->
           <el-card class="section-card" style="margin-top:16px">
             <template #header>
-              <span class="section-title">📋 最近交易动态</span>
+              <span class="section-title">最近交易动态</span>
               <el-button text type="primary" style="float:right" @click="$router.push('/demo/strategy/deals')">
                 查看全部 →
               </el-button>
@@ -157,16 +157,16 @@
       <!-- 各市场资产柱状图 -->
       <el-card class="section-card">
         <template #header>
-          <span class="section-title">📊 各市场资产对比</span>
+          <span class="section-title">各市场资产对比</span>
         </template>
-        <vab-chart v-if="allMarketAssets.length > 0" :option="assetBarOption" style="height:320px" />
+        <vab-chart v-if="allMarketAssets.length > 0" :option="assetBarOption" class="demo-chart-md" />
         <el-empty v-else description="暂无数据" />
       </el-card>
 
       <!-- 风控策略风险列表 -->
       <el-card class="section-card" style="margin-top:16px">
         <template #header>
-          <span class="section-title">🛡️ 风险事件（全部策略）</span>
+          <span class="section-title">风险事件（全部策略）</span>
           <el-button text type="primary" style="float:right" @click="$router.push('/demo/risk/events')">
             风控详情 →
           </el-button>
@@ -204,7 +204,7 @@
       <!-- 最近交易 -->
       <el-card class="section-card" style="margin-top:16px">
         <template #header>
-          <span class="section-title">📋 最近交易动态（全部市场）</span>
+          <span class="section-title">最近交易动态（全部市场）</span>
           <el-button text type="primary" style="float:right" @click="$router.push('/demo/strategy/deals')">
             查看全部 →
           </el-button>
@@ -276,7 +276,7 @@ const pieOption = computed(() => {
   }))
   return {
     tooltip: { trigger: 'item', formatter: '{b}: ¥{c} ({d}%)' },
-    legend: { bottom: 0, textStyle: { fontSize: 10 } },
+    legend: { bottom: 0, itemWidth: 12, itemHeight: 8, textStyle: { fontSize: 12, color: '#526071' } },
     series: [{
       type: 'pie',
       radius: ['40%', '70%'],
@@ -294,8 +294,8 @@ const assetBarOption = computed(() => {
   const names = allMarketAssets.value.map((m: any) => m.name)
   return {
     tooltip: { trigger: 'axis' },
-    legend: { data: ['总资产', '持仓市值', '现金余额'], bottom: 0 },
-    grid: { left: '3%', right: '4%', bottom: '12%', top: '10%', containLabel: true },
+    legend: { data: ['总资产', '持仓市值', '现金余额'], bottom: 0, itemWidth: 12, itemHeight: 8, textStyle: { fontSize: 12, color: '#526071' } },
+    grid: { left: 42, right: 28, bottom: 48, top: 28, containLabel: true },
     xAxis: { type: 'category', data: names, axisLabel: { fontSize: 12 } },
     yAxis: { type: 'value', axisLabel: { formatter: (v: number) => (v / 10000).toFixed(0) + '万' } },
     series: [
