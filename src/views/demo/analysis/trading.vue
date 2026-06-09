@@ -27,33 +27,30 @@
       </el-col>
     </el-row>
 
-    <!-- 月度交易统计 -->
-    <el-card style="margin-top:16px">
-      <template #header><span class="section-title">月度交易统计</span></template>
-      <el-table :data="data.monthlyTrades || []" stripe size="small">
-        <el-table-column prop="month" label="月份" width="120" />
-        <el-table-column prop="count" label="交易次数" width="120" />
-        <el-table-column prop="winRate" label="胜率" width="120">
-          <template #default="{ row }">{{ row.winRate?.toFixed(1) }}%</template>
-        </el-table-column>
-      </el-table>
-    </el-card>
+    <!-- 月度交易统计 + 频率/滑点（一行紧凑排列） -->
+    <div class="compact-row">
+      <el-card class="fit-card">
+        <template #header><span class="section-title">月度交易统计</span></template>
+        <el-table :data="data.monthlyTrades || []" stripe size="small" style="width: 360px">
+          <el-table-column prop="month" label="月份" width="120" />
+          <el-table-column prop="count" label="交易次数" width="120" />
+          <el-table-column prop="winRate" label="胜率" width="120">
+            <template #default="{ row }">{{ row.winRate?.toFixed(1) }}%</template>
+          </el-table-column>
+        </el-table>
+      </el-card>
 
-    <!-- 频率与滑点 -->
-    <el-row :gutter="16" style="margin-top:16px">
-      <el-col :span="12">
-        <el-card>
+      <div class="num-stack">
+        <el-card class="num-card">
           <template #header><span class="section-title">交易频率（日均）</span></template>
           <div class="big-number">{{ data.tradeFrequency?.toFixed(1) }} 笔/天</div>
         </el-card>
-      </el-col>
-      <el-col :span="12">
-        <el-card>
+        <el-card class="num-card">
           <template #header><span class="section-title">滑点分析</span></template>
           <div class="big-number">{{ data.slippage?.toFixed(2) }}%</div>
         </el-card>
-      </el-col>
-    </el-row>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -82,5 +79,11 @@ onMounted(async () => {
 .up { color: #e74c3c; }
 .down { color: #27ae60; }
 .section-title { font-weight: 600; font-size: 15px; }
-.big-number { font-size: 32px; font-weight: 700; text-align: center; padding: 24px 0; color: #303133; }
+/* 紧凑一行：月度统计表 + 频率/滑点堆叠 */
+.compact-row { display: flex; gap: 16px; align-items: stretch; flex-wrap: wrap; margin-top: 16px; }
+.compact-row .fit-card { flex: 0 0 auto; width: fit-content; }
+.num-stack { display: flex; flex-direction: column; gap: 16px; flex: 0 0 auto; min-width: 240px; }
+.num-stack .num-card { flex: 1; }
+.num-stack .num-card :deep(.el-card__body) { height: 100%; display: flex; align-items: center; justify-content: center; }
+.big-number { font-size: 30px; font-weight: 700; text-align: center; color: #303133; white-space: nowrap; }
 </style>

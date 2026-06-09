@@ -5,27 +5,28 @@
       <p class="page-desc">多策略收益/风险对比、贡献度分析与相关性矩阵。</p>
     </div>
 
+    <div class="compact-row">
     <!-- 策略对比表格 -->
-    <el-card>
+    <el-card class="fit-card">
       <template #header><span class="section-title">策略绩效对比</span></template>
-      <el-table :data="list" stripe v-loading="loading">
-        <el-table-column prop="strategyName" label="策略" width="140" />
-        <el-table-column prop="totalReturn" label="总收益" width="100">
+      <el-table :data="list" stripe v-loading="loading" style="width: 610px">
+        <el-table-column prop="strategyName" label="策略" width="134" />
+        <el-table-column prop="totalReturn" label="总收益" width="84">
           <template #default="{ row }">
             <span :class="row.totalReturn >= 0 ? 'up' : 'down'">{{ row.totalReturn?.toFixed(2) }}%</span>
           </template>
         </el-table-column>
-        <el-table-column prop="sharpeRatio" label="Sharpe" width="90">
+        <el-table-column prop="sharpeRatio" label="Sharpe" width="76">
           <template #default="{ row }">{{ row.sharpeRatio?.toFixed(2) }}</template>
         </el-table-column>
-        <el-table-column prop="maxDrawdown" label="最大回撤" width="100">
+        <el-table-column prop="maxDrawdown" label="最大回撤" width="86">
           <template #default="{ row }">{{ row.maxDrawdown?.toFixed(2) }}%</template>
         </el-table-column>
-        <el-table-column prop="winRate" label="胜率" width="80">
+        <el-table-column prop="winRate" label="胜率" width="70">
           <template #default="{ row }">{{ row.winRate?.toFixed(1) }}%</template>
         </el-table-column>
-        <el-table-column prop="tradeCount" label="交易数" width="80" />
-        <el-table-column prop="contribution" label="贡献度" width="90">
+        <el-table-column prop="tradeCount" label="交易数" width="68" />
+        <el-table-column prop="contribution" label="贡献度" width="92">
           <template #default="{ row }">
             <el-progress :percentage="row.contribution" :stroke-width="8" :show-text="true" />
           </template>
@@ -34,7 +35,7 @@
     </el-card>
 
     <!-- 相关性矩阵 -->
-    <el-card style="margin-top:16px">
+    <el-card class="fit-card">
       <template #header><span class="section-title">策略相关性矩阵</span></template>
       <div class="corr-matrix" v-if="list.length > 0">
         <div class="corr-header">
@@ -51,6 +52,7 @@
         </div>
       </div>
     </el-card>
+    </div>
   </div>
 </template>
 
@@ -87,10 +89,13 @@ onMounted(async () => {
 .section-title { font-weight: 600; font-size: 15px; }
 .up { color: #e74c3c; }
 .down { color: #27ae60; }
+/* 绩效表 + 相关性矩阵 紧凑并排一行 */
+.compact-row { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+.compact-row .fit-card { flex: 0 0 auto; width: fit-content; }
 .corr-matrix { overflow-x: auto; }
 .corr-header, .corr-row { display: flex; }
-.corr-empty, .corr-row-label { width: 120px; min-width: 120px; padding: 8px; font-weight: 600; font-size: 13px; }
-.corr-col-label { width: 80px; min-width: 80px; padding: 8px; font-weight: 600; font-size: 12px; text-align: center; }
-.corr-cell { width: 80px; min-width: 80px; padding: 4px; }
-.corr-value { text-align: center; padding: 8px 4px; border-radius: 4px; font-size: 13px; font-weight: 600; color: #fff; }
+.corr-empty, .corr-row-label { width: 102px; min-width: 102px; padding: 8px 6px; font-weight: 600; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.corr-col-label { width: 66px; min-width: 66px; padding: 8px 4px; font-weight: 600; font-size: 11px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.corr-cell { width: 66px; min-width: 66px; padding: 4px; }
+.corr-value { text-align: center; padding: 8px 4px; border-radius: 4px; font-size: 12px; font-weight: 600; color: #fff; }
 </style>

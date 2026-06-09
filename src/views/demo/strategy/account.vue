@@ -22,11 +22,11 @@
     </el-row>
 
     <!-- 净值走势 + 资产变化记录 -->
-    <el-row :gutter="16">
+    <el-row :gutter="16" class="eq-row">
       <el-col :span="14">
-        <el-card>
+        <el-card class="chart-card">
           <template #header><span class="section-title">资产净值走势（近30日）</span></template>
-          <vab-chart :option="navOption" class="demo-chart-md" />
+          <vab-chart :option="navOption" />
         </el-card>
       </el-col>
       <el-col :span="10">
@@ -102,6 +102,11 @@ onMounted(async () => {
 .section-title { font-weight: 600; font-size: 15px; }
 .up { color: #e74c3c; }
 .down { color: #27ae60; }
+/* 净值走势 / 资产变化记录 两卡片等高对齐 */
+.eq-row :deep(.el-col) { display: flex; flex-direction: column; }
+.eq-row :deep(.el-card) { flex: 1; display: flex; flex-direction: column; }
+.eq-row :deep(.el-card__body) { flex: 1; }
+.eq-row .chart-card :deep(.el-card__body) { min-height: 320px; }
 .chart-placeholder { padding: 8px 0; }
 .chart-mock { display: flex; align-items: flex-end; height: 280px; gap: 2px; }
 .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
