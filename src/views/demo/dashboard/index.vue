@@ -43,7 +43,7 @@
       </el-row>
 
       <!-- 中间三栏 -->
-      <el-row :gutter="16" class="main-row">
+      <el-row :gutter="16" class="main-row pos-row">
         <!-- 左：持仓概览 -->
         <el-col :span="14">
           <el-card class="section-card">
@@ -388,4 +388,7 @@ onMounted(doRefresh)
 .risk-level.level-3 { background: #fdecea; color: #e74c3c; }
 .risk-score { margin-top: 8px; color: #909399; font-size: 14px; }
 .main-row { margin-top: 0; }
+/* 持仓概览 / 持仓分布 这一行两卡片等高对齐 */
+.pos-row :deep(.el-col) { display: flex; flex-direction: column; }
+.pos-row .section-card { flex: 1; }
 </style>
