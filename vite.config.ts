@@ -43,8 +43,8 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       host: '0.0.0.0',
       proxy: {
         '/api': {
-          // 与后端 Flask 默认启动端口保持一致
-          target: 'http://127.0.0.1:5002',
+          // 与后端 FastAPI 默认启动端口保持一致
+          target: 'http://127.0.0.1:8000',
           changeOrigin: true,
           rewrite: (p: string) => p,
         },

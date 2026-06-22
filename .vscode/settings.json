@@ -129,5 +129,6 @@
     "zlevel",
     "zoomer",
     "zxwk"
-  ]
+  ],
+  "python-envs.defaultEnvManager": "ms-python.python:system"
 }

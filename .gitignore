@@ -44,3 +44,20 @@ public/video
 *.zip
 *.7z
 *.rar
+
+# ================================
+# Python / Backend
+# ================================
+__pycache__/
+*.py[cod]
+*.so
+backend/venv/
+backend/.venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.env
+.env.*
+!.env.example
+*.sqlite
+*.db
