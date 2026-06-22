@@ -6,8 +6,8 @@
 from datetime import datetime
 from decimal import Decimal
 
-from common.interfaces import AssetRepository, DealRepository, OperationRepository
-from common.models import ActivePosition, Asset, Deal, Operation, OrderResult, PagedResult
+from common.interfaces import AssetRepository, DealRepository, OperationRepository, TradeRepository
+from common.models import ActivePosition, Asset, Deal, Operation, OrderResult, PagedResult, Trade
 
 
 def build_deal_from_order(result: OrderResult, operation: Operation | None = None) -> Deal | None:
@@ -37,8 +37,8 @@ def build_deal_from_order(result: OrderResult, operation: Operation | None = Non
     )
 
 
-class InMemoryExecutionRepository(OperationRepository, DealRepository, AssetRepository):
-    """执行层的内存版 Operation / Deal / Asset 仓储实现。"""
+class InMemoryExecutionRepository(OperationRepository, DealRepository, AssetRepository, TradeRepository):
+    """执行层的内存版 Operation / Deal / Asset / Trade 仓储实现。"""
 
     def __init__(self):
         self._operations: list[Operation] = []
@@ -46,6 +46,7 @@ class InMemoryExecutionRepository(OperationRepository, DealRepository, AssetRepo
         self._deals: list[Deal] = []
         self._assets: list[Asset] = []
         self._positions: list[ActivePosition] = []
+        self._trades: list[Trade] = []
 
     async def add_operation(self, operation: Operation) -> None:
         """添加一条待执行操作，供测试和本地流程使用。"""
@@ -290,3 +291,24 @@ class InMemoryExecutionRepository(OperationRepository, DealRepository, AssetRepo
                 for asset in self._assets
             ],
         }
+
+    # ── TradeRepository 接口 ─────────────────────────────────────
+
+    async def insert_trade(self, account_id: str, strategy_id: str, trade: Trade) -> int:
+        """保存完整交易记录。"""
+        trade_id = len(self._trades) + 1
+        self._trades.append(trade)
+        return trade_id
+
+    async def get_trades_by_range(
+        self, account_id: str, strategy_id: str, market_id: int,
+        start_time: datetime, end_time: datetime,
+    ) -> list[Trade]:
+        """按时间范围查询完整交易记录。"""
+        return [
+            t for t in self._trades
+            if t.account_id == account_id
+            and t.strategy_id == strategy_id
+            and t.market_id == market_id
+            and start_time <= t.open_time <= end_time
+        ]

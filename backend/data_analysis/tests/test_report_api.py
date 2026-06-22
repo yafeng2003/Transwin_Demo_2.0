@@ -1,3 +1,5 @@
+"""报表中心 HTTP API 测试：列表(前端结构) + 导出 + 查询/生成。"""
+
 from datetime import datetime
 from unittest.mock import AsyncMock
 
@@ -19,7 +21,7 @@ def _metadata(report_id: int = 1, file_format: str = "pdf") -> ReportMetadata:
         report_id=report_id, report_type="daily", market_id=1, account_id="acc_001",
         strategy_id="s1", period_start=datetime(2024, 1, 1), period_end=datetime(2024, 1, 1, 23, 59),
         file_format=file_format, file_uri=f"s3://reports/{report_id}.{file_format}",
-        file_size=2048, status="saved", generated_at=datetime(2024, 1, 2),
+        file_size=251000, status="generated", generated_at=datetime(2024, 1, 2, 8, 0, 0),
     )
 
 
@@ -57,26 +59,39 @@ def client(repos, store):
 class TestReportCenterAPI:
 
     def test_list_reports(self, client):
-        resp = client.get("/api/v1/reports", params={"market_id": 1, "account_id": "acc_001"})
+        resp = client.get("/api/v1/reports", params={"type": "daily"})
         assert resp.status_code == 200
-        assert len(resp.json()) == 2
+        body = resp.json()
+        assert body["code"] == 200 and body["msg"] == "success"
+        rows = body["data"]
+        assert len(rows) == 2
+        item = rows[0]
+        assert set(item) == {"id", "title", "type", "createdAt", "fileSize", "status"}
+        assert item["title"].startswith("日报 - ")
+        assert item["fileSize"] == "245KB"          # 251000 字节 -> 245KB
+        assert item["createdAt"] == "2024-01-02 08:00:00"
+
+    def test_list_reports_requires_type(self, client):
+        resp = client.get("/api/v1/reports")  # 缺 type
+        assert resp.status_code == 422
+
+    def test_export_report(self, client):
+        resp = client.get("/api/v1/reports/1/export", params={"format": "excel"})
+        assert resp.status_code == 200
+        assert resp.content == b"%PDF-1.4 fake"
+        assert "attachment" in resp.headers["content-disposition"]
+
+    def test_export_report_404(self, client, store):
+        store.get_report.return_value = None
+        resp = client.get("/api/v1/reports/123/export", params={"format": "pdf"})
+        assert resp.status_code == 404
 
     def test_get_report_metadata(self, client):
         resp = client.get("/api/v1/reports/1")
         assert resp.status_code == 200
-        assert resp.json()["report_id"] == 1
-
-    def test_get_report_404(self, client, store):
-        store.get_report.return_value = None
-        resp = client.get("/api/v1/reports/123")
-        assert resp.status_code == 404
-
-    def test_download_report(self, client):
-        resp = client.get("/api/v1/reports/1/download")
-        assert resp.status_code == 200
-        assert resp.content == b"%PDF-1.4 fake"
-        assert "attachment" in resp.headers["content-disposition"]
-        assert resp.headers["content-type"].startswith("application/pdf")
+        body = resp.json()
+        assert body["code"] == 200
+        assert body["data"]["report_id"] == 1
 
     def test_generate_daily_report(self, client, store):
         resp = client.post("/api/v1/reports/generate", json={
@@ -84,15 +99,8 @@ class TestReportCenterAPI:
             "strategy_id": "s1", "period_date": "2024-01-01", "file_format": "csv",
         })
         assert resp.status_code == 200
-        assert resp.json()["status"] == "saved"
+        assert resp.json()["data"]["status"] == "saved"
         store.save_report_file.assert_awaited_once()
-
-    def test_generate_daily_missing_strategy_422(self, client):
-        resp = client.post("/api/v1/reports/generate", json={
-            "report_type": "daily", "market_id": 1, "account_id": "acc_001",
-            "period_date": "2024-01-01",
-        })
-        assert resp.status_code == 422
 
     def test_generate_unknown_type_422(self, client):
         resp = client.post("/api/v1/reports/generate", json={

@@ -87,6 +87,7 @@ async def get_account_assets():
 
 @router.get("/dashboard/asset-summary", response_model=ApiResponse[dict])
 async def get_dashboard_asset_summary():
+    """Dashboard 资产概览聚合接口，组合 account/assets 数据。"""
     assets = await execution_repository.get_account_assets()
     current = assets.get("current", {})
     return ApiResponse(
@@ -105,6 +106,7 @@ async def get_dashboard_asset_summary():
 
 @router.get("/dashboard/position-overview", response_model=ApiResponse[dict])
 async def get_dashboard_position_overview(limit: int = Query(6, ge=1, le=100)):
+    """Dashboard 持仓概览聚合接口。"""
     positions = await execution_repository.list_positions()
     total_market_value = sum(p.get("holdingAmount", 0) for p in positions)
     result_positions = []
@@ -169,6 +171,21 @@ async def manual_modify_order(request: ModifyManualOrderRequest):
 
 
 @router.get("/logs/trading", response_model=ApiResponse[PagedResult[dict]])
-async def list_trading_logs(page: int = Query(1, ge=1), size: int = Query(20, ge=1, le=100)):
+async def list_trading_logs(
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    type: str | None = Query(None, description="类型：order / cancel / deal"),
+):
+    result = PagedResult(list=[], total=0, page=page, size=size)
+    return ApiResponse(data=result)
+
+
+@router.get("/logs/system", response_model=ApiResponse[PagedResult[dict]])
+async def list_system_logs(
+    level: str | None = Query(None, description="级别：INFO / WARN / ERROR"),
+    module: str | None = Query(None, description="模块：strategy / executor / risk / analysis / system"),
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+):
     result = PagedResult(list=[], total=0, page=page, size=size)
     return ApiResponse(data=result)

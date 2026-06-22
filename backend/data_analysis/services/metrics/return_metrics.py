@@ -136,3 +136,10 @@ def analyze_returns(
         start_net_value=getattr(ordered[0], equity_field) if ordered else None,
         end_net_value=getattr(ordered[-1], equity_field) if ordered else None,
     )
+
+
+def calmar_ratio(annualized_ret: float, max_dd: float) -> float:
+    """Calmar 比率 = 年化收益 / 最大回撤(绝对值)。回撤为 0 时无定义，返回 0。"""
+    if max_dd <= 0.0:
+        return 0.0
+    return annualized_ret / max_dd

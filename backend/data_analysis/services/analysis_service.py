@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from common.interfaces.analysis_interface import PriceProvider
 from common.interfaces.asset_repository import AssetRepository
@@ -29,9 +29,24 @@ from data_analysis.services.metrics import (
     strategy_metrics,
     trade_metrics,
 )
+from data_analysis.services import frontend_views
 from data_analysis.services.metrics.risk_metrics import build_drawdown_series
 from data_analysis.services.position_reconstructor import reconstruct_positions
 from data_analysis.services.sector_map import SectorMap, sector_distribution
+
+# 前端 period 入参到回看天数的映射。period 相对“当前时间”取窗口。
+_PERIOD_DAYS = {"1m": 30, "3m": 90, "6m": 180, "1y": 365}
+_DEFAULT_PERIOD = "3m"
+# 跨策略/账户级查询时传给各 repository 的 strategy_id 约定值，表示“该账户全部策略”。
+# 需基础服务在仓储实现中将空串(或等价)解释为不按策略过滤。
+_ALL_STRATEGIES = ""
+
+
+def _resolve_period(period: str | None) -> tuple[datetime, datetime]:
+    """把 1m/3m/6m/1y 解析成 [start, end] 时间窗(end 取当前时间)。"""
+    end = datetime.now()
+    days = _PERIOD_DAYS.get(period or _DEFAULT_PERIOD, _PERIOD_DAYS[_DEFAULT_PERIOD])
+    return end - timedelta(days=days), end
 
 
 class AnalysisService:
@@ -203,3 +218,77 @@ class AnalysisService:
                 market_id, account_id, strategy_id, start_time, end_time
             )
         return strategy_metrics.compare_strategies(trades_by_strategy)
+
+    # ---------------------- 前端组合接口 ----------------------
+
+    async def returns_analysis(self, market_id: int, account_id: str, period: str | None) -> dict:
+        """收益分析(GET /analysis/returns)：summary + 每日收益序列。"""
+        start, end = _resolve_period(period)
+        assets = await self._assets(market_id, account_id, start, end)
+        trades = await self._trades(market_id, account_id, _ALL_STRATEGIES, start, end)
+        return frontend_views.build_returns_view(
+            assets, trades, self._ppy(market_id),
+            self._config.annual_risk_free_rate, self._config.equity_field,
+        )
+
+    async def risk_analysis(self, market_id: int, account_id: str, period: str | None) -> dict:
+        """风险分析(GET /analysis/risk)：波动率/下行波动率/回撤分布/风险敞口。"""
+        start, end = _resolve_period(period)
+        assets = await self._assets(market_id, account_id, start, end)
+        exposure = await self._risk_exposure(market_id, account_id, end)
+        return frontend_views.build_risk_view(
+            assets, exposure, self._ppy(market_id),
+            self._config.var_confidence, self._config.equity_field,
+        )
+
+    async def trading_analysis(
+        self, market_id: int, account_id: str, strategy_id: str | None, period: str | None
+    ) -> dict:
+        """交易分析(GET /analysis/trading)。strategy_id 为空表示该账户全部策略。"""
+        start, end = _resolve_period(period)
+        sid = strategy_id or _ALL_STRATEGIES
+        trades = await self._trades(market_id, account_id, sid, start, end)
+        deals = await self._deals(market_id, account_id, sid, start, end)
+        operations = await self._operations(market_id, account_id, sid, start, end)
+        return frontend_views.build_trading_view(trades, deals, operations)
+
+    async def strategy_analysis(self, market_id: int, account_id: str) -> list[dict]:
+        """策略对比(GET /analysis/strategy)。前端不传周期，取该账户全部可得交易。"""
+        trades = await self._trades(
+            market_id, account_id, _ALL_STRATEGIES, datetime.min, datetime.now()
+        )
+        trades_by_strategy: dict[str, list] = {}
+        for t in trades:
+            trades_by_strategy.setdefault(t.strategy_id, []).append(t)
+        return frontend_views.build_strategy_view(trades_by_strategy)
+
+    async def _risk_exposure(self, market_id: int, account_id: str, as_of: datetime) -> dict:
+        """风险敞口：板块 × 策略 的持仓占比热力图。
+
+        按账户全部成交分策略重建持仓，映射板块后按持仓金额占比构矩阵。
+        ⚠ heatmapData 的 value 当前取“占账户总持仓金额的百分比”，语义需与前端确认。
+        """
+        deals = await self._deals(market_id, account_id, _ALL_STRATEGIES, datetime.min, as_of)
+        deals_by_strategy: dict[str, list] = {}
+        for d in deals:
+            deals_by_strategy.setdefault(d.strategy_id, []).append(d)
+
+        cell: dict[tuple[str, str], float] = {}
+        for sid, strategy_deals in deals_by_strategy.items():
+            positions = reconstruct_positions(
+                strategy_deals, market_id, account_id, sid, as_of, None
+            )
+            for p in positions.active_positions:
+                sector = self._sector_map.lookup(market_id, p.symbol_code) or "未分类"
+                cell[(sector, sid)] = cell.get((sector, sid), 0.0) + float(p.holding_amount)
+
+        sectors = sorted({sector for sector, _ in cell})
+        strategies = sorted(deals_by_strategy)
+        total = sum(cell.values()) or 1.0
+        heatmap: list[list[float]] = []
+        for si, sector in enumerate(sectors):
+            for ti, strategy in enumerate(strategies):
+                amount = cell.get((sector, strategy), 0.0)
+                if amount > 0:
+                    heatmap.append([si, ti, round(amount / total * 100, 2)])
+        return {"sectors": sectors, "strategies": strategies, "heatmapData": heatmap}

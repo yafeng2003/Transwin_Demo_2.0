@@ -124,3 +124,38 @@ def analyze_risk(
         return_std=float(returns.std(ddof=1)) if returns.size >= 2 else 0.0,
         var_95=historical_var(values, var_confidence),
     )
+
+
+def downside_deviation(values: list[float], periods_per_year: int, mar: float = 0.0) -> float:
+    """年化下行波动率(Sortino 下行偏差)：仅对低于最低可接受收益 MAR 的部分计均方根后年化。"""
+    returns = simple_returns(values)
+    if returns.size < 1:
+        return 0.0
+    downside = np.minimum(returns - mar, 0.0)
+    rms = float(np.sqrt(np.mean(np.square(downside))))
+    return rms * float(np.sqrt(periods_per_year))
+
+
+def drawdown_distribution(
+    values: list[float], edges: tuple[float, ...] = (0.02, 0.04, 0.06, 0.08)
+) -> list[tuple[str, int]]:
+    """回撤深度分布：统计各时点回撤深度落入 0~2% / 2~4% / ... / 8%+ 各档的时点数。
+
+    深度取每个时点相对历史峰值的回撤(>=0)；新高(深度 0)的时点计入首档。
+    计数口径(按天含新高日)如与前端不一致可调整 edges 或过滤逻辑。
+    """
+    dd = drawdown_series(values)
+    if dd.size == 0:
+        return []
+    depths = -dd
+    labels = [f"{(0 if i == 0 else edges[i-1]) * 100:.0f}~{e * 100:.0f}%" for i, e in enumerate(edges)]
+    labels.append(f"{edges[-1] * 100:.0f}%+")
+    counts = [0] * len(labels)
+    for d in depths:
+        for i, hi in enumerate(edges):
+            if d <= hi:
+                counts[i] += 1
+                break
+        else:
+            counts[-1] += 1
+    return list(zip(labels, counts))

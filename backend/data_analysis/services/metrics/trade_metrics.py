@@ -118,3 +118,21 @@ def compute_slippage(deals: list[Deal], operations: list[Operation]) -> Slippage
         total_slippage_cost=total_cost,
         avg_slippage_per_deal=avg_per_deal,
     )
+
+
+def monthly_trade_stats(trades: list[Trade]) -> list[tuple[str, int, float]]:
+    """按平仓月份分组，返回 [(月份 YYYY-MM, 交易数, 胜率), ...]，按月份升序。
+
+    未平仓(close_time 为空)的交易不计入。
+    """
+    buckets: dict[str, list[Trade]] = {}
+    for t in trades:
+        if t.close_time is None:
+            continue
+        buckets.setdefault(t.close_time.strftime("%Y-%m"), []).append(t)
+    result: list[tuple[str, int, float]] = []
+    for month in sorted(buckets):
+        group = buckets[month]
+        wins = sum(1 for t in group if t.realized_pnl > 0)
+        result.append((month, len(group), wins / len(group) if group else 0.0))
+    return result

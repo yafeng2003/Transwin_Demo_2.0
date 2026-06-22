@@ -1,3 +1,8 @@
+"""数据分析层 HTTP API 测试：按前端契约校验 4 个组合接口。
+
+伪仓储用 AsyncMock 且忽略日期区间，返回固定数据，故 period 换算日期后结果确定。
+"""
+
 from unittest.mock import AsyncMock
 
 import pytest
@@ -11,7 +16,6 @@ from common.interfaces.trade_repository import TradeRepository
 from data_analysis.tests.conftest import make_assets, make_deal, make_operation, make_trade
 from data_analysis.app import build_app
 
-_WINDOW = {"start_time": "2024-01-01T00:00:00", "end_time": "2024-12-31T00:00:00"}
 _ACCOUNT = {"market_id": 1, "account_id": "acc_001"}
 
 
@@ -22,9 +26,17 @@ def repos():
     deal_repo = AsyncMock(spec=DealRepository)
     operation_repo = AsyncMock(spec=OperationRepository)
     asset_repo.get_assets_by_range.return_value = make_assets(["100", "110", "121"])
-    trade_repo.get_trades_by_range.return_value = [make_trade("100", trade_id=1), make_trade("-50", trade_id=2)]
+    # 两个策略，含盈亏，平仓落在不同月份，便于校验胜率/月度/策略对比
+    trade_repo.get_trades_by_range.return_value = [
+        make_trade("100", trade_id=1, strategy_id="s1", return_rate="0.10", close_day_offset=10),
+        make_trade("-50", trade_id=2, strategy_id="s1", return_rate="-0.05", close_day_offset=40),
+        make_trade("80", trade_id=3, strategy_id="s2", return_rate="0.08", close_day_offset=12),
+    ]
     deal_repo.get_deals_by_range.return_value = [
-        make_deal(1, 0, deal_type=1, deal_quantity="100", deal_price="10.1", position_after="100", operation_id=1),
+        make_deal(1, 0, deal_type=1, deal_quantity="100", deal_price="10",
+                  position_after="100", strategy_id="s1", symbol_code="600001.SH", operation_id=1),
+        make_deal(2, 1, deal_type=1, deal_quantity="50", deal_price="20",
+                  position_after="50", strategy_id="s2", symbol_code="600002.SH", operation_id=2),
     ]
     operation_repo.get_operations_by_range.return_value = [make_operation(1, "10.0")]
     return asset_repo, trade_repo, deal_repo, operation_repo
@@ -42,72 +54,69 @@ class TestAnalysisAPI:
         assert client.get("/health").json() == {"status": "ok"}
 
     def test_returns(self, client):
-        resp = client.get("/api/v1/analysis/returns", params={**_ACCOUNT, **_WINDOW})
+        resp = client.get("/api/v1/analysis/returns", params={**_ACCOUNT, "period": "3m"})
         assert resp.status_code == 200
-        assert resp.json()["cumulative_return"] == pytest.approx(0.21)
-
-    def test_period_returns(self, client):
-        resp = client.get("/api/v1/analysis/returns/periods",
-                          params={**_ACCOUNT, **_WINDOW, "granularity": "daily"})
-        assert resp.status_code == 200
-        assert len(resp.json()["items"]) == 2
-
-    def test_equity_curve(self, client):
-        resp = client.get("/api/v1/analysis/equity-curve", params={**_ACCOUNT, **_WINDOW})
-        assert len(resp.json()["points"]) == 3
+        body = resp.json()
+        # ApiResponse 信封
+        assert body["code"] == 200 and body["msg"] == "success"
+        summary = body["data"]["summary"]
+        assert set(summary) == {
+            "totalReturn", "annualReturn", "sharpeRatio",
+            "maxDrawdown", "calmarRatio", "winRate",
+        }
+        assert summary["totalReturn"] == pytest.approx(21.0)   # 100 -> 121
+        assert summary["winRate"] == pytest.approx(66.7)       # 3 笔 2 胜
+        daily = body["data"]["dailyReturns"]
+        assert len(daily) == 3
+        assert set(daily[0]) == {"date", "dailyReturn", "cumulativeReturn", "netValue"}
+        assert daily[-1]["cumulativeReturn"] == pytest.approx(21.0)
 
     def test_risk(self, client):
-        resp = client.get("/api/v1/analysis/risk", params={**_ACCOUNT, **_WINDOW})
+        resp = client.get("/api/v1/analysis/risk", params={**_ACCOUNT, "period": "3m"})
         assert resp.status_code == 200
-        assert "max_drawdown" in resp.json()
+        data = resp.json()["data"]
+        assert set(data) == {"volatility", "downsideVolatility", "drawdownDistribution", "riskExposure"}
+        assert {item["range"] for item in data["drawdownDistribution"]} == {
+            "0~2%", "2~4%", "4~6%", "6~8%", "8%+",
+        }
+        exposure = data["riskExposure"]
+        assert set(exposure) == {"sectors", "strategies", "heatmapData"}
+        assert exposure["strategies"] == ["s1", "s2"]
 
-    def test_drawdown_series(self, client):
-        resp = client.get("/api/v1/analysis/risk/drawdown", params={**_ACCOUNT, **_WINDOW})
+    def test_trading(self, client):
+        resp = client.get("/api/v1/analysis/trading", params={**_ACCOUNT, "period": "3m"})
         assert resp.status_code == 200
-        assert len(resp.json()) == 3
+        data = resp.json()["data"]
+        assert set(data) == {
+            "winRate", "profitLossRatio", "avgProfit", "avgLoss", "tradeCount",
+            "tradeFrequency", "totalCommission", "slippage", "monthlyTrades",
+        }
+        assert data["profitLossRatio"] == pytest.approx(1.8)   # avg win 90 / avg loss 50
+        assert data["avgProfit"] == pytest.approx(90.0)
+        assert data["avgLoss"] == pytest.approx(-50.0)
+        assert data["tradeCount"] == 3
+        months = {m["month"]: m for m in data["monthlyTrades"]}
+        assert months["2024-01"]["count"] == 2 and months["2024-01"]["winRate"] == pytest.approx(100.0)
+        assert months["2024-02"]["winRate"] == pytest.approx(0.0)
 
-    def test_return_distribution(self, client):
-        resp = client.get("/api/v1/analysis/risk/distribution",
-                          params={**_ACCOUNT, **_WINDOW, "bins": 5})
+    def test_strategy(self, client):
+        resp = client.get("/api/v1/analysis/strategy", params=_ACCOUNT)
         assert resp.status_code == 200
-        assert "bins" in resp.json()
+        rows = resp.json()["data"]
+        assert isinstance(rows, list) and len(rows) == 2
+        keys = {"strategyId", "strategyName", "totalReturn", "sharpeRatio",
+                "maxDrawdown", "winRate", "tradeCount", "contribution", "correlation"}
+        assert all(set(r) == keys for r in rows)
+        by_id = {r["strategyId"]: r for r in rows}
+        # 贡献度合计 ~100%（s1 已实现 50，s2 80）
+        assert by_id["s1"]["contribution"] + by_id["s2"]["contribution"] == pytest.approx(100.0, abs=0.2)
+        assert by_id["s1"]["winRate"] == pytest.approx(50.0)
+        # 相关性为 [{strategy,value}] 数组，自相关为 1
+        self_corr = next(c["value"] for c in by_id["s1"]["correlation"] if c["strategy"] == "s1")
+        assert self_corr == pytest.approx(1.0)
 
-    def test_trades(self, client):
-        resp = client.get("/api/v1/analysis/trades", params={**_ACCOUNT, "strategy_id": "s1", **_WINDOW})
-        assert resp.json()["total_trades"] == 2
-
-    def test_trade_frequency(self, client):
-        resp = client.get("/api/v1/analysis/trades/frequency",
-                          params={**_ACCOUNT, "strategy_id": "s1", **_WINDOW})
+    @pytest.mark.parametrize("period", ["1m", "3m", "6m", "1y", "bogus"])
+    def test_period_param_accepted(self, client, period):
+        # 任意 period（含非法值回退默认）都应正常返回，不报错
+        resp = client.get("/api/v1/analysis/returns", params={**_ACCOUNT, "period": period})
         assert resp.status_code == 200
-        assert resp.json()["total_trades"] == 2
-
-    def test_slippage(self, client):
-        resp = client.get("/api/v1/analysis/trades/slippage",
-                          params={**_ACCOUNT, "strategy_id": "s1", **_WINDOW})
-        assert resp.status_code == 200
-        assert resp.json()["matched_count"] == 1
-
-    def test_positions(self, client):
-        resp = client.get("/api/v1/analysis/positions",
-                          params={**_ACCOUNT, "strategy_id": "s1", "query_time": "2024-06-01T00:00:00"})
-        assert resp.status_code == 200
-        assert resp.json()["active_positions"][0]["holding_quantity"] == "100"
-
-    def test_position_distribution(self, client):
-        resp = client.get("/api/v1/analysis/positions/distribution",
-                          params={**_ACCOUNT, "strategy_id": "s1", "query_time": "2024-06-01T00:00:00"})
-        assert resp.status_code == 200
-        assert resp.json()["weights"][0]["weight"] == pytest.approx(1.0)
-
-    def test_exposure(self, client):
-        resp = client.get("/api/v1/analysis/positions/exposure",
-                          params={**_ACCOUNT, "strategy_id": "s1", "query_time": "2024-06-01T00:00:00"})
-        assert resp.status_code == 200
-        assert resp.json()["position_count"] == 1
-
-    def test_strategy_comparison(self, client):
-        resp = client.get("/api/v1/analysis/strategy-comparison",
-                          params={**_ACCOUNT, "strategy_ids": ["A", "B"], **_WINDOW})
-        assert resp.status_code == 200
-        assert len(resp.json()["contributions"]) == 2

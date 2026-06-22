@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 
 from common.models import ApiResponse
+from data_analysis.api import analysis_controller
+from data_analysis.services.analysis_service import AnalysisService
 from execution.adapters.mock_adapter import MockBrokerAdapter
 from execution.api import configure_execution_dependencies, router as execution_router
 from execution.services import InMemoryExecutionRepository, ManualExecutionService
@@ -27,15 +29,26 @@ configure_execution_dependencies(execution_repository, manual_service)
 configure_notification_dependencies(notification_service)
 configure_risk_dependencies(risk_service)
 
+# 分析层：复用执行层内存仓储作为数据源（实现 Asset/Deal/Operation/Trade 接口）
+analysis_service = AnalysisService(
+    asset_repository=execution_repository,
+    trade_repository=execution_repository,
+    deal_repository=execution_repository,
+    operation_repository=execution_repository,
+)
+
 app = FastAPI(
     title="量化交易系统后端",
     version="1.0.0",
     description="支持策略生成、订单执行、风控监控、数据分析的量化交易平台",
 )
 
+app.dependency_overrides[analysis_controller.get_analysis_service] = lambda: analysis_service
+
 app.include_router(execution_router)
 app.include_router(risk_router)
 app.include_router(notification_router)
+app.include_router(analysis_controller.router)
 
 
 @app.get("/api/v1/health", response_model=ApiResponse[dict])

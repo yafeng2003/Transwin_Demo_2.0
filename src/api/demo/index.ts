@@ -71,31 +71,39 @@ export function resolveRiskEvent(data: { id: number }) {
 export function getAnalysisReturns(params?: Record<string, any>) {
   return request({ url: '/api/v1/analysis/returns', method: 'get', params })
 }
+export function getAnalysisRisk(params?: Record<string, any>) {
+  return request({ url: '/api/v1/analysis/risk', method: 'get', params })
+}
 export function getAnalysisTrading(params?: Record<string, any>) {
-  return request({ url: '/api/v1/analysis/trades', method: 'get', params })
+  return request({ url: '/api/v1/analysis/trading', method: 'get', params })
 }
 export function getAnalysisStrategy(params?: Record<string, any>) {
-  // 后端路径: /api/v1/analysis/strategies (待确认)
-  return request({ url: '/api/v1/analysis/strategies', method: 'get', params })
+  return request({ url: '/api/v1/analysis/strategy', method: 'get', params })
 }
 
 // ==================== 报表 ====================
 export function getReports(params?: Record<string, any>) {
   return request({ url: '/api/v1/reports', method: 'get', params })
 }
+export function exportReport(id: number, format: string = 'pdf') {
+  return request({ url: `/api/v1/reports/${id}/export`, method: 'get', params: { format } })
+}
 
 // ==================== 日志 ====================
-// 交易日志 (后端: /api/v1/logs/trading)
+// 系统日志 (v2.0 新增)
+export function getSystemLogs(params?: Record<string, any>) {
+  return request({ url: '/api/v1/logs/system', method: 'get', params })
+}
+// 交易日志
 export function getTradeLogs(params?: Record<string, any>) {
   return request({ url: '/api/v1/logs/trading', method: 'get', params })
 }
-// 订单状态日志 (后端暂未提供，预留对接)
+// 兼容旧版（订单日志已合并到交易日志，错误日志改为系统日志）
 export function getOrderLogs(params?: Record<string, any>) {
-  return request({ url: '/api/v1/logs/order', method: 'get', params })
+  return request({ url: '/api/v1/logs/trading', method: 'get', params: { ...params, type: 'order' } })
 }
-// 错误日志 (后端暂未提供，预留对接)
 export function getErrorLogs(params?: Record<string, any>) {
-  return request({ url: '/api/v1/logs/error', method: 'get', params })
+  return request({ url: '/api/v1/logs/system', method: 'get', params: { ...params, level: 'ERROR' } })
 }
 
 // ==================== 人工干预 ====================
