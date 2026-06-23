@@ -127,3 +127,11 @@ class RiskEventService(RiskEventHandler):
                 },
             ],
         }
+
+    async def resolve_event(
+        self, event_id: int, account_id: str | None = None, strategy_id: str | None = None
+    ) -> bool:
+        """将风险事件标记为已解决。"""
+        return await self._repository.update_event_status(
+            event_id, "resolved", account_id, strategy_id
+        )

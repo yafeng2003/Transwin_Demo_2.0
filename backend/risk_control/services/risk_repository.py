@@ -36,6 +36,24 @@ class InMemoryRiskRepository(RiskRepository):
                 return self._to_event_row(stored_id, event)
         return None
 
+    async def update_event_status(
+        self,
+        event_id: int,
+        status: str,
+        account_id: str | None = None,
+        strategy_id: str | None = None,
+    ) -> bool:
+        """更新风险事件处理状态。"""
+        for stored_id, event in self._events:
+            if (
+                stored_id == event_id
+                and (account_id is None or event.account_id == account_id)
+                and (strategy_id is None or event.strategy_id == strategy_id)
+            ):
+                event.status = status
+                return True
+        return False
+
     async def list_events(
         self,
         event_type: str | None = None,

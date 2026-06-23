@@ -4,6 +4,7 @@
 """
 
 from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel
 
 from common.models import ApiResponse, PagedResult
 from risk_control.services.risk_service import RiskEventService
@@ -17,6 +18,12 @@ def configure_risk_dependencies(service: RiskEventService) -> None:
     """在 main.py 中注入风控服务，保持 API 层与具体实现解耦。"""
     global risk_service
     risk_service = service
+
+
+class ResolveRiskEventRequest(BaseModel):
+    id: int
+    account_id: str | None = None
+    strategy_id: str | None = None
 
 
 @router.get("/dashboard/risk-status", response_model=ApiResponse[dict])
@@ -79,6 +86,16 @@ async def get_risk_event(
     if event is None:
         raise HTTPException(status_code=404, detail="risk event not found")
     return ApiResponse(data=event)
+
+
+@router.post("/risk/events/resolve", response_model=ApiResponse[dict])
+async def resolve_risk_event(request: ResolveRiskEventRequest):
+    success = await risk_service.resolve_event(
+        request.id, request.account_id, request.strategy_id
+    )
+    if not success:
+        raise HTTPException(status_code=404, detail="risk event not found")
+    return ApiResponse(data={"id": request.id, "status": "resolved"})
 
 
 @router.get("/risk/account-metrics", response_model=ApiResponse[dict])
