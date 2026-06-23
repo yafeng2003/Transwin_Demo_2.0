@@ -217,7 +217,7 @@ export const asyncRoutes: VabRouteRecord[] = [
     path: '/demo/logs',
     name: 'Logs',
     component: Layout,
-    redirect: '/demo/logs/error',
+    redirect: '/demo/logs/system',
     meta: {
       title: '日志与通知',
       icon: 'file-list-line',
@@ -225,10 +225,10 @@ export const asyncRoutes: VabRouteRecord[] = [
     },
     children: [
       {
-        path: 'error',
-        name: 'LogsError',
+        path: 'system',
+        name: 'LogsSystem',
         component: () => import('/@/views/demo/logs/system.vue'),
-        meta: { title: '错误日志', icon: 'error-warning-line' },
+        meta: { title: '系统日志', icon: 'error-warning-line' },
       },
       {
         path: 'trading',

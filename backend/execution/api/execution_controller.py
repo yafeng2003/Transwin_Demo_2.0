@@ -39,6 +39,17 @@ class ManualOrderRequest(BaseModel):
     price: Decimal | None = None
     quantity: Decimal = Field(ge=0)
 
+    @model_validator(mode="before")
+    @classmethod
+    def coerce_empty(cls, data: dict) -> dict:
+        """将前端空字符串转为合理默认值。"""
+        if isinstance(data, dict):
+            if data.get("price") in (None, ""):
+                data["price"] = None
+            if data.get("quantity") in (None, ""):
+                data["quantity"] = "0"
+        return data
+
 
 class ModifyManualOrderRequest(BaseModel):
     """手工改单请求体。"""
