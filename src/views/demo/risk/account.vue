@@ -82,12 +82,12 @@ import { computed } from 'vue'
 
 defineOptions({ name: 'DemoRiskAccount' })
 
-const mockDailyLoss = 324000
-const mockDrawdown = 15.6
+const mockDailyLoss = 20020.00
+const mockDrawdown = 15.52
 const consecutiveLosses = 2
 
-const dailyLossPercent = computed(() => Math.min(100, (mockDailyLoss / 500000) * 100))
-const drawdownPercent = computed(() => Math.min(100, (mockDrawdown / 20) * 100))
+const dailyLossPercent = computed(() => Math.min(100, Math.round((mockDailyLoss / 500000) * 10000) / 100))
+const drawdownPercent = computed(() => Math.min(100, Math.round((mockDrawdown / 20) * 10000) / 100))
 
 const thresholds = [
   { name: '单日亏损超限', threshold: '¥500,000', action: '暂停交易 + 通知', breached: false, description: '当日累计亏损超过阈值时触发' },

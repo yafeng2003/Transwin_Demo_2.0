@@ -55,12 +55,12 @@
               </template>
             </el-table-column>
             <el-table-column label="操作" width="168">
-              <template #default>
+              <template #default="{ row }">
                 <div class="report-actions">
-                  <button type="button">预览</button>
-                  <button type="button">PDF</button>
-                  <button type="button">Excel</button>
-                  <button type="button">CSV</button>
+                  <button type="button" @click="previewReport(row)">预览</button>
+                  <button type="button" @click="downloadReport(row, 'pdf')">PDF</button>
+                  <button type="button" @click="downloadReport(row, 'xlsx')">Excel</button>
+                  <button type="button" @click="downloadReport(row, 'csv')">CSV</button>
                 </div>
               </template>
             </el-table-column>
@@ -74,8 +74,10 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue'
 import { getReports } from '/@/api/demo/index'
+import { useDemoStore } from '/@/store/modules/demo'
 
 defineOptions({ name: 'DemoReports' })
+const demoStore = useDemoStore()
 
 const reportType = ref('daily')
 const list = ref<any[]>([])
@@ -103,8 +105,16 @@ const miniNavOption = computed(() => {
 })
 
 async function fetchData() {
-  const res = await getReports({ type: reportType.value })
+  const res = await getReports({ type: reportType.value, market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
   list.value = res.data
+}
+
+function previewReport(row: any) {
+  window.open(`/api/v1/reports/${row.id}/export?format=pdf`, '_blank')
+}
+
+function downloadReport(row: any, format: string) {
+  window.open(`/api/v1/reports/${row.id}/export?format=${format}`, '_blank')
 }
 
 onMounted(fetchData)

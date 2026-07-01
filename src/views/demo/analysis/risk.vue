@@ -42,8 +42,10 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue'
 import { getAnalysisReturns } from '/@/api/demo/index'
+import { useDemoStore } from '/@/store/modules/demo'
 
 defineOptions({ name: 'DemoAnalysisRisk' })
+const demoStore = useDemoStore()
 
 const summary = ref<any>({})
 
@@ -76,7 +78,7 @@ const heatmapOption = computed(() => ({
 }))
 
 onMounted(async () => {
-  const res = await getAnalysisReturns()
+  const res = await getAnalysisReturns({ market_id: demoStore.marketId, account_id: demoStore.accountId })
   summary.value = res.data.summary
 })
 </script>

@@ -50,9 +50,11 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
 import { getRiskNotifications } from '/@/api/demo/index'
+import { useDemoStore } from '/@/store/modules/demo'
 
 defineOptions({ name: 'DemoLogsNotifications' })
 
+const demoStore = useDemoStore()
 const loading = ref(false)
 const list = ref<any[]>([])
 const page = ref(1)
@@ -62,7 +64,7 @@ const total = ref(0)
 async function fetchData() {
   loading.value = true
   try {
-    const res = await getRiskNotifications({ page: page.value, size: size.value })
+    const res = await getRiskNotifications({ page: page.value, size: size.value, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
     list.value = res.data.list
     total.value = res.data.total
   } finally { loading.value = false }

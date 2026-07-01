@@ -88,8 +88,10 @@
 <script lang="ts" setup>
 import { onMounted, reactive, ref } from 'vue'
 import { getAccounts, getOrders } from '/@/api/demo/index'
+import { useDemoStore } from '/@/store/modules/demo'
 
 defineOptions({ name: 'DemoStrategyOrders' })
+const demoStore = useDemoStore()
 
 const loading = ref(false)
 const list = ref<any[]>([])
@@ -110,6 +112,7 @@ async function fetchData() {
     const params: any = { page: page.value, size: size.value }
     if (filter.marketId != null) params.market_id = filter.marketId
     if (filter.accountId) params.account_id = filter.accountId
+    params.strategy_id = demoStore.strategyId
     if (filter.status != null) params.status = filter.status
     if (filter.symbol) params.symbol = filter.symbol
     const res = await getOrders(params)
@@ -127,7 +130,6 @@ function resetFilter() {
 onMounted(async () => {
   const aRes = await getAccounts()
   accounts.value = aRes.data
-  fetchData()
 })
 </script>
 

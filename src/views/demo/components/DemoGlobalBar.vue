@@ -10,7 +10,7 @@
         <el-option v-for="m in demoStore.markets" :key="m.id" :label="m.name" :value="m.id" />
       </el-select>
     </el-col>
-    <el-col :span="6">
+    <el-col :span="5">
       <el-select
         v-model="demoStore.accountId"
         placeholder="选择账户"
@@ -19,7 +19,16 @@
         <el-option v-for="a in demoStore.accounts" :key="a.id" :label="a.label" :value="a.id" />
       </el-select>
     </el-col>
-    <el-col :span="12" class="text-right">
+    <el-col :span="5">
+      <el-select
+        v-model="demoStore.strategyId"
+        placeholder="选择策略"
+        @change="$emit('change')"
+      >
+        <el-option label="marsi" value="marsi" />
+      </el-select>
+    </el-col>
+    <el-col :span="8" class="text-right">
       <el-tag :type="health.status === 'running' ? 'success' : 'danger'" size="large">
         系统状态：{{ health.status === 'running' ? '运行中' : '异常' }}
       </el-tag>

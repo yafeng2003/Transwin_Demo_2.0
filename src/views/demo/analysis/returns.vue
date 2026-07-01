@@ -35,16 +35,10 @@
 
     <!-- 第一行：净值走势+回撤 -->
     <el-row :gutter="16" style="margin-top:16px">
-      <el-col :span="16">
+      <el-col :span="24">
         <el-card>
           <template #header><span class="section-title">净值走势 & 回撤</span></template>
           <vab-chart :option="navDrawdownOption" class="demo-chart-lg" />
-        </el-card>
-      </el-col>
-      <el-col :span="8">
-        <el-card>
-          <template #header><span class="section-title">月度收益热力图</span></template>
-          <vab-chart :option="monthlyHeatmapOption" class="demo-chart-lg" />
         </el-card>
       </el-col>
     </el-row>
@@ -76,13 +70,14 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue'
 import { getAnalysisReturns } from '/@/api/demo/index'
+import { useDemoStore } from '/@/store/modules/demo'
 
 defineOptions({ name: 'DemoAnalysisReturns' })
+const demoStore = useDemoStore()
 
 const dailyReturns = ref<any[]>([])
 const navSeries = ref<number[]>([])
 const drawdownSeries = ref<number[]>([])
-const monthlyReturns = ref<any[]>([])
 const dailyReturnDist = ref<any[]>([])
 const annualReturns = ref<any[]>([])
 const summary = ref<any>({})
@@ -143,42 +138,7 @@ const navDrawdownOption = computed(() => {
   }
 })
 
-// ====== 2. 月度收益热力图 ======
-const monthlyHeatmapOption = computed(() => {
-  // 按年份分组
-  const yearMap: Record<number, any[]> = {}
-  monthlyReturns.value.forEach((m: any) => {
-    if (!yearMap[m.year]) yearMap[m.year] = Array(12).fill(null)
-    yearMap[m.year][m.monthIdx - 1] = m.return
-  })
-  const years = Object.keys(yearMap).map(Number).sort()
-  const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
-  const heatData: any[] = []
-  years.forEach((y, yi) => {
-    yearMap[y].forEach((val: number | null, mi: number) => {
-      if (val !== null) heatData.push([mi, yi, val])
-    })
-  })
-
-  return {
-    grid: { top: 24, right: 30, bottom: 72, left: 46, containLabel: true },
-    tooltip: { formatter: (p: any) => `${years[p.value[1]]}年${months[p.value[0]]}：<b>${p.value[2].toFixed(2)}%</b>` },
-    xAxis: { type: 'category', data: months, axisLabel: { fontSize: 11, rotate: 28, color: '#7a8699' } },
-    yAxis: { type: 'category', data: years.map(String), axisLabel: { fontSize: 11, color: '#7a8699' } },
-    visualMap: {
-      min: -10, max: 15, calculable: true, orient: 'horizontal', bottom: 0, left: 'center',
-      inRange: { color: ['#27ae60', '#ffffff', '#e74c3c'] },
-      text: ['赚', '亏'], textStyle: { color: '#667085', fontSize: 11 },
-    },
-    series: [{
-      type: 'heatmap', data: heatData,
-      label: { show: false },
-      emphasis: { itemStyle: { shadowBlur: 8, shadowColor: 'rgba(0,0,0,0.3)' } },
-    }],
-  }
-})
-
-// ====== 3. 日收益分布直方图 + 正态曲线 ======
+// ====== 2. 日收益分布直方图 + 正态曲线 ======
 const distOption = computed(() => {
   const buckets = dailyReturnDist.value.map((d: any) => d.bucket)
   const counts = dailyReturnDist.value.map((d: any) => d.count)
@@ -279,12 +239,11 @@ const returnsOption = computed(() => {
 })
 
 onMounted(async () => {
-  const res = await getAnalysisReturns()
+  const res = await getAnalysisReturns({ market_id: demoStore.marketId, account_id: demoStore.accountId })
   const data = res.data
   dailyReturns.value = data.dailyReturns
   navSeries.value = data.navSeries
   drawdownSeries.value = data.drawdownSeries
-  monthlyReturns.value = data.monthlyReturns
   dailyReturnDist.value = data.dailyReturnDist
   annualReturns.value = data.annualReturns
   summary.value = data.summary

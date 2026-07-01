@@ -67,9 +67,11 @@
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { computed, onMounted, ref } from 'vue'
 import { getRiskEvents, resolveRiskEvent } from '/@/api/demo/index'
+import { useDemoStore } from '/@/store/modules/demo'
 
 defineOptions({ name: 'DemoRiskExecution' })
 
+const demoStore = useDemoStore()
 const loading = ref(false)
 const list = ref<any[]>([])
 const activeTab = ref('order_failed')
@@ -105,7 +107,7 @@ async function handleResolve(row: any) {
 async function fetchData() {
   loading.value = true
   try {
-    const res = await getRiskEvents({ page: page.value, size: 100 })
+    const res = await getRiskEvents({ page: page.value, size: 100, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
     list.value = res.data.list
     total.value = res.data.total
   } finally { loading.value = false }

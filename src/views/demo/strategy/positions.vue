@@ -72,9 +72,11 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue'
 import { getCurrentPositions } from '/@/api/demo/index'
+import { useDemoStore } from '/@/store/modules/demo'
 
 defineOptions({ name: 'DemoStrategyPositions' })
 
+const demoStore = useDemoStore()
 const loading = ref(false)
 const list = ref<any[]>([])
 const activeTab = ref('current')
@@ -91,7 +93,7 @@ const uniqueStrategies = computed(() => new Set(list.value.map((i: any) => i.str
 onMounted(async () => {
   loading.value = true
   try {
-    const res = await getCurrentPositions()
+    const res = await getCurrentPositions({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
     list.value = res.data
   } finally { loading.value = false }
 })

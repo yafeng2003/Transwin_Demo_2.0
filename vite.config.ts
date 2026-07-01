@@ -43,8 +43,8 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       host: '0.0.0.0',
       proxy: {
         '/api': {
-          // 与后端 FastAPI 默认启动端口保持一致
-          target: 'http://127.0.0.1:8000',
+          // 通过 Vite 代理转发到远程后端（避免浏览器跨域问题）
+          target: 'http://27.193.176.153:8000',
           changeOrigin: true,
           rewrite: (p: string) => p,
         },

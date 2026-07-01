@@ -76,9 +76,11 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
 import { getDeals, getDealStats } from '/@/api/demo/index'
+import { useDemoStore } from '/@/store/modules/demo'
 
 defineOptions({ name: 'DemoStrategyDeals' })
 
+const demoStore = useDemoStore()
 const loading = ref(false)
 const list = ref<any[]>([])
 const stats = ref<any>({})
@@ -96,8 +98,8 @@ async function fetchData() {
   loading.value = true
   try {
     const [dRes, sRes] = await Promise.all([
-      getDeals({ page: page.value, size: size.value }),
-      getDealStats(),
+      getDeals({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId, page: page.value, size: size.value }),
+      getDealStats({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId }),
     ])
     list.value = dRes.data.list
     total.value = dRes.data.total

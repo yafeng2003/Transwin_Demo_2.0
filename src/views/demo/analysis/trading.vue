@@ -57,13 +57,15 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
 import { getAnalysisTrading } from '/@/api/demo/index'
+import { useDemoStore } from '/@/store/modules/demo'
 
 defineOptions({ name: 'DemoAnalysisTrading' })
+const demoStore = useDemoStore()
 
 const data = ref<any>({})
 
 onMounted(async () => {
-  const res = await getAnalysisTrading()
+  const res = await getAnalysisTrading({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
   data.value = res.data
 })
 </script>

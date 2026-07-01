@@ -58,8 +58,10 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue'
 import { getAccountAssets } from '/@/api/demo/index'
+import { useDemoStore } from '/@/store/modules/demo'
 
 defineOptions({ name: 'DemoStrategyAccount' })
+const demoStore = useDemoStore()
 
 const history = ref<any[]>([])
 const current = ref<any>({})
@@ -69,23 +71,34 @@ const formatMoney = (v: number) => {
   return (v >= 0 ? '¥' : '-¥') + Math.abs(v).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
-const navOption = computed(() => ({
-  grid: { top: 28, right: 28, bottom: 40, left: 52, containLabel: true },
-  tooltip: { trigger: 'axis' },
-  xAxis: { type: 'category', data: history.value.map((h: any) => h.date), axisLabel: { rotate: 45, fontSize: 10 } },
-  yAxis: { type: 'value', name: '净值' },
-  series: [{
-    type: 'line',
-    data: history.value.map((h: any) => h.netValue),
-    smooth: true,
-    areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(64,158,255,0.3)' }, { offset: 1, color: 'rgba(64,158,255,0.02)' }] } },
-    lineStyle: { color: '#409EFF', width: 2 },
-    itemStyle: { color: '#409EFF' },
-  }],
-}))
+const navOption = computed(() => {
+  const values = history.value.map((h: any) => h.netValue)
+  let yMin, yMax
+  if (values.length > 0) {
+    const dataMin = Math.min(...values)
+    const dataMax = Math.max(...values)
+    const pad = (dataMax - dataMin) * 0.1 || 0.005
+    yMin = +(dataMin - pad).toFixed(4)
+    yMax = +(dataMax + pad).toFixed(4)
+  }
+  return {
+    grid: { top: 28, right: 28, bottom: 40, left: 52, containLabel: true },
+    tooltip: { trigger: 'axis' },
+    xAxis: { type: 'category', data: history.value.map((h: any) => h.date), axisLabel: { rotate: 45, fontSize: 10 } },
+    yAxis: { type: 'value', name: '净值', min: yMin, max: yMax },
+    series: [{
+      type: 'line',
+      data: values,
+      smooth: true,
+      areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(64,158,255,0.3)' }, { offset: 1, color: 'rgba(64,158,255,0.02)' }] } },
+      lineStyle: { color: '#409EFF', width: 2 },
+      itemStyle: { color: '#409EFF' },
+    }],
+  }
+})
 
 onMounted(async () => {
-  const res = await getAccountAssets({ days: 30 })
+  const res = await getAccountAssets({ market_id: demoStore.marketId, account_id: demoStore.accountId, days: 30 })
   history.value = res.data.history
   current.value = res.data.current
 })

@@ -21,8 +21,6 @@
           <el-card shadow="hover" class="risk-stat-item"><div class="stat-label">今日事件</div><div class="stat-value">{{ data.todayEvents }}</div></el-card>
           <el-card shadow="hover" class="risk-stat-item"><div class="stat-label">未处理事件</div><div class="stat-value" :class="data.unresolvedEvents > 0 ? 'warn' : ''">{{ data.unresolvedEvents }}</div></el-card>
           <el-card shadow="hover" class="risk-stat-item"><div class="stat-label">本周事件</div><div class="stat-value">{{ data.weekEvents }}</div></el-card>
-          <el-card shadow="hover" class="risk-stat-item"><div class="stat-label">最大回撤</div><div class="stat-value down">{{ data.maxDrawdown?.toFixed(2) }}%</div></el-card>
-          <el-card shadow="hover" class="risk-stat-item"><div class="stat-label">日VaR</div><div class="stat-value">{{ formatMoney(data.dailyVar) }}</div></el-card>
         </div>
       </el-col>
     </el-row>
@@ -64,8 +62,10 @@
 import { Bell, DataAnalysis, WarningFilled } from '@element-plus/icons-vue'
 import { computed, onMounted, ref } from 'vue'
 import { getRiskOverview } from '/@/api/demo/index'
+import { useDemoStore } from '/@/store/modules/demo'
 
 defineOptions({ name: 'DemoRiskOverview' })
+const demoStore = useDemoStore()
 
 const data = ref<any>({ trend: [] })
 
@@ -95,7 +95,7 @@ const trendOption = computed(() => ({
 }))
 
 onMounted(async () => {
-  const res = await getRiskOverview()
+  const res = await getRiskOverview({ account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
   data.value = res.data
 })
 </script>

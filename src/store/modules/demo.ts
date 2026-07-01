@@ -3,7 +3,8 @@ import { getAccounts, getMarkets } from '/@/api/demo/index'
 
 export const useDemoStore = defineStore('demo', () => {
   const marketId = ref(1)
-  const accountId = ref('acc_main')
+  const accountId = ref('ggt')
+  const strategyId = ref('marsi')
   const markets = ref<any[]>([])
   const accounts = ref<any[]>([])
 
@@ -17,5 +18,5 @@ export const useDemoStore = defineStore('demo', () => {
     }
   }
 
-  return { marketId, accountId, markets, accounts, fetchMarketsAndAccounts }
+  return { marketId, accountId, strategyId, markets, accounts, fetchMarketsAndAccounts }
 })

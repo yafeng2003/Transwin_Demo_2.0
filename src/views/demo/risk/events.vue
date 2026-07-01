@@ -69,9 +69,11 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
 import { getRiskEvents } from '/@/api/demo/index'
+import { useDemoStore } from '/@/store/modules/demo'
 
 defineOptions({ name: 'DemoRiskEvents' })
 
+const demoStore = useDemoStore()
 const loading = ref(false)
 const list = ref<any[]>([])
 const filterLevel = ref(null as any)
@@ -86,7 +88,7 @@ const statusTag = (s: string) => ({ pending: 'danger', processing: 'warning', re
 async function fetchData() {
   loading.value = true
   try {
-    const params: any = { page: page.value, size: size.value }
+    const params: any = { page: page.value, size: size.value, account_id: demoStore.accountId, strategy_id: demoStore.strategyId }
     if (filterLevel.value) params.level = filterLevel.value
     if (filterStatus.value) params.status = filterStatus.value
     const res = await getRiskEvents(params)

@@ -59,8 +59,10 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
 import { getAnalysisStrategy } from '/@/api/demo/index'
+import { useDemoStore } from '/@/store/modules/demo'
 
 defineOptions({ name: 'DemoAnalysisStrategy' })
+const demoStore = useDemoStore()
 
 const loading = ref(false)
 const list = ref<any[]>([])
@@ -75,7 +77,7 @@ function corrColor(v: number) {
 onMounted(async () => {
   loading.value = true
   try {
-    const res = await getAnalysisStrategy()
+    const res = await getAnalysisStrategy({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_ids: demoStore.strategyId })
     list.value = res.data
   } finally { loading.value = false }
 })

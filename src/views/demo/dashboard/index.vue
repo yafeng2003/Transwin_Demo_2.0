@@ -113,8 +113,6 @@
                 <el-descriptions :column="2" size="small" border>
                   <el-descriptions-item label="今日事件">{{ risk.todayEvents }}</el-descriptions-item>
                   <el-descriptions-item label="待处理事件">{{ risk.unresolvedEvents }}</el-descriptions-item>
-                  <el-descriptions-item label="最大回撤">{{ risk.maxDrawdown?.toFixed(2) }}%</el-descriptions-item>
-                  <el-descriptions-item label="连续亏损">{{ risk.consecutiveLosses }}次</el-descriptions-item>
                 </el-descriptions>
               </el-col>
             </el-row>
@@ -321,9 +319,9 @@ const assetBarOption = computed(() => {
 async function refreshAll() {
   const [aSumRes, posRes, rRes, dRes] = await Promise.all([
     getAssetSummary({ market_id: demoStore.marketId, account_id: demoStore.accountId }),
-    getPositionOverview({ market_id: demoStore.marketId, account_id: demoStore.accountId }),
-    getRiskStatus({ market_id: demoStore.marketId, account_id: demoStore.accountId }),
-    getRecentDeals({ market_id: demoStore.marketId, limit: 10 }),
+    getPositionOverview({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId }),
+    getRiskStatus({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId }),
+    getRecentDeals({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId, limit: 10 }),
   ])
   asset.value = aSumRes.data
   positions.value = posRes.data.positions
