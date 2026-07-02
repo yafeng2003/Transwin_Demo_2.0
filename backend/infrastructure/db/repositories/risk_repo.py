@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from common.interfaces.risk_repository import RiskRepository as RiskRepositoryInterface
 from common.models import PagedResult, RiskEvent, RiskNotification
@@ -60,6 +60,41 @@ class RiskRepository(BaseRepository, RiskRepositoryInterface):
         )
         row = self._db.fetch_one(sql, (event_id,))
         return self._event_row(row) if row is not None else None
+
+    async def update_event_status(
+        self,
+        event_id: int,
+        status: str,
+        account_id: str | None = None,
+        strategy_id: str | None = None,
+    ) -> bool:
+        account_id, strategy_id = self._require_scope(account_id, strategy_id)
+        return await asyncio.to_thread(
+            self._update_event_status_sync,
+            event_id,
+            status,
+            account_id,
+            strategy_id,
+        )
+
+    def _update_event_status_sync(
+        self,
+        event_id: int,
+        status: str,
+        account_id: str,
+        strategy_id: str,
+    ) -> bool:
+        table = self._table_name(account_id, strategy_id)
+        sql = f"UPDATE {table} SET status = %s WHERE risk_event_id = %s"
+        try:
+            with self._db.cnx.cursor() as cursor:
+                cursor.execute(sql, (status, event_id))
+                updated = cursor.rowcount > 0
+            self._db.commit()
+        except Exception:
+            self._db.cnx.rollback()
+            raise
+        return updated
 
     async def list_events(
         self,
@@ -215,20 +250,90 @@ class RiskRepository(BaseRepository, RiskRepositoryInterface):
 
     def _summarize_events_sync(self, account_id: str, strategy_id: str) -> dict:
         table = self._table_name(account_id, strategy_id)
+        now = datetime.now()
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end = today_start.replace(hour=23, minute=59, second=59)
+        week_start = today_start - timedelta(days=today_start.weekday())
+        week_end = week_start + timedelta(days=6, hours=23, minutes=59, seconds=59)
+
         total = self._count(table)
         unresolved = self._count(table, "status <> %s", ("resolved",))
         high = self._count(table, "event_level >= %s", (4,))
+        today = self._count(table, "occur_time >= %s AND occur_time <= %s",
+                            (today_start, today_end))
+        this_week = self._count(table, "occur_time >= %s AND occur_time <= %s",
+                                (week_start, week_end))
         return {
             "totalEvents": total,
-            "todayEvents": total,
+            "todayEvents": today,
+            "weekEvents": this_week,
             "unresolvedEvents": unresolved,
             "highRiskEvents": high,
         }
 
+    async def compute_trend(
+        self, account_id: str | None = None, strategy_id: str | None = None,
+        days: int = 30,
+    ) -> list[dict]:
+        account_id, strategy_id = self._require_scope(account_id, strategy_id)
+        return await asyncio.to_thread(self._compute_trend_sync, account_id, strategy_id, days)
+
+    def _compute_trend_sync(self, account_id: str, strategy_id: str, days: int) -> list[dict]:
+        table = self._table_name(account_id, strategy_id)
+        now = datetime.now()
+
+        # 查出每天的高风险事件数(event_level>=4)和未解决事件数
+        rows = self._db.fetch_all(
+            f"SELECT DATE(occur_time) AS d, "
+            f"event_level, status "
+            f"FROM {table} "
+            f"WHERE occur_time >= %s "
+            f"ORDER BY occur_time ASC",
+            (now - timedelta(days=days),),
+        )
+
+        # 按日期分组统计
+        daily_high: dict[str, int] = {}
+        daily_unresolved: dict[str, int] = {}
+        for r in rows:
+            day = r["d"].strftime("%Y-%m-%d") if hasattr(r["d"], "strftime") else str(r["d"])
+            if r["event_level"] >= 4:
+                daily_high[day] = daily_high.get(day, 0) + 1
+            if r["status"] != "resolved":
+                daily_unresolved[day] = daily_unresolved.get(day, 0) + 1
+
+        # 逐日累加计算风险评分
+        trend: list[dict] = []
+        cum_high = 0
+        cum_unresolved = 0
+        for i in range(days):
+            day = (now - timedelta(days=days - 1 - i)).strftime("%Y-%m-%d")
+            # 被覆盖到的事件计入累计
+            if day in daily_high:
+                cum_high += daily_high[day]
+            if day in daily_unresolved:
+                cum_unresolved += daily_unresolved[day]
+
+            # 当天若有新事件才重新算分，否则延续前一天分数
+            if day in daily_high or day in daily_unresolved:
+                score = min(100, cum_high * 25 + cum_unresolved * 10)
+            else:
+                score = trend[-1]["riskScore"] if trend else 0
+
+            trend.append({"date": day, "riskScore": score})
+
+        return trend
+
     def _count(self, table: str, where_sql: str = "", params: tuple = ()) -> int:
         clause = f"WHERE {where_sql}" if where_sql else ""
-        row = self._db.fetch_one(f"SELECT COUNT(*) AS cnt FROM {table} {clause}", params)
-        return row["cnt"] if row is not None else 0
+        try:
+            row = self._db.fetch_one(f"SELECT COUNT(*) AS cnt FROM {table} {clause}", params)
+        except Exception:
+            return 0
+        if row is None:
+            return 0
+        # DictCursor 返回的 dict 键名可能因版本而异，取第一个值
+        return int(list(row.values())[0]) if row else 0
 
     def _require_scope(
         self, account_id: str | None, strategy_id: str | None

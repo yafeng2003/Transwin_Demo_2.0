@@ -6,6 +6,15 @@
 
 from __future__ import annotations
 
+import sys
+import os
+
+# 确保直接 python path/to/file.py 也能找到项目根目录的包
+_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_ROOT = os.path.abspath(os.path.join(_THIS_DIR, "..", ".."))
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
+
 from unittest.mock import MagicMock, call
 
 import pytest
@@ -169,3 +178,73 @@ class TestDdlFailure:
 
         with pytest.raises(RuntimeError):
             sm.drop_tables("ly", "maop")
+
+
+class TestCreateSevenTables:
+    """验证 create_all(5张) + create_asset_table + create_report_table = 7张表。"""
+
+    @pytest.mark.mock_only
+    def test_total_seven_tables_mock(self, mock_db: MagicMock) -> None:
+        """mock 模式下验证 7 条 DDL 语句都正确发出。"""
+        sm = SchemaManager(mock_db)
+        result = sm.create_all("test_acct", "test_strat")
+        sm.create_asset_table("test_acct")
+        sm.create_report_table("test_acct")
+
+        assert isinstance(result, dict)
+        assert set(result.keys()) == {
+            "operation",
+            "deal",
+            "trade",
+            "risk_event",
+            "notification",
+        }
+        assert mock_db.execute.call_count == 7
+
+        sqls = [c[0][0] for c in mock_db.execute.call_args_list]
+        assert any("test_acct_test_strat_operation" in s for s in sqls)
+        assert any("test_acct_test_strat_deal" in s for s in sqls)
+        assert any("test_acct_test_strat_trade" in s for s in sqls)
+        assert any("test_acct_test_strat_risk_event" in s for s in sqls)
+        assert any("test_acct_test_strat_notification" in s for s in sqls)
+        assert any("test_acct_asset" in s for s in sqls)
+        assert any("test_acct_report" in s for s in sqls)
+
+        # 验证是 CREATE TABLE 语句
+        for sql in sqls:
+            assert "CREATE TABLE" in sql
+
+
+# ── 直接运行入口 ─────────────────────────────────────────────────────
+# python -m infrastructure.tests.test_schema_manager
+# 连接数据库并创建 7 张业务表，调整下方 account_id / strategy_id 切换目标
+
+if __name__ == "__main__":
+    from infrastructure.db.connection import Database, DatabaseConfig
+    from infrastructure.db.schema_manager import SchemaManager
+
+    ACCOUNT_ID = "ggt"
+    STRATEGY_ID = "marsi"
+
+    cfg = DatabaseConfig(
+        host="192.16.1.112",
+        port=3306,
+        user="root",
+        password="",
+        database="strategy_system",
+    )
+    db = Database(cfg)
+    db.connect()
+
+    sm = SchemaManager(db)
+    sm.create_all(ACCOUNT_ID, STRATEGY_ID)     # 5 张策略级表
+    sm.create_asset_table(ACCOUNT_ID)           # 1 张资产表
+    sm.create_report_table(ACCOUNT_ID)          # 1 张报表表
+
+    print(
+        f"✅ 已创建 7 张表: "
+        f"{ACCOUNT_ID}_{STRATEGY_ID}_"
+        f"{{operation,deal,trade,risk_event,notification}} + "
+        f"{ACCOUNT_ID}_{{asset,report}}"
+    )
+    db.close()

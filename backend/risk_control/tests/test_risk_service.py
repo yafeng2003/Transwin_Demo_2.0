@@ -82,3 +82,16 @@ async def test_list_events_filters_by_type():
 
     assert result.total == 1
     assert result.list[0]["eventType"] == "api_error"
+
+
+@pytest.mark.anyio
+async def test_resolve_event_updates_status():
+    service = RiskEventService()
+    response = await service.handle_risk_event(
+        RiskEvent(event_type="order_failed", account_id="a", strategy_id="s", event_level=2, event_message="A")
+    )
+
+    event = await service.resolve_event(response.risk_event_id)
+
+    assert event is not None
+    assert event["status"] == "resolved"

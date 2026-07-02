@@ -87,20 +87,23 @@ class ManualExecutionService:
         quantity: Decimal,
     ) -> dict:
         """组装手工订单请求，调用券商接口，并处理成交与风险上报。"""
-        request = OrderRequest(
-            symbol_code=symbol_code,
-            side=side,
-            order_type=OrderType.MARKET if order_type == 1 else OrderType.LIMIT,
-            quantity=quantity,
-            price=price,
-            market_id=market_id,
-            account_id=account_id,
-            remark="manual_order",
-            is_manual=True,
-        )
         await self._adapter.connect()
         try:
+            if side == OrderSide.SELL and quantity == Decimal("0"):
+                quantity = await self._resolve_full_sell_quantity(account_id, market_id, symbol_code)
+            request = OrderRequest(
+                symbol_code=symbol_code,
+                side=side,
+                order_type=OrderType.MARKET if order_type == 1 else OrderType.LIMIT,
+                quantity=quantity,
+                price=price,
+                market_id=market_id,
+                account_id=account_id,
+                remark="manual_order",
+                is_manual=True,
+            )
             result = await self._adapter.place_order(request)
+            self._attach_order_context(result, request)
             await self._repository.save_order_result(result)
             if result.success:
                 price = result.price or Decimal("0")
@@ -144,4 +147,21 @@ class ManualExecutionService:
             "status": result.status,
             "message": result.message or "委托已提交，等待成交确认。",
             "dealTime": result.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+
+    async def _resolve_full_sell_quantity(self, account_id: str, market_id: int, symbol_code: str) -> Decimal:
+        positions = await self._adapter.get_positions(account_id, market_id)
+        for position in positions:
+            if position.symbol_code == symbol_code and position.holding_quantity > Decimal("0"):
+                return position.holding_quantity
+        raise ValueError("no position available for full sell")
+
+    def _attach_order_context(self, result, request: OrderRequest) -> None:
+        result.raw = {
+            **(result.raw or {}),
+            "marketId": request.market_id,
+            "accountId": request.account_id,
+            "strategyId": request.strategy_id or "manual",
+            "symbolName": "",
+            "operationType": 1,
         }

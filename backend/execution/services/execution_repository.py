@@ -38,15 +38,15 @@ def build_deal_from_order(result: OrderResult, operation: Operation | None = Non
 
 
 class InMemoryExecutionRepository(OperationRepository, DealRepository, AssetRepository, TradeRepository):
-    """执行层的内存版 Operation / Deal / Asset / Trade 仓储实现。"""
+    """执行层的内存版 Operation / Deal / Asset 仓储实现。"""
 
     def __init__(self):
         self._operations: list[Operation] = []
         self._order_results: list[OrderResult] = []
         self._deals: list[Deal] = []
+        self._trades: list[Trade] = []
         self._assets: list[Asset] = []
         self._positions: list[ActivePosition] = []
-        self._trades: list[Trade] = []
 
     async def add_operation(self, operation: Operation) -> None:
         """添加一条待执行操作，供测试和本地流程使用。"""
@@ -154,6 +154,32 @@ class InMemoryExecutionRepository(OperationRepository, DealRepository, AssetRepo
             and start_time <= deal.deal_time <= end_time
         ]
 
+    async def insert_trade(self, account_id: str, strategy_id: str, trade: Trade) -> int:
+        """写入完整交易记录，并生成内存自增 ID。"""
+        trade_id = len(self._trades) + 1
+        trade.trade_id = trade_id
+        self._trades.append(trade)
+        return trade_id
+
+    async def get_trades_by_range(
+        self,
+        account_id: str,
+        strategy_id: str,
+        market_id: int,
+        start_time: datetime,
+        end_time: datetime,
+    ) -> list[Trade]:
+        """按时间范围查询完整交易记录。"""
+        return [
+            trade
+            for trade in self._trades
+            if trade.account_id == account_id
+            and trade.strategy_id == strategy_id
+            and trade.market_id == market_id
+            and trade.close_time is not None
+            and start_time <= trade.close_time <= end_time
+        ]
+
     async def save_asset(self, asset: Asset) -> None:
         """兼容旧调用方式，将资产快照保存到账户级资产仓储。"""
         await self.sync_asset(asset.account_id, asset)
@@ -183,13 +209,26 @@ class InMemoryExecutionRepository(OperationRepository, DealRepository, AssetRepo
 
     # ── 前端列表接口 ───────────────────────────────────────────────
 
-    async def list_orders(self, page: int = 1, size: int = 20) -> PagedResult[dict]:
+    async def list_orders(
+        self,
+        page: int = 1,
+        size: int = 20,
+        market_id: int | None = None,
+        account_id: str | None = None,
+        strategy_id: str | None = None,
+        status: int | None = None,
+        symbol: str | None = None,
+    ) -> PagedResult[dict]:
         """分页返回订单列表视图。"""
         rows = [
             {
                 "id": index,
+                "marketId": (result.raw or {}).get("marketId", 1),
+                "accountId": (result.raw or {}).get("accountId", ""),
+                "strategyId": (result.raw or {}).get("strategyId", "manual"),
                 "symbolCode": result.symbol_code,
-                "symbolName": "",
+                "symbolName": (result.raw or {}).get("symbolName", ""),
+                "operationType": (result.raw or {}).get("operationType", 1),
                 "direction": 1 if result.side == "BUY" else 2,
                 "orderType": 1 if result.order_type == "MARKET" else 2,
                 "price": float(result.price or 0),
@@ -200,12 +239,40 @@ class InMemoryExecutionRepository(OperationRepository, DealRepository, AssetRepo
             }
             for index, result in enumerate(self._order_results, 1)
         ]
+        rows = [
+            row
+            for row in rows
+            if (market_id is None or row["marketId"] == market_id)
+            and (account_id is None or row["accountId"] == account_id)
+            and (strategy_id is None or row["strategyId"] == strategy_id)
+            and (status is None or row["status"] == status)
+            and self._matches_symbol(row, symbol)
+        ]
         start = (page - 1) * size
         end = start + size
         return PagedResult(list=rows[start:end], total=len(rows), page=page, size=size)
 
-    async def list_deals(self, page: int = 1, size: int = 20) -> PagedResult[dict]:
+    async def list_deals(
+        self,
+        page: int = 1,
+        size: int = 20,
+        market_id: int | None = None,
+        account_id: str | None = None,
+        strategy_id: str | None = None,
+        start_time: datetime | None = None,
+        end_time: datetime | None = None,
+        symbol: str | None = None,
+    ) -> PagedResult[dict]:
         """分页返回成交列表视图。"""
+        deals = [
+            deal
+            for deal in self._deals
+            if (market_id is None or deal.market_id == market_id)
+            and (account_id is None or deal.account_id == account_id)
+            and (strategy_id is None or deal.strategy_id == strategy_id)
+            and (start_time is None or deal.deal_time >= start_time)
+            and (end_time is None or deal.deal_time <= end_time)
+        ]
         rows = [
             {
                 "id": deal.deal_id,
@@ -225,22 +292,33 @@ class InMemoryExecutionRepository(OperationRepository, DealRepository, AssetRepo
                 "isManual": deal.is_manual,
                 "dealTime": deal.deal_time.strftime("%Y-%m-%d %H:%M:%S"),
             }
-            for deal in self._deals
+            for deal in deals
         ]
+        rows = [row for row in rows if self._matches_symbol(row, symbol)]
         start = (page - 1) * size
         end = start + size
         return PagedResult(list=rows[start:end], total=len(rows), page=page, size=size)
 
-    async def get_deal_stats(self) -> dict:
+    async def get_deal_stats(
+        self,
+        start_time: datetime | None = None,
+        end_time: datetime | None = None,
+    ) -> dict:
         """汇总成交统计指标。"""
-        today_amount = sum(deal.deal_amount for deal in self._deals)
-        today_commission = sum(deal.commission for deal in self._deals)
+        deals = [
+            deal
+            for deal in self._deals
+            if (start_time is None or deal.deal_time >= start_time)
+            and (end_time is None or deal.deal_time <= end_time)
+        ]
+        today_amount = sum(deal.deal_amount for deal in deals)
+        today_commission = sum(deal.commission for deal in deals)
         return {
-            "todayCount": len(self._deals),
+            "todayCount": len(deals),
             "todayAmount": float(today_amount),
             "todayCommission": float(today_commission),
-            "weekCount": len(self._deals),
-            "monthCount": len(self._deals),
+            "weekCount": len(deals),
+            "monthCount": len(deals),
         }
 
     async def list_positions(self) -> list[dict]:
@@ -262,12 +340,25 @@ class InMemoryExecutionRepository(OperationRepository, DealRepository, AssetRepo
             for position in self._positions
         ]
 
-    async def get_account_assets(self) -> dict:
+    async def get_account_assets(
+        self,
+        account_id: str | None = None,
+        market_id: int | None = None,
+        days: int | None = None,
+    ) -> dict:
         """返回账户资产当前值与历史序列。"""
-        current = self._assets[-1] if self._assets else Asset(
+        assets = [
+            asset
+            for asset in self._assets
+            if (account_id is None or asset.account_id == account_id)
+            and (market_id is None or asset.market_id == market_id)
+        ]
+        if days is not None and days > 0:
+            assets = assets[-days:]
+        current = assets[-1] if assets else Asset(
             created_at=datetime.now(),
-            market_id=1,
-            account_id="acc_main",
+            market_id=market_id or 1,
+            account_id=account_id or "acc_main",
             total_asset=Decimal("0"),
             net_value=Decimal("1"),
             market_value=Decimal("0"),
@@ -288,27 +379,55 @@ class InMemoryExecutionRepository(OperationRepository, DealRepository, AssetRepo
                     "marketValue": float(asset.market_value),
                     "cashBalance": float(asset.cash_balance),
                 }
-                for asset in self._assets
+                for asset in assets
             ],
         }
 
-    # ── TradeRepository 接口 ─────────────────────────────────────
-
-    async def insert_trade(self, account_id: str, strategy_id: str, trade: Trade) -> int:
-        """保存完整交易记录。"""
-        trade_id = len(self._trades) + 1
-        self._trades.append(trade)
-        return trade_id
-
-    async def get_trades_by_range(
-        self, account_id: str, strategy_id: str, market_id: int,
-        start_time: datetime, end_time: datetime,
-    ) -> list[Trade]:
-        """按时间范围查询完整交易记录。"""
-        return [
-            t for t in self._trades
-            if t.account_id == account_id
-            and t.strategy_id == strategy_id
-            and t.market_id == market_id
-            and start_time <= t.open_time <= end_time
+    async def get_asset_summary(self, market_id: int, account_id: str) -> dict:
+        """返回 Dashboard 资产概览。"""
+        assets = [
+            asset
+            for asset in self._assets
+            if asset.market_id == market_id and asset.account_id == account_id
         ]
+        current = assets[-1] if assets else Asset(
+            created_at=datetime.now(),
+            market_id=market_id,
+            account_id=account_id,
+            total_asset=Decimal("0"),
+            net_value=Decimal("1"),
+            market_value=Decimal("0"),
+            cash_balance=Decimal("0"),
+        )
+        previous = assets[-2] if len(assets) >= 2 else None
+        first = assets[0] if assets else None
+
+        today_pnl = current.total_asset - previous.total_asset if previous else Decimal("0")
+        total_pnl = current.total_asset - first.total_asset if first else Decimal("0")
+        today_return_rate = (
+            today_pnl / previous.total_asset * Decimal("100")
+            if previous and previous.total_asset != Decimal("0")
+            else Decimal("0")
+        )
+        total_return_rate = (
+            total_pnl / first.total_asset * Decimal("100")
+            if first and first.total_asset != Decimal("0")
+            else Decimal("0")
+        )
+
+        return {
+            "totalAsset": float(current.total_asset),
+            "netValue": float(current.net_value),
+            "todayPnl": float(today_pnl),
+            "totalPnl": float(total_pnl),
+            "marketValue": float(current.market_value),
+            "cashBalance": float(current.cash_balance),
+            "todayReturnRate": float(today_return_rate),
+            "totalReturnRate": float(total_return_rate),
+        }
+
+    def _matches_symbol(self, row: dict, symbol: str | None) -> bool:
+        if not symbol:
+            return True
+        keyword = symbol.lower()
+        return keyword in str(row.get("symbolCode", "")).lower() or keyword in str(row.get("symbolName", "")).lower()

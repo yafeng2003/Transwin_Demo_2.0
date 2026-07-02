@@ -100,9 +100,8 @@ async def export_report(
     payload = await store.load_report_bytes(report_id)
     if payload is None:
         raise HTTPException(status_code=404, detail="报表文件缺失")
-    # 当前按报表已生成的格式返回文件；请求格式与已生成格式不一致时以已生成为准
-    # (按需重渲染为后续增强，待与前端确认)。excel->xlsx 仅用于匹配/命名。
-    _ = _FORMAT_ALIAS.get(export_format.lower(), metadata.file_format)
+    # 以数据库存储的格式为准；请求格式仅在不一致时做文件名映射。
+    fmt = _FORMAT_ALIAS.get(export_format.lower(), metadata.file_format)
     stored = metadata.file_format
     media_type = _MEDIA_TYPES.get(stored, "application/octet-stream")
     filename = f"{metadata.report_type}_{report_id}.{stored}"

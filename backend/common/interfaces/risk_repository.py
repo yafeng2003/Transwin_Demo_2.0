@@ -26,6 +26,17 @@ class RiskRepository(ABC):
         ...
 
     @abstractmethod
+    async def update_event_status(
+        self,
+        event_id: int,
+        status: str,
+        account_id: str | None = None,
+        strategy_id: str | None = None,
+    ) -> bool:
+        """更新风险事件处理状态。"""
+        ...
+
+    @abstractmethod
     async def list_events(
         self,
         event_type: str | None = None,
@@ -61,4 +72,12 @@ class RiskRepository(ABC):
         self, account_id: str | None = None, strategy_id: str | None = None
     ) -> dict:
         """汇总风控概览所需的事件数量指标。"""
+        ...
+
+    @abstractmethod
+    async def compute_trend(
+        self, account_id: str | None = None, strategy_id: str | None = None,
+        days: int = 30,
+    ) -> list[dict]:
+        """计算指定天数内的风险评分趋势 [{date, riskScore}]。"""
         ...

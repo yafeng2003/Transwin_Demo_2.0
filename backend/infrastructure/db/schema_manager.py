@@ -10,6 +10,7 @@ from infrastructure.db.naming import (
     SUFFIX_DEAL,
     SUFFIX_NOTIFICATION,
     SUFFIX_OPERATION,
+    SUFFIX_REPORT,
     SUFFIX_RISK_EVENT,
     SUFFIX_TRADE,
     asset_table_name,
@@ -135,6 +136,25 @@ CREATE TABLE IF NOT EXISTS {table} (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 """
 
+_CREATE_REPORT = """\
+CREATE TABLE IF NOT EXISTS {table} (
+    report_id      INT            NOT NULL AUTO_INCREMENT,
+    report_type    VARCHAR(20)    NOT NULL COMMENT 'daily / weekly / monthly',
+    market_id      INT            NOT NULL COMMENT '市场标识',
+    account_id     VARCHAR(64)    NOT NULL COMMENT '关联账户',
+    strategy_id    VARCHAR(64)    DEFAULT NULL COMMENT '关联策略，账户级为 NULL',
+    period_start   DATETIME       NOT NULL COMMENT '报表周期起',
+    period_end     DATETIME       NOT NULL COMMENT '报表周期止',
+    file_format    VARCHAR(10)    NOT NULL COMMENT 'pdf / xlsx / csv',
+    content        MEDIUMBLOB     NOT NULL COMMENT '渲染后的文件二进制',
+    file_size      INT            NOT NULL COMMENT 'content 字节数',
+    status         VARCHAR(20)    NOT NULL DEFAULT 'saved' COMMENT 'saved / failed',
+    generated_at   DATETIME       NOT NULL COMMENT '生成时间',
+    PRIMARY KEY (report_id),
+    KEY idx_lookup (market_id, account_id, strategy_id, period_start, period_end)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='报表文件元数据与内容'
+"""
+
 
 class SchemaManager:
     """Manage physical MySQL tables."""
@@ -169,11 +189,18 @@ class SchemaManager:
         table = table_name(account_id, SUFFIX_NOTIFICATION, strategy_id)
         return self._run_ddl(_CREATE_NOTIFICATION.format(table=table), table)
 
+    def create_report_table(self, account_id: str) -> bool:
+        """Create account-scoped report table (``{account}_report``)."""
+        table = table_name(account_id, SUFFIX_REPORT)
+        return self._run_ddl(_CREATE_REPORT.format(table=table), table)
+
     def create_all(self, account_id: str, strategy_id: str) -> dict[str, bool]:
-        """Create all tables for an account/strategy, plus account-level asset."""
-        result = self.create_tables(account_id, strategy_id)
-        result[SUFFIX_ASSET] = self.create_asset_table(account_id)
-        return result
+        """Create strategy-scoped tables (operation, deal, trade, risk_event, notification).
+
+        Account-level asset and report tables are NOT created here;
+        call :meth:`create_asset_table` and :meth:`create_report_table` separately.
+        """
+        return self.create_tables(account_id, strategy_id)
 
     def drop_tables(self, account_id: str, strategy_id: str) -> dict[str, bool]:
         """Drop account/strategy-scoped business tables."""
@@ -191,6 +218,10 @@ class SchemaManager:
 
     def drop_asset_table(self, account_id: str) -> bool:
         table = asset_table_name(account_id)
+        return self._run_ddl(f"DROP TABLE IF EXISTS {table}", table)
+
+    def drop_report_table(self, account_id: str) -> bool:
+        table = table_name(account_id, SUFFIX_REPORT)
         return self._run_ddl(f"DROP TABLE IF EXISTS {table}", table)
 
     def drop_risk_event_table(self, account_id: str, strategy_id: str) -> bool:

@@ -27,8 +27,11 @@ class ResolveRiskEventRequest(BaseModel):
 
 
 @router.get("/dashboard/risk-status", response_model=ApiResponse[dict])
-async def get_dashboard_risk_status():
-    overview = await risk_service.get_overview()
+async def get_dashboard_risk_status(
+    account_id: str = Query("acc_main"),
+    strategy_id: str = Query("manual"),
+):
+    overview = await risk_service.get_overview(account_id=account_id, strategy_id=strategy_id)
     return ApiResponse(
         data={
             "riskLevel": overview["riskLevel"],
@@ -45,8 +48,11 @@ async def get_dashboard_risk_status():
 
 
 @router.get("/risk/overview", response_model=ApiResponse[dict])
-async def get_risk_overview():
-    return ApiResponse(data=await risk_service.get_overview())
+async def get_risk_overview(
+    account_id: str = Query("acc_main"),
+    strategy_id: str = Query("manual"),
+):
+    return ApiResponse(data=await risk_service.get_overview(account_id=account_id, strategy_id=strategy_id))
 
 
 @router.get("/risk/trend", response_model=ApiResponse[list[dict]])
@@ -76,6 +82,14 @@ async def list_risk_events(
     return ApiResponse(data=result)
 
 
+@router.post("/risk/events/resolve", response_model=ApiResponse[dict])
+async def resolve_risk_event(request: ResolveRiskEventRequest):
+    event = await risk_service.resolve_event(request.id, request.account_id, request.strategy_id)
+    if event is None:
+        raise HTTPException(status_code=404, detail="risk event not found")
+    return ApiResponse(data=event)
+
+
 @router.get("/risk/events/{event_id}", response_model=ApiResponse[dict])
 async def get_risk_event(
     event_id: int,
@@ -86,16 +100,6 @@ async def get_risk_event(
     if event is None:
         raise HTTPException(status_code=404, detail="risk event not found")
     return ApiResponse(data=event)
-
-
-@router.post("/risk/events/resolve", response_model=ApiResponse[dict])
-async def resolve_risk_event(request: ResolveRiskEventRequest):
-    success = await risk_service.resolve_event(
-        request.id, request.account_id, request.strategy_id
-    )
-    if not success:
-        raise HTTPException(status_code=404, detail="risk event not found")
-    return ApiResponse(data={"id": request.id, "status": "resolved"})
 
 
 @router.get("/risk/account-metrics", response_model=ApiResponse[dict])

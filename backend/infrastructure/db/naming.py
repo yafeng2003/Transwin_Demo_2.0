@@ -8,6 +8,7 @@ SUFFIX_TRADE = "trade"
 SUFFIX_ASSET = "asset"
 SUFFIX_RISK_EVENT = "risk_event"
 SUFFIX_NOTIFICATION = "notification"
+SUFFIX_REPORT = "report"
 
 
 def table_name(

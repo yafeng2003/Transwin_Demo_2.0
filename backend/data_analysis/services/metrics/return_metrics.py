@@ -12,7 +12,7 @@ from common.models.analytics import (
 )
 from common.models.asset import Asset
 
-_PANDAS_FREQ = {"daily": "D", "weekly": "W", "monthly": "ME"}
+_PANDAS_FREQ = {"daily": "D", "weekly": "W", "monthly": "M"}
 
 
 def _sorted_assets(assets: list[Asset]) -> list[Asset]:
@@ -136,6 +136,29 @@ def analyze_returns(
         start_net_value=getattr(ordered[0], equity_field) if ordered else None,
         end_net_value=getattr(ordered[-1], equity_field) if ordered else None,
     )
+
+
+def information_ratio(
+    values: list[float],
+    periods_per_year: int,
+    annual_benchmark_return: float,
+) -> float:
+    """信息比率 = 年化超额收益 / 跟踪误差。
+
+    Information_ratio = (R_p - R_b) / TE,
+    其中 TE = std(R_p - R_b) * sqrt(ppy)，R_b 为基准年化收益率。
+    跟踪误差为 0 时返回 0。
+    """
+    returns = simple_returns(values)
+    if returns.size < 2:
+        return 0.0
+    benchmark_per_period = annual_benchmark_return / periods_per_year
+    excess = returns - benchmark_per_period
+    tracking_error = excess.std(ddof=1)
+    if tracking_error == 0.0:
+        return 0.0
+    annualized_excess = float(excess.mean() * periods_per_year)
+    return annualized_excess / (tracking_error * np.sqrt(periods_per_year))
 
 
 def calmar_ratio(annualized_ret: float, max_dd: float) -> float:

@@ -68,6 +68,14 @@ class OrderExecutor:
 
                 for request in requests:
                     result = await self._adapter.place_order(request)
+                    result.raw = {
+                        **(result.raw or {}),
+                        "marketId": operation.market_id,
+                        "accountId": operation.account_id,
+                        "strategyId": operation.strategy_id,
+                        "symbolName": operation.symbol_name,
+                        "operationType": operation.operation_type,
+                    }
                     await self._repository.save_order_result(result)
                     deal = build_deal_from_order(result, operation)
                     if deal is not None:

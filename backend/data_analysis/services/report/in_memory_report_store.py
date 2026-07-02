@@ -31,7 +31,11 @@ class InMemoryReportFileStore(ReportFileStore):
             generated_at=report.generated_at,
         )
         self._reports[report_id] = (metadata, report.content)
-        return ReportFileResult(report_id=report_id, file_uri=metadata.file_uri, status="saved")
+        return ReportFileResult(
+            report_id=report_id,
+            file_uri=metadata.file_uri,
+            status="saved",
+        )
 
     async def list_reports(
         self,

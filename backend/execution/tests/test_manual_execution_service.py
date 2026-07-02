@@ -9,6 +9,7 @@ from decimal import Decimal
 
 import pytest
 
+from common.models import ActivePosition
 from execution.adapters import MockBrokerAdapter
 from execution.services import InMemoryExecutionRepository, ManualExecutionService
 from infrastructure.db.repositories import DealRepository
@@ -46,3 +47,34 @@ async def test_manual_modify_order_requires_change():
 
     with pytest.raises(ValueError):
         await service.modify_order("1", "acc_main", None, None)
+
+
+@pytest.mark.anyio
+async def test_manual_sell_zero_quantity_sells_full_position():
+    adapter = MockBrokerAdapter()
+    adapter.positions = [
+        ActivePosition(
+            symbol_code="HK.00700",
+            symbol_name="腾讯控股",
+            open_price=Decimal("300"),
+            current_price=Decimal("310"),
+            holding_quantity=Decimal("200"),
+            holding_amount=Decimal("62000"),
+            open_time=datetime.now(),
+            unrealized_pnl=Decimal("2000"),
+        )
+    ]
+    service = ManualExecutionService(adapter)
+
+    result = await service.sell(1, "acc_main", "HK.00700", 1, None, Decimal("0"))
+
+    assert result["status"] == "submitted"
+    assert adapter.orders[0].quantity == Decimal("200")
+
+
+@pytest.mark.anyio
+async def test_manual_sell_zero_quantity_requires_position():
+    service = ManualExecutionService(MockBrokerAdapter())
+
+    with pytest.raises(ValueError):
+        await service.sell(1, "acc_main", "HK.00700", 1, None, Decimal("0"))

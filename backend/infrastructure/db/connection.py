@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import threading
 import time
 from dataclasses import dataclass, field
 from importlib import import_module
@@ -22,7 +23,7 @@ class DatabaseConfig:
     port: int = 3306
     user: str = "root"
     password: str = ""
-    database: str = ""
+    database: str = "strategy_system"
     charset: str = "utf8mb4"
     max_retries: int = 3         
     retry_interval: float = 3.0 
@@ -32,6 +33,7 @@ class Database:
     def __init__(self, config: DatabaseConfig):
         self.config = config
         self._connection: Optional[Any] = None
+        self._lock = threading.Lock()
 
     # ── 连接生命周期 ──────────────────────────────────────────────
 
@@ -93,22 +95,26 @@ class Database:
         return self._connection
 
     def fetch_all(self, sql: str, params: tuple = ()) -> list[dict]:
-        with self.cnx.cursor() as cursor:
-            cursor.execute(sql, params)
-            return cursor.fetchall()
+        with self._lock:
+            with self.cnx.cursor() as cursor:
+                cursor.execute(sql, params)
+                return cursor.fetchall()
 
     def fetch_one(self, sql: str, params: tuple = ()) -> Optional[dict]:
-        with self.cnx.cursor() as cursor:
-            cursor.execute(sql, params)
-            return cursor.fetchone()
+        with self._lock:
+            with self.cnx.cursor() as cursor:
+                cursor.execute(sql, params)
+                return cursor.fetchone()
 
     def execute(self, sql: str, params: tuple = ()) -> int:
-        with self.cnx.cursor() as cursor:
-            affected = cursor.execute(sql, params)
-        return affected
+        with self._lock:
+            with self.cnx.cursor() as cursor:
+                affected = cursor.execute(sql, params)
+            return affected
 
     def commit(self) -> None:
-        self.cnx.commit()
+        with self._lock:
+            self.cnx.commit()
 
     def __enter__(self) -> "Database":
         self.connect()

@@ -131,9 +131,16 @@ class InMemoryRiskRepository(RiskRepository):
         return {
             "totalEvents": total,
             "todayEvents": today_events,
+            "weekEvents": total,
             "unresolvedEvents": unresolved,
             "highRiskEvents": high,
         }
+
+    async def compute_trend(
+        self, account_id: str | None = None, strategy_id: str | None = None,
+        days: int = 30,
+    ) -> list[dict]:
+        return []
 
     def _to_event_row(self, event_id: int, event: RiskEvent) -> dict:
         return {

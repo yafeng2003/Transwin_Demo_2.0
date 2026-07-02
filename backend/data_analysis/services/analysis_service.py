@@ -174,6 +174,13 @@ class AnalysisService:
         operations = await self._operations(market_id, account_id, strategy_id, start_time, end_time)
         return trade_metrics.compute_slippage(deals, operations)
 
+    async def get_monthly_trade_stats(
+        self, market_id: int, account_id: str, strategy_id: str,
+        start_time: datetime, end_time: datetime,
+    ) -> list[tuple[str, int, float]]:
+        trades = await self._trades(market_id, account_id, strategy_id, start_time, end_time)
+        return trade_metrics.monthly_trade_stats(trades)
+
     # ---------------------- 持仓分析 ----------------------
 
     async def get_positions(

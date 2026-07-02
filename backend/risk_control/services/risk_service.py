@@ -62,6 +62,23 @@ class RiskEventService(RiskEventHandler):
         """查询单条风险事件。"""
         return await self._repository.get_event(event_id, account_id, strategy_id)
 
+    async def resolve_event(
+        self,
+        event_id: int,
+        account_id: str | None = None,
+        strategy_id: str | None = None,
+    ) -> dict | None:
+        """将风险事件标记为已处理，并返回更新后的事件。"""
+        updated = await self._repository.update_event_status(
+            event_id,
+            "resolved",
+            account_id,
+            strategy_id,
+        )
+        if not updated:
+            return None
+        return await self._repository.get_event(event_id, account_id, strategy_id)
+
     async def list_notifications(
         self,
         notification_type: str | None = None,
@@ -80,21 +97,23 @@ class RiskEventService(RiskEventHandler):
         )
 
     async def get_overview(
-        self, account_id: str | None = None, strategy_id: str | None = None
+        self, account_id: str | None = None, strategy_id: str | None = None,
+        trend_days: int = 30,
     ) -> dict:
         """计算风控概览指标，供看板 API 使用。"""
         summary = await self._repository.summarize_events(account_id, strategy_id)
         risk_score = min(100, summary["highRiskEvents"] * 25 + summary["unresolvedEvents"] * 10)
         risk_level = 3 if risk_score >= 70 else 2 if risk_score >= 35 else 1
+        trend = await self._repository.compute_trend(account_id, strategy_id, trend_days)
         return {
             "riskLevel": risk_level,
             "riskScore": risk_score,
             "todayEvents": summary["todayEvents"],
             "unresolvedEvents": summary["unresolvedEvents"],
-            "weekEvents": summary["totalEvents"],
+            "weekEvents": summary["weekEvents"],
             "maxDrawdown": 0,
             "dailyVar": 0,
-            "trend": [],
+            "trend": trend,
         }
 
     async def get_account_metrics(self) -> dict:
@@ -127,11 +146,3 @@ class RiskEventService(RiskEventHandler):
                 },
             ],
         }
-
-    async def resolve_event(
-        self, event_id: int, account_id: str | None = None, strategy_id: str | None = None
-    ) -> bool:
-        """将风险事件标记为已解决。"""
-        return await self._repository.update_event_status(
-            event_id, "resolved", account_id, strategy_id
-        )
