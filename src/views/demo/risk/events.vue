@@ -9,12 +9,14 @@
       <!-- 筛选 -->
       <el-form :inline="true" class="filter-form">
         <el-form-item label="事件级别">
-          <el-select v-model="filterLevel" placeholder="全部" clearable style="width:120px" @change="fetchData">
+          <el-select v-model="filterLevel" style="width:130px" @change="fetchData">
+            <el-option label="全部" value="all" />
             <el-option label="低" :value="1" /><el-option label="中" :value="2" /><el-option label="高" :value="3" />
           </el-select>
         </el-form-item>
         <el-form-item label="处理状态">
-          <el-select v-model="filterStatus" placeholder="全部" clearable style="width:120px" @change="fetchData">
+          <el-select v-model="filterStatus" style="width:130px" @change="fetchData">
+            <el-option label="全部" value="all" />
             <el-option label="待处理" value="pending" /><el-option label="处理中" value="processing" />
             <el-option label="已解决" value="resolved" /><el-option label="已忽略" value="ignored" />
           </el-select>
@@ -67,7 +69,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { getRiskEvents } from '/@/api/demo/index'
 import { useDemoStore } from '/@/store/modules/demo'
 
@@ -76,8 +78,8 @@ defineOptions({ name: 'DemoRiskEvents' })
 const demoStore = useDemoStore()
 const loading = ref(false)
 const list = ref<any[]>([])
-const filterLevel = ref(null as any)
-const filterStatus = ref('')
+const filterLevel = ref('all' as any)
+const filterStatus = ref('all')
 const page = ref(1)
 const size = ref(20)
 const total = ref(0)
@@ -88,9 +90,9 @@ const statusTag = (s: string) => ({ pending: 'danger', processing: 'warning', re
 async function fetchData() {
   loading.value = true
   try {
-    const params: any = { page: page.value, size: size.value, account_id: demoStore.accountId, strategy_id: demoStore.strategyId }
-    if (filterLevel.value) params.level = filterLevel.value
-    if (filterStatus.value) params.status = filterStatus.value
+    const params: any = { page: page.value, size: size.value, market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId }
+    if (filterLevel.value !== 'all') params.level = filterLevel.value
+    if (filterStatus.value !== 'all') params.status = filterStatus.value
     const res = await getRiskEvents(params)
     list.value = res.data.list
     total.value = res.data.total
@@ -98,6 +100,7 @@ async function fetchData() {
 }
 
 onMounted(fetchData)
+watch(() => demoStore.switchVersion, () => { page.value = 1; fetchData() })
 </script>
 
 <style scoped>

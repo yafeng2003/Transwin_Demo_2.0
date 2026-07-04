@@ -12,7 +12,7 @@ from common.models.analytics import (
 )
 from common.models.asset import Asset
 
-_PANDAS_FREQ = {"daily": "D", "weekly": "W", "monthly": "M"}
+_PANDAS_FREQ = {"daily": "D", "weekly": "W", "monthly": "ME"}
 
 
 def _sorted_assets(assets: list[Asset]) -> list[Asset]:

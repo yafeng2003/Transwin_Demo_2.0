@@ -74,7 +74,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { getDeals, getDealStats } from '/@/api/demo/index'
 import { useDemoStore } from '/@/store/modules/demo'
 
@@ -108,6 +108,7 @@ async function fetchData() {
 }
 
 onMounted(fetchData)
+watch(() => demoStore.switchVersion, () => { page.value = 1; fetchData() })
 </script>
 
 <style scoped>

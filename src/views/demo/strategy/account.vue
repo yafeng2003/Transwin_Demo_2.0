@@ -56,7 +56,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { getAccountAssets } from '/@/api/demo/index'
 import { useDemoStore } from '/@/store/modules/demo'
 
@@ -97,11 +97,14 @@ const navOption = computed(() => {
   }
 })
 
-onMounted(async () => {
+async function fetchData() {
   const res = await getAccountAssets({ market_id: demoStore.marketId, account_id: demoStore.accountId, days: 30 })
   history.value = res.data.history
   current.value = res.data.current
-})
+}
+
+onMounted(fetchData)
+watch(() => demoStore.switchVersion, fetchData)
 </script>
 
 <style scoped>

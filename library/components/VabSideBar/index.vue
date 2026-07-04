@@ -14,6 +14,10 @@
     >
       <vab-menu v-for="(item, index) in handleRoutes" :key="index + item.name" :item="item" />
     </el-menu>
+    <div class="sidebar-toggle" @click="settingsStore.toggleSideBar()">
+      <span v-if="!collapse">« 收起</span>
+      <span v-else>展开 »</span>
+    </div>
   </el-scrollbar>
 </template>
 
@@ -161,6 +165,28 @@ const handleRoutes = computed(() =>
 
     .el-menu-item {
       font-size: large;
+    }
+  }
+
+  .sidebar-toggle {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--el-menu-color-text);
+    font-size: 13px;
+    cursor: pointer;
+    border-top: 1px solid var(--el-border-color-light);
+    background: var(--el-menu-background-color);
+    user-select: none;
+
+    &:hover {
+      color: var(--el-color-primary);
+      background: var(--el-menu-hover-bg-color, rgba(0, 0, 0, 0.04));
     }
   }
 }

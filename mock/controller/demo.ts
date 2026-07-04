@@ -73,7 +73,12 @@ export default [
     method: 'get',
     response: () => ({
       code: 200,
-      data: accounts.map((a) => ({ id: a, name: a, label: a.replace('acc_', '').toUpperCase() })),
+      data: accounts.map((a) => ({
+        id: a,
+        name: a,
+        label: a.replace('acc_', '').toUpperCase(),
+        strategies: strategies,
+      })),
     }),
   },
 
@@ -117,18 +122,22 @@ export default [
   {
     url: '/api/demo/dashboard/risk-status',
     method: 'get',
-    response: () => ({
-      code: 200,
-      data: {
-        riskLevel: randomPick([1, 1, 2, 2, 2, 3]),
-        riskLevelLabel: ['低', '中', '高'],
-        todayEvents: randomInt(0, 5),
-        maxDrawdown: randomNum(-25, -1),
-        dailyLossLimit: randomNum(100000, 500000),
-        dailyLoss: randomNum(0, 80000),
-        consecutiveLosses: randomInt(0, 3),
-      },
-    }),
+    response: () => {
+      const level = randomPick([1, 1, 2, 2, 2, 3])
+      return {
+        code: 200,
+        data: {
+          riskLevel: level,
+          riskScore: level === 1 ? randomInt(10, 30) : level === 2 ? randomInt(31, 60) : randomInt(61, 90),
+          todayEvents: randomInt(0, 5),
+          unresolvedEvents: randomInt(0, 3),
+          maxDrawdown: randomNum(-25, -1),
+          dailyLossLimit: randomNum(100000, 500000),
+          dailyLoss: randomNum(0, 80000),
+          consecutiveLosses: randomInt(0, 3),
+        },
+      }
+    },
   },
   {
     url: '/api/demo/dashboard/recent-deals',
@@ -147,6 +156,7 @@ export default [
           dealAmount: randomNum(5000, 500000),
           dealTime: nowDateTime(),
           strategyId: randomPick(strategies),
+          accountId: randomPick(accounts),
         }
       })
       return { code: 200, data: list }

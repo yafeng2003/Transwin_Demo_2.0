@@ -179,12 +179,6 @@ export const asyncRoutes: VabRouteRecord[] = [
         component: () => import('/@/views/demo/analysis/strategy.vue'),
         meta: { title: '策略分析', icon: 'brain-line' },
       },
-      {
-        path: 'charts',
-        name: 'AnalysisCharts',
-        component: () => import('/@/views/demo/analysis/charts.vue'),
-        meta: { title: '可视化图表', icon: 'pie-chart-line' },
-      },
     ],
   },
 

@@ -358,7 +358,7 @@ class InMemoryExecutionRepository(OperationRepository, DealRepository, AssetRepo
         current = assets[-1] if assets else Asset(
             created_at=datetime.now(),
             market_id=market_id or 1,
-            account_id=account_id or "acc_main",
+            account_id=account_id or "ggt",
             total_asset=Decimal("0"),
             net_value=Decimal("1"),
             market_value=Decimal("0"),

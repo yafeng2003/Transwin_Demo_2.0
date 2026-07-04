@@ -70,7 +70,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { getCurrentPositions } from '/@/api/demo/index'
 import { useDemoStore } from '/@/store/modules/demo'
 
@@ -90,13 +90,16 @@ const totalMarketValue = computed(() => list.value.reduce((s, i) => s + (i.holdi
 const totalUnrealizedPnl = computed(() => list.value.reduce((s, i) => s + (i.unrealizedPnl || 0), 0))
 const uniqueStrategies = computed(() => new Set(list.value.map((i: any) => i.strategyId)).size)
 
-onMounted(async () => {
+async function fetchData() {
   loading.value = true
   try {
     const res = await getCurrentPositions({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
     list.value = res.data
   } finally { loading.value = false }
-})
+}
+
+onMounted(fetchData)
+watch(() => demoStore.switchVersion, fetchData)
 </script>
 
 <style scoped>

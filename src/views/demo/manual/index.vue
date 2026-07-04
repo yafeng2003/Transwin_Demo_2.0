@@ -13,16 +13,16 @@
           <el-form :model="buyForm" label-width="80px" size="default">
             <el-form-item label="市场">
               <el-select v-model="buyForm.marketId" style="width:100%">
-                <el-option label="沪深A股" :value="1" /><el-option label="港股" :value="2" />
+                <el-option label="港股" :value="2" /><el-option label="沪深A股" :value="1" />
               </el-select>
             </el-form-item>
             <el-form-item label="账户">
               <el-select v-model="buyForm.accountId" style="width:100%">
-                <el-option label="主账户" value="acc_main" /><el-option label="成长账户" value="acc_growth" />
+                <el-option label="GGT主账户" value="ggt" />
               </el-select>
             </el-form-item>
             <el-form-item label="股票代码">
-              <el-input v-model="buyForm.symbolCode" placeholder="如 000001" />
+              <el-input v-model="buyForm.symbolCode" placeholder="如 00005" />
             </el-form-item>
             <el-form-item label="价格类型">
               <el-radio-group v-model="buyForm.orderType">
@@ -50,16 +50,26 @@
           <el-form :model="sellForm" label-width="80px" size="default">
             <el-form-item label="市场">
               <el-select v-model="sellForm.marketId" style="width:100%">
-                <el-option label="沪深A股" :value="1" /><el-option label="港股" :value="2" />
+                <el-option label="港股" :value="2" /><el-option label="沪深A股" :value="1" />
               </el-select>
             </el-form-item>
             <el-form-item label="账户">
               <el-select v-model="sellForm.accountId" style="width:100%">
-                <el-option label="主账户" value="acc_main" /><el-option label="成长账户" value="acc_growth" />
+                <el-option label="GGT主账户" value="ggt" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="持仓选择">
+              <el-select v-model="sellForm.symbolCode" placeholder="从持仓中选择" style="width:100%" filterable @change="(val: string) => {
+                const pos = positions.find(p => p.symbolCode === val)
+                if (pos) onSellPositionSelect(pos)
+              }">
+                <el-option v-for="p in positions" :key="p.symbolCode"
+                  :label="`${p.symbolCode} | ${p.direction===1?'多':'空'} | ${p.holdingQuantity}股`"
+                  :value="p.symbolCode" />
               </el-select>
             </el-form-item>
             <el-form-item label="股票代码">
-              <el-input v-model="sellForm.symbolCode" placeholder="如 600519" />
+              <el-input v-model="sellForm.symbolCode" placeholder="或手动输入代码" />
             </el-form-item>
             <el-form-item label="价格类型">
               <el-radio-group v-model="sellForm.orderType">
@@ -85,8 +95,18 @@
         <el-card>
           <template #header><span class="section-title">改单</span></template>
           <el-form :model="modifyForm" label-width="80px" size="default">
+            <el-form-item label="选择订单">
+              <el-select v-model="modifyForm.orderId" placeholder="从活跃订单中选择" style="width:100%" filterable @change="(val: string) => {
+                const order = orders.find(o => o.id?.toString() === val)
+                if (order) onModifyOrderSelect(order)
+              }">
+                <el-option v-for="o in orders" :key="o.id"
+                  :label="`#${o.id} ${o.symbolCode} ${o.direction===1?'多':'空'} ${o.quantity}股`"
+                  :value="o.id?.toString()" />
+              </el-select>
+            </el-form-item>
             <el-form-item label="订单ID">
-              <el-input v-model="modifyForm.orderId" placeholder="输入要修改的订单ID" />
+              <el-input v-model="modifyForm.orderId" placeholder="或手动输入订单ID" />
             </el-form-item>
             <el-form-item label="新价格">
               <el-input v-model="modifyForm.price" placeholder="修改后的价格（留空不变）" />
@@ -121,17 +141,47 @@
 
 <script lang="ts" setup>
 import { ElMessage } from 'element-plus'
-import { reactive, ref } from 'vue'
-import { manualBuy, manualModifyOrder, manualSell } from '/@/api/demo/index'
+import { onMounted, reactive, ref } from 'vue'
+import { getCurrentPositions, getOrders, manualBuy, manualModifyOrder, manualSell } from '/@/api/demo/index'
+import { useDemoStore } from '/@/store/modules/demo'
 
 defineOptions({ name: 'DemoManual' })
 
+const demoStore = useDemoStore()
 const submitting = ref(false)
 const lastResult = ref<any>(null)
+const positions = ref<any[]>([])
+const orders = ref<any[]>([])
 
-const buyForm = reactive({ marketId: 1, accountId: 'acc_main', symbolCode: '', orderType: 1, price: '', quantity: '' })
-const sellForm = reactive({ marketId: 1, accountId: 'acc_main', symbolCode: '', orderType: 1, price: '', quantity: '' })
-const modifyForm = reactive({ orderId: '', price: '', quantity: '' })
+const buyForm = reactive({ marketId: 2, accountId: 'ggt', symbolCode: '', orderType: 1, price: '', quantity: '' })
+const sellForm = reactive({ marketId: 2, accountId: 'ggt', symbolCode: '', orderType: 1, price: '', quantity: '' })
+const modifyForm = reactive({ orderId: '', accountId: 'ggt', price: '', quantity: '' })
+
+async function loadPositions() {
+  try {
+    const res = await getCurrentPositions({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
+    positions.value = res.data || []
+  } catch { positions.value = [] }
+}
+
+async function loadOrders() {
+  try {
+    const res = await getOrders({ page: 1, size: 100, market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
+    orders.value = (res.data.list || []).filter((o: any) => o.status === 0 || o.status === 3)
+  } catch { orders.value = [] }
+}
+
+function onSellPositionSelect(pos: any) {
+  sellForm.symbolCode = pos.symbolCode
+  sellForm.quantity = pos.holdingQuantity?.toString() || ''
+}
+
+function onModifyOrderSelect(order: any) {
+  modifyForm.orderId = order.id?.toString() || ''
+  modifyForm.price = order.price?.toString() || ''
+  modifyForm.quantity = order.quantity?.toString() || ''
+  modifyForm.accountId = order.accountId || 'ggt'
+}
 
 async function submitBuy() {
   submitting.value = true
@@ -162,6 +212,10 @@ async function submitModify() {
   } catch { ElMessage.error('修改失败') }
   finally { submitting.value = false }
 }
+
+onMounted(async () => {
+  await Promise.all([loadPositions(), loadOrders()])
+})
 </script>
 
 <style scoped>

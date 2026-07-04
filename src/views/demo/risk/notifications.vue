@@ -9,9 +9,7 @@
       <el-tabs v-model="activeTab">
         <el-tab-pane label="全部" name="all" />
         <el-tab-pane label="风险报警" name="risk_alert" />
-        <el-tab-pane label="熔断通知" name="circuit_breaker" />
         <el-tab-pane label="异常通知" name="anomaly" />
-        <el-tab-pane label="策略暂停" name="strategy_pause" />
       </el-tabs>
 
       <el-table :data="filteredList" stripe v-loading="loading" max-height="500" @row-click="showDetail">
@@ -46,7 +44,7 @@
       <div class="pagination-wrap">
         <el-pagination
           v-model:current-page="page" v-model:page-size="size"
-          :total="total" :page-sizes="[10, 20, 50]" layout="total, sizes, prev, pager, next"
+          :total="displayTotal" :page-sizes="[10, 20, 50]" layout="total, sizes, prev, pager, next"
           @size-change="fetchData" @current-change="fetchData" />
       </div>
     </el-card>
@@ -55,7 +53,7 @@
 
 <script lang="ts" setup>
 import { CircleCheckFilled, WarningFilled } from '@element-plus/icons-vue'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { getRiskNotifications } from '/@/api/demo/index'
 import { useDemoStore } from '/@/store/modules/demo'
 
@@ -69,25 +67,28 @@ const page = ref(1)
 const size = ref(20)
 const total = ref(0)
 
-const filteredList = computed(() =>
-  activeTab.value === 'all' ? list.value : list.value.filter((i: any) => i.type === activeTab.value)
-)
+const filteredList = computed(() => {
+  const filtered = activeTab.value === 'all' ? list.value : list.value.filter((i: any) => i.type === activeTab.value)
+  return filtered
+})
+
+const displayTotal = computed(() => filteredList.value.length)
 
 function showDetail(row: any) {
-  // demo: just mark as read
   row.isRead = true
 }
 
 async function fetchData() {
   loading.value = true
   try {
-    const res = await getRiskNotifications({ page: page.value, size: size.value, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
+    const res = await getRiskNotifications({ page: page.value, size: size.value, market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
     list.value = res.data.list
     total.value = res.data.total
   } finally { loading.value = false }
 }
 
 onMounted(fetchData)
+watch(() => demoStore.switchVersion, () => { page.value = 1; fetchData() })
 </script>
 
 <style scoped>

@@ -54,13 +54,16 @@
                 </span>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="168">
+            <el-table-column label="操作" width="220">
               <template #default="{ row }">
                 <div class="report-actions">
                   <button type="button" @click="previewReport(row)">预览</button>
-                  <button type="button" @click="downloadReport(row, 'pdf')">PDF</button>
-                  <button type="button" @click="downloadReport(row, 'xlsx')">Excel</button>
-                  <button type="button" @click="downloadReport(row, 'csv')">CSV</button>
+                  <button type="button" v-for="f in row.availableFormats" :key="f.format"
+                    class="active"
+                    :title="'下载 ' + (f.format === 'xlsx' ? 'Excel' : f.format.toUpperCase())"
+                    @click="downloadReportById(f.reportId, f.format)">
+                    {{ f.format === 'xlsx' ? 'Excel' : f.format.toUpperCase() }}
+                  </button>
                 </div>
               </template>
             </el-table-column>
@@ -72,7 +75,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { getReports } from '/@/api/demo/index'
 import { useDemoStore } from '/@/store/modules/demo'
 
@@ -110,14 +113,21 @@ async function fetchData() {
 }
 
 function previewReport(row: any) {
-  window.open(`/api/v1/reports/${row.id}/export?format=pdf`, '_blank')
+  const firstFormat = row.availableFormats?.[0]
+  const id = firstFormat?.reportId ?? row.id
+  window.open(`/api/v1/reports/${id}/export?format=pdf`, '_blank')
 }
 
 function downloadReport(row: any, format: string) {
   window.open(`/api/v1/reports/${row.id}/export?format=${format}`, '_blank')
 }
 
+function downloadReportById(reportId: number, format: string) {
+  window.open(`/api/v1/reports/${reportId}/export?format=${format}`, '_blank')
+}
+
 onMounted(fetchData)
+watch(() => demoStore.switchVersion, fetchData)
 </script>
 
 <style scoped>
@@ -188,6 +198,7 @@ onMounted(fetchData)
   background: transparent;
   border: 0;
   cursor: pointer;
+  font-weight: 700;
 }
 
 </style>

@@ -55,7 +55,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { getAnalysisTrading } from '/@/api/demo/index'
 import { useDemoStore } from '/@/store/modules/demo'
 
@@ -64,10 +64,13 @@ const demoStore = useDemoStore()
 
 const data = ref<any>({})
 
-onMounted(async () => {
+async function fetchData() {
   const res = await getAnalysisTrading({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
   data.value = res.data
-})
+}
+
+onMounted(fetchData)
+watch(() => demoStore.switchVersion, fetchData)
 </script>
 
 <style scoped>

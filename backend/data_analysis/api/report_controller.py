@@ -46,8 +46,46 @@ def _to_list_item(meta: ReportMetadata) -> dict:
         "type": meta.report_type,
         "createdAt": created.strftime("%Y-%m-%d %H:%M:%S"),
         "fileSize": _format_size(meta.file_size),
+        "fileFormat": meta.file_format,
         "status": meta.status,
     }
+
+
+def _merge_reports(reports: list[ReportMetadata]) -> list[dict]:
+    """合并同日期同类型的多格式报表为单行，附 availableFormats。"""
+    from collections import defaultdict
+    groups: dict[tuple, list[ReportMetadata]] = defaultdict(list)
+    for r in reports:
+        key = (r.report_type, r.period_end, r.account_id, r.market_id)
+        groups[key].append(r)
+
+    merged = []
+    for items in groups.values():
+        items.sort(key=lambda x: x.report_id, reverse=True)
+        main = items[0]
+        created = main.generated_at or main.period_end
+        label = _TYPE_LABELS.get(main.report_type, main.report_type)
+        available_formats = []
+        seen_formats = set()
+        for r in items:
+            if r.file_format not in seen_formats:
+                seen_formats.add(r.file_format)
+                available_formats.append({
+                    "format": r.file_format,
+                    "reportId": r.report_id,
+                    "fileSize": _format_size(r.file_size),
+                })
+        merged.append({
+            "id": main.report_id,
+            "title": f"{label} - {main.period_end.strftime('%Y-%m-%d')}",
+            "type": main.report_type,
+            "createdAt": created.strftime("%Y-%m-%d %H:%M:%S"),
+            "fileSize": _format_size(main.file_size),
+            "fileFormat": main.file_format,
+            "availableFormats": available_formats,
+            "status": main.status,
+        })
+    return merged
 
 
 class GenerateReportRequest(BaseModel):
@@ -73,8 +111,8 @@ def get_report_store() -> ReportFileStore:
 async def list_reports(
     report_type: str = Query(alias="type", description="报表类型：daily/weekly/monthly"),
     report_date: date | None = Query(default=None, alias="date", description="日期，如 2026-06-01"),
-    market_id: int = Query(1, description="市场ID，选填"),
-    account_id: str = Query("", description="账户ID，选填"),
+    market_id: int = Query(2, description="市场ID，选填"),
+    account_id: str = Query("ggt", description="账户ID，选填"),
     store: ReportFileStore = Depends(get_report_store),
 ) -> ApiResponse[list[dict]]:
     start_time: datetime | None = None
@@ -85,7 +123,7 @@ async def list_reports(
     reports = await store.list_reports(
         market_id, account_id, report_type, None, start_time, end_time
     )
-    return ApiResponse(data=[_to_list_item(meta) for meta in reports])
+    return ApiResponse(data=_merge_reports(reports))
 
 
 @router.get("/{report_id}/export")
@@ -97,11 +135,27 @@ async def export_report(
     metadata = await store.get_report(report_id)
     if metadata is None:
         raise HTTPException(status_code=404, detail="报表不存在")
+
+    requested_fmt = _FORMAT_ALIAS.get(export_format.lower(), export_format.lower())
+
+    # 若请求格式与存储格式不一致，尝试查找同日期同类型的匹配格式报表
+    if requested_fmt != metadata.file_format:
+        same_date_reports = await store.list_reports(
+            metadata.market_id, metadata.account_id, metadata.report_type,
+            metadata.strategy_id, metadata.period_start, metadata.period_end,
+        )
+        for r in same_date_reports:
+            if r.file_format == requested_fmt and r.report_id != report_id:
+                alt_payload = await store.load_report_bytes(r.report_id)
+                if alt_payload is not None:
+                    metadata = r
+                    report_id = r.report_id
+                    break
+
     payload = await store.load_report_bytes(report_id)
     if payload is None:
         raise HTTPException(status_code=404, detail="报表文件缺失")
-    # 以数据库存储的格式为准；请求格式仅在不一致时做文件名映射。
-    fmt = _FORMAT_ALIAS.get(export_format.lower(), metadata.file_format)
+
     stored = metadata.file_format
     media_type = _MEDIA_TYPES.get(stored, "application/octet-stream")
     filename = f"{metadata.report_type}_{report_id}.{stored}"

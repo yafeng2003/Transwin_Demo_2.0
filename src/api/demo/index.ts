@@ -11,8 +11,8 @@ export function getHealth() {
 export function getMarkets() {
   return request({ url: '/api/v1/markets', method: 'get' })
 }
-export function getAccounts() {
-  return request({ url: '/api/v1/accounts', method: 'get' })
+export function getAccounts(params?: Record<string, any>) {
+  return request({ url: '/api/v1/accounts', method: 'get', params })
 }
 
 // ==================== Dashboard ====================

@@ -42,6 +42,7 @@ class RiskEventService(RiskEventHandler):
         status: str | None = None,
         page: int = 1,
         size: int = 20,
+        market_id: int | None = None,
         account_id: str | None = None,
         strategy_id: str | None = None,
     ) -> PagedResult[dict]:
@@ -52,6 +53,7 @@ class RiskEventService(RiskEventHandler):
             status=status,
             page=page,
             size=size,
+            market_id=market_id,
             account_id=account_id,
             strategy_id=strategy_id,
         )

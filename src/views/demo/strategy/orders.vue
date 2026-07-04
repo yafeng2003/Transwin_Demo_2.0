@@ -5,22 +5,12 @@
       <p class="page-desc">展示策略生成的委托订单，包括待执行、已成交、失败等各状态订单。</p>
     </div>
 
-    <!-- 筛选栏 -->
+    <!-- 筛选栏（市场/账户由顶部全局栏统一控制） -->
     <el-card class="filter-card">
       <el-form :inline="true" :model="filter" size="default">
-        <el-form-item label="市场">
-          <el-select v-model="filter.marketId" placeholder="全部" clearable style="width:120px">
-            <el-option label="沪深A股" :value="1" />
-            <el-option label="港股" :value="2" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="账户">
-          <el-select v-model="filter.accountId" placeholder="全部" clearable style="width:130px">
-            <el-option v-for="a in accounts" :key="a.id" :label="a.label" :value="a.id" />
-          </el-select>
-        </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="filter.status" placeholder="全部" clearable style="width:120px">
+          <el-select v-model="filter.status" style="width:130px">
+            <el-option label="全部" value="all" />
             <el-option label="待执行" :value="0" />
             <el-option label="已成交" :value="1" />
             <el-option label="失败" :value="2" />
@@ -86,7 +76,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import { getAccounts, getOrders } from '/@/api/demo/index'
 import { useDemoStore } from '/@/store/modules/demo'
 
@@ -99,7 +89,7 @@ const accounts = ref<any[]>([])
 const page = ref(1)
 const size = ref(20)
 const total = ref(0)
-const filter = reactive({ marketId: null as any, accountId: '', status: null as any, symbol: '' })
+const filter = reactive({ status: 'all' as any, symbol: '' })
 
 const statusType = (s: number) => {
   const map: Record<number, string> = { 0: 'info', 1: 'success', 2: 'danger', 3: 'warning', 4: '' }
@@ -109,11 +99,13 @@ const statusType = (s: number) => {
 async function fetchData() {
   loading.value = true
   try {
-    const params: any = { page: page.value, size: size.value }
-    if (filter.marketId != null) params.market_id = filter.marketId
-    if (filter.accountId) params.account_id = filter.accountId
-    params.strategy_id = demoStore.strategyId
-    if (filter.status != null) params.status = filter.status
+    const params: any = {
+      page: page.value, size: size.value,
+      market_id: demoStore.marketId,
+      account_id: demoStore.accountId,
+      strategy_id: demoStore.strategyId,
+    }
+    if (filter.status !== 'all') params.status = filter.status
     if (filter.symbol) params.symbol = filter.symbol
     const res = await getOrders(params)
     list.value = res.data.list
@@ -122,15 +114,17 @@ async function fetchData() {
 }
 
 function resetFilter() {
-  filter.marketId = null; filter.accountId = ''; filter.status = null; filter.symbol = ''
+  filter.status = 'all'; filter.symbol = ''
   page.value = 1
   fetchData()
 }
 
 onMounted(async () => {
-  const aRes = await getAccounts()
+  const aRes = await getAccounts({ market_id: demoStore.marketId })
   accounts.value = aRes.data
+  fetchData()
 })
+watch(() => demoStore.switchVersion, () => { page.value = 1; fetchData() })
 </script>
 
 <style scoped>

@@ -92,6 +92,11 @@ class Database:
     def cnx(self) -> Any:
         if self._connection is None or not self._connection.open:
             self.connect()
+        else:
+            try:
+                self._connection.ping(reconnect=True)
+            except Exception:
+                self.connect()
         return self._connection
 
     def fetch_all(self, sql: str, params: tuple = ()) -> list[dict]:

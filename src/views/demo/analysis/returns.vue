@@ -68,7 +68,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { getAnalysisReturns } from '/@/api/demo/index'
 import { useDemoStore } from '/@/store/modules/demo'
 
@@ -238,7 +238,7 @@ const returnsOption = computed(() => {
   }
 })
 
-onMounted(async () => {
+async function fetchData() {
   const res = await getAnalysisReturns({ market_id: demoStore.marketId, account_id: demoStore.accountId })
   const data = res.data
   dailyReturns.value = data.dailyReturns
@@ -247,7 +247,10 @@ onMounted(async () => {
   dailyReturnDist.value = data.dailyReturnDist
   annualReturns.value = data.annualReturns
   summary.value = data.summary
-})
+}
+
+onMounted(fetchData)
+watch(() => demoStore.switchVersion, fetchData)
 </script>
 
 <style scoped>

@@ -103,6 +103,7 @@ class RiskRepository(BaseRepository, RiskRepositoryInterface):
         status: str | None = None,
         page: int = 1,
         size: int = 20,
+        market_id: int | None = None,
         account_id: str | None = None,
         strategy_id: str | None = None,
     ) -> PagedResult[dict]:
@@ -114,6 +115,7 @@ class RiskRepository(BaseRepository, RiskRepositoryInterface):
             status,
             page,
             size,
+            market_id,
             account_id,
             strategy_id,
         )
@@ -125,6 +127,7 @@ class RiskRepository(BaseRepository, RiskRepositoryInterface):
         status: str | None,
         page: int,
         size: int,
+        market_id: int | None,
         account_id: str,
         strategy_id: str,
     ) -> PagedResult[dict]:
@@ -141,6 +144,9 @@ class RiskRepository(BaseRepository, RiskRepositoryInterface):
         if status is not None:
             where.append("status = %s")
             params.append(status)
+        if market_id is not None:
+            where.append("market_id = %s")
+            params.append(market_id)
 
         where_sql = f"WHERE {' AND '.join(where)}" if where else ""
         count_row = self._db.fetch_one(

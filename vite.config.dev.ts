@@ -55,6 +55,10 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         clientFiles: ['./index.html', './library/{components,layouts}/*', './src/{views,plugins}/*'],
       },
       https,
+      watch: {
+        // 排除 backend 虚拟环境，避免 ENOSPC 文件监听数超限
+        ignored: ['**/backend/.venv/**', '**/backend/venv/**'],
+      },
     },
     resolve: {
       alias: {

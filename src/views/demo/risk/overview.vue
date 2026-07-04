@@ -60,7 +60,7 @@
 
 <script lang="ts" setup>
 import { Bell, DataAnalysis, WarningFilled } from '@element-plus/icons-vue'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { getRiskOverview } from '/@/api/demo/index'
 import { useDemoStore } from '/@/store/modules/demo'
 
@@ -94,10 +94,13 @@ const trendOption = computed(() => ({
   }],
 }))
 
-onMounted(async () => {
-  const res = await getRiskOverview({ account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
+async function fetchData() {
+  const res = await getRiskOverview({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
   data.value = res.data
-})
+}
+
+onMounted(fetchData)
+watch(() => demoStore.switchVersion, fetchData)
 </script>
 
 <style scoped>

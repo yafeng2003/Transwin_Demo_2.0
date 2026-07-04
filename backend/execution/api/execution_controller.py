@@ -10,7 +10,7 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field, model_validator
 
 from common.models import ApiResponse, PagedResult
-from common.utils import app_logger
+import common.utils
 from execution.adapters.mock_adapter import MockBrokerAdapter
 from execution.services.execution_repository import InMemoryExecutionRepository
 from execution.services.manual_execution_service import ManualExecutionService
@@ -52,7 +52,7 @@ class ModifyManualOrderRequest(BaseModel):
     """手工改单请求体。"""
 
     orderId: str
-    accountId: str = "acc_main"
+    accountId: str = "ggt"
     price: Decimal | None = None
     quantity: Decimal | None = None
 
@@ -66,9 +66,9 @@ class ModifyManualOrderRequest(BaseModel):
 
 @router.get("/orders", response_model=ApiResponse[PagedResult[dict]])
 async def list_orders(
-    market_id: int = Query(1),
-    account_id: str = Query("acc_main"),
-    strategy_id: str = Query("manual"),
+    market_id: int = Query(2),
+    account_id: str = Query("ggt"),
+    strategy_id: str = Query("marsi"),
     status: int | None = Query(None),
     symbol: str | None = Query(None),
     page: int = Query(1, ge=1),
@@ -89,9 +89,9 @@ async def list_orders(
 
 @router.get("/deals", response_model=ApiResponse[PagedResult[dict]])
 async def list_deals(
-    market_id: int = Query(1),
-    account_id: str = Query("acc_main"),
-    strategy_id: str = Query("manual"),
+    market_id: int = Query(2),
+    account_id: str = Query("ggt"),
+    strategy_id: str = Query("marsi"),
     date_range: str | None = Query(None),
     symbol: str | None = Query(None),
     page: int = Query(1, ge=1),
@@ -114,8 +114,8 @@ async def list_deals(
 
 @router.get("/deals/stats", response_model=ApiResponse[dict])
 async def get_deal_stats(
-    account_id: str = Query("acc_main"),
-    strategy_id: str = Query("manual"),
+    account_id: str = Query("ggt"),
+    strategy_id: str = Query("marsi"),
     date_range: str | None = Query(None),
 ):
     start_time, end_time = _parse_date_range(date_range)
@@ -126,9 +126,9 @@ async def get_deal_stats(
 
 @router.get("/positions/current", response_model=ApiResponse[list[dict]])
 async def list_current_positions(
-    market_id: int = Query(1),
-    account_id: str = Query("acc_main"),
-    strategy_id: str = Query("manual"),
+    market_id: int = Query(2),
+    account_id: str = Query("ggt"),
+    strategy_id: str = Query("marsi"),
 ):
     return ApiResponse(
         data=await position_service.list_strategy_positions(
@@ -141,8 +141,8 @@ async def list_current_positions(
 
 @router.get("/account/positions", response_model=ApiResponse[list[dict]])
 async def list_account_positions(
-    market_id: int = Query(1),
-    account_id: str = Query("acc_main"),
+    market_id: int = Query(2),
+    account_id: str = Query("ggt"),
 ):
     return ApiResponse(data=await position_service.list_account_positions(account_id, market_id))
 
@@ -163,17 +163,17 @@ async def get_account_assets(
 
 @router.get("/dashboard/asset-summary", response_model=ApiResponse[dict])
 async def get_asset_summary(
-    market_id: int = Query(1),
-    account_id: str = Query("acc_main"),
+    market_id: int = Query(2),
+    account_id: str = Query("ggt"),
 ):
     return ApiResponse(data=await execution_repository.get_asset_summary(market_id, account_id))
 
 
 @router.get("/dashboard/position-overview", response_model=ApiResponse[dict])
 async def get_position_overview(
-    market_id: int = Query(1),
-    account_id: str = Query("acc_main"),
-    strategy_id: str = Query("manual"),
+    market_id: int = Query(2),
+    account_id: str = Query("ggt"),
+    strategy_id: str = Query("marsi"),
     limit: int = Query(5, ge=1, le=100),
 ):
     raw = await position_service.list_strategy_positions(market_id, account_id, strategy_id)
@@ -233,7 +233,7 @@ async def manual_buy(request: ManualOrderRequest):
         request.price,
         request.quantity,
     )
-    app_logger.log_trading("order", request.symbolCode, "", f"手动买入: {request.symbolCode} x{request.quantity}")
+    common.utils.app_logger.log_trading("order", request.symbolCode, "", f"手动买入: {request.symbolCode} x{request.quantity}")
     return ApiResponse(data=result)
 
 
@@ -268,7 +268,7 @@ async def list_trading_logs(
     size: int = Query(20, ge=1, le=100),
     type: str | None = Query(None, description="类型：order / cancel / deal"),
 ):
-    return ApiResponse(data=app_logger.list_trading_logs(log_type=type, page=page, size=size))
+    return ApiResponse(data=common.utils.app_logger.list_trading_logs(log_type=type, page=page, size=size))
 
 
 @router.get("/logs/system", response_model=ApiResponse[PagedResult[dict]])
@@ -281,7 +281,7 @@ async def list_system_logs(
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
 ):
-    return ApiResponse(data=app_logger.list_system_logs(level=level, module=module, page=page, size=size))
+    return ApiResponse(data=common.utils.app_logger.list_system_logs(level=level, module=module, page=page, size=size))
 
 
 def _parse_date_range(date_range: str | None) -> tuple[datetime | None, datetime | None]:

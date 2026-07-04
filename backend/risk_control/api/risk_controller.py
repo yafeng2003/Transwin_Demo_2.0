@@ -28,8 +28,8 @@ class ResolveRiskEventRequest(BaseModel):
 
 @router.get("/dashboard/risk-status", response_model=ApiResponse[dict])
 async def get_dashboard_risk_status(
-    account_id: str = Query("acc_main"),
-    strategy_id: str = Query("manual"),
+    account_id: str = Query("ggt"),
+    strategy_id: str = Query("marsi"),
 ):
     overview = await risk_service.get_overview(account_id=account_id, strategy_id=strategy_id)
     return ApiResponse(
@@ -49,8 +49,8 @@ async def get_dashboard_risk_status(
 
 @router.get("/risk/overview", response_model=ApiResponse[dict])
 async def get_risk_overview(
-    account_id: str = Query("acc_main"),
-    strategy_id: str = Query("manual"),
+    account_id: str = Query("ggt"),
+    strategy_id: str = Query("marsi"),
 ):
     return ApiResponse(data=await risk_service.get_overview(account_id=account_id, strategy_id=strategy_id))
 
@@ -62,6 +62,7 @@ async def get_risk_trend(days: int = Query(30, ge=1, le=365)):
 
 @router.get("/risk/events", response_model=ApiResponse[PagedResult[dict]])
 async def list_risk_events(
+    market_id: int = Query(2),
     account_id: str | None = Query(None),
     strategy_id: str | None = Query(None),
     type: str | None = Query(None),
@@ -76,6 +77,7 @@ async def list_risk_events(
         status=status,
         page=page,
         size=size,
+        market_id=market_id,
         account_id=account_id,
         strategy_id=strategy_id,
     )

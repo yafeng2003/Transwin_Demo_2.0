@@ -57,7 +57,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { getAnalysisStrategy } from '/@/api/demo/index'
 import { useDemoStore } from '/@/store/modules/demo'
 
@@ -74,13 +74,16 @@ function corrColor(v: number) {
   return 'rgba(39,174,96,0.5)'
 }
 
-onMounted(async () => {
+async function fetchData() {
   loading.value = true
   try {
     const res = await getAnalysisStrategy({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_ids: demoStore.strategyId })
     list.value = res.data
   } finally { loading.value = false }
-})
+}
+
+onMounted(fetchData)
+watch(() => demoStore.switchVersion, fetchData)
 </script>
 
 <style scoped>

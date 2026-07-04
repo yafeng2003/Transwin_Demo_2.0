@@ -6,11 +6,9 @@
     </div>
 
     <el-card>
-      <el-tabs v-model="activeTab">
-        <el-tab-pane label="下单失败" name="order_failed" />
-        <el-tab-pane label="撤单失败" name="cancel_failed" />
-        <el-tab-pane label="API异常" name="api_error" />
-        <el-tab-pane label="超时异常" name="timeout" />
+      <el-tabs v-model="activeTab" @tab-change="onTabChange">
+        <el-tab-pane label="全部事件" name="all" />
+        <el-tab-pane v-for="t in eventTypes" :key="t.value" :label="t.label" :name="t.value" />
       </el-tabs>
 
       <el-table :data="filteredList" stripe v-loading="loading" max-height="500">
@@ -56,7 +54,7 @@
       <div class="pagination-wrap">
         <el-pagination
           v-model:current-page="page" v-model:page-size="size"
-          :total="total" :page-sizes="[10, 20, 50]" layout="total, sizes, prev, pager, next"
+          :total="displayTotal" :page-sizes="[10, 20, 50]" layout="total, sizes, prev, pager, next"
           @size-change="fetchData" @current-change="fetchData" />
       </div>
     </el-card>
@@ -65,7 +63,7 @@
 
 <script lang="ts" setup>
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { getRiskEvents, resolveRiskEvent } from '/@/api/demo/index'
 import { useDemoStore } from '/@/store/modules/demo'
 
@@ -74,12 +72,36 @@ defineOptions({ name: 'DemoRiskExecution' })
 const demoStore = useDemoStore()
 const loading = ref(false)
 const list = ref<any[]>([])
-const activeTab = ref('order_failed')
+const activeTab = ref('all')
 const page = ref(1)
 const size = ref(20)
 const total = ref(0)
 
-const filteredList = computed(() => list.value.filter((i: any) => i.eventType === activeTab.value))
+const EVENT_LABELS: Record<string, string> = {
+  api_error: 'API异常', api_timeout: 'API超时', timeout: '超时异常',
+  order_delay: '下单延迟', modify_failed: '改单失败',
+  slippage_warning: '滑点预警', daily_loss: '日亏损超限',
+  drawdown: '回撤超限', consecutive_loss: '连续亏损',
+}
+
+const eventTypes = computed(() => {
+  const seen = new Set<string>()
+  return list.value
+    .map(i => i.eventType)
+    .filter(t => { if (seen.has(t)) return false; seen.add(t); return true })
+    .map(t => ({ value: t, label: EVENT_LABELS[t] || t }))
+})
+
+const filteredList = computed(() => {
+  const filtered = activeTab.value === 'all'
+    ? list.value
+    : list.value.filter((i: any) => i.eventType === activeTab.value)
+  return filtered
+})
+
+const displayTotal = computed(() => filteredList.value.length)
+
+function onTabChange() { /* tab 切换时 filteredList 自动重新计算 */ }
 
 const statusLabel = (s: string) => ({ pending: '待处理', processing: '处理中', resolved: '已处理', ignored: '已忽略' }[s] || s)
 const statusTagType = (s: string) => ({ pending: 'danger', processing: 'warning', resolved: 'success', ignored: 'info' }[s] || '')
@@ -107,13 +129,14 @@ async function handleResolve(row: any) {
 async function fetchData() {
   loading.value = true
   try {
-    const res = await getRiskEvents({ page: page.value, size: 100, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
+    const res = await getRiskEvents({ page: page.value, size: 100, market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
     list.value = res.data.list
     total.value = res.data.total
   } finally { loading.value = false }
 }
 
 onMounted(fetchData)
+watch(() => demoStore.switchVersion, () => { page.value = 1; fetchData() })
 </script>
 
 <style scoped>

@@ -21,7 +21,7 @@ def get_frontend_analysis_service() -> AnalysisService:
 @router.get("/returns", response_model=ApiResponse[dict])
 async def get_analysis_returns(
     market_id: int = Query(1),
-    account_id: str = Query("acc_main"),
+    account_id: str = Query("ggt"),
     period: str = Query("1m"),
     service: AnalysisService = Depends(get_frontend_analysis_service),
 ):
@@ -98,7 +98,7 @@ async def get_analysis_returns(
 @router.get("/risk", response_model=ApiResponse[dict])
 async def get_analysis_risk(
     market_id: int = Query(1),
-    account_id: str = Query("acc_main"),
+    account_id: str = Query("ggt"),
     period: str = Query("1m"),
     service: AnalysisService = Depends(get_frontend_analysis_service),
 ):
@@ -129,9 +129,9 @@ async def get_analysis_risk(
 @router.get("/trading", response_model=ApiResponse[dict])
 async def get_analysis_trading(
     market_id: int = Query(1),
-    account_id: str = Query("acc_main"),
+    account_id: str = Query("ggt"),
     period: str = Query("1y"),
-    strategy_id: str = Query("manual"),
+    strategy_id: str = Query("marsi"),
     service: AnalysisService = Depends(get_frontend_analysis_service),
 ):
     start_time, end_time = _period_window(period)
@@ -172,7 +172,7 @@ async def get_analysis_trading(
 @router.get("/strategy", response_model=ApiResponse[list[dict]])
 async def get_analysis_strategy(
     market_id: int = Query(1),
-    account_id: str = Query("acc_main"),
+    account_id: str = Query("ggt"),
     strategy_ids: list[str] | None = Query(None),
     service: AnalysisService = Depends(get_frontend_analysis_service),
 ):
