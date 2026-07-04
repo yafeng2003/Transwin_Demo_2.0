@@ -104,6 +104,10 @@ async function fetchData() {
     list.value = dRes.data.list
     total.value = dRes.data.total
     stats.value = sRes.data
+  } catch {
+    list.value = []
+    total.value = 0
+    stats.value = {}
   } finally { loading.value = false }
 }
 

@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, Query
 
 from common.models import ApiResponse
 from data_analysis.services.analysis_service import AnalysisService
-from data_analysis.services.metrics import risk_metrics
+from data_analysis.services.metrics import risk_metrics, trade_metrics
 from data_analysis.services.metrics.return_metrics import calmar_ratio, information_ratio
 
 router = APIRouter(prefix="/api/v1/analysis", tags=["数据分析"])
@@ -22,6 +22,7 @@ def get_frontend_analysis_service() -> AnalysisService:
 async def get_analysis_returns(
     market_id: int = Query(1),
     account_id: str = Query("ggt"),
+    strategy_id: str | None = Query(None),
     period: str = Query("1m"),
     service: AnalysisService = Depends(get_frontend_analysis_service),
 ):
@@ -32,6 +33,15 @@ async def get_analysis_returns(
     drawdown = await service.get_drawdown_series(market_id, account_id, start_time, end_time)
     monthly = await service.get_period_returns(market_id, account_id, "monthly", start_time, end_time)
     distribution = await service.get_return_distribution(market_id, account_id, start_time, end_time, bins=10)
+
+    # 如果指定了策略，从交易数据计算胜率；否则取账户全部策略
+    effective_strategy = strategy_id or ""
+    try:
+        trades = await service._trades(market_id, account_id, effective_strategy, start_time, end_time)
+        trade_metrics_result = trade_metrics.analyze_trades(trades) if trades else None
+        win_rate = (trade_metrics_result.win_rate * 100) if trade_metrics_result else 0
+    except Exception:
+        win_rate = 0
 
     daily_returns = []
     previous_net_value: Decimal | None = None
@@ -75,7 +85,7 @@ async def get_analysis_returns(
                 "sharpeRatio": summary.sharpe_ratio,
                 "maxDrawdown": (-risk_summary.max_drawdown * 100) + 0.0,
                 "calmarRatio": calmar_ratio(summary.annualized_return, risk_summary.max_drawdown),
-                "winRate": 0,
+                "winRate": win_rate,
                 "volatility": risk_summary.annualized_volatility * 100,
                 "sortinoRatio": _sortino_ratio(
                     summary.annualized_return,
@@ -99,6 +109,7 @@ async def get_analysis_returns(
 async def get_analysis_risk(
     market_id: int = Query(1),
     account_id: str = Query("ggt"),
+    strategy_id: str | None = Query(None),
     period: str = Query("1m"),
     service: AnalysisService = Depends(get_frontend_analysis_service),
 ):
@@ -119,7 +130,7 @@ async def get_analysis_risk(
             ],
             "riskExposure": {
                 "sectors": [],
-                "strategies": [],
+                "strategies": [strategy_id] if strategy_id else [],
                 "heatmapData": [],
             },
         }

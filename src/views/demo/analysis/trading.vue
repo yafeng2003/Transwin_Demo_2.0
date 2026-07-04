@@ -65,8 +65,10 @@ const demoStore = useDemoStore()
 const data = ref<any>({})
 
 async function fetchData() {
-  const res = await getAnalysisTrading({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
-  data.value = res.data
+  try {
+    const res = await getAnalysisTrading({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
+    data.value = res.data
+  } catch { /* ignore */ }
 }
 
 onMounted(fetchData)

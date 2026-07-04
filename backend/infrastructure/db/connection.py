@@ -102,20 +102,45 @@ class Database:
     def fetch_all(self, sql: str, params: tuple = ()) -> list[dict]:
         with self._lock:
             with self.cnx.cursor() as cursor:
-                cursor.execute(sql, params)
-                return cursor.fetchall()
+                try:
+                    cursor.execute(sql, params)
+                    return cursor.fetchall()
+                except Exception as e:
+                    if self._is_missing_table_error(e):
+                        return []
+                    raise
 
     def fetch_one(self, sql: str, params: tuple = ()) -> Optional[dict]:
         with self._lock:
             with self.cnx.cursor() as cursor:
-                cursor.execute(sql, params)
-                return cursor.fetchone()
+                try:
+                    cursor.execute(sql, params)
+                    return cursor.fetchone()
+                except Exception as e:
+                    if self._is_missing_table_error(e):
+                        return None
+                    raise
 
     def execute(self, sql: str, params: tuple = ()) -> int:
         with self._lock:
             with self.cnx.cursor() as cursor:
-                affected = cursor.execute(sql, params)
-            return affected
+                try:
+                    cursor.execute(sql, params)
+                    return cursor.rowcount
+                except Exception as e:
+                    if self._is_missing_table_error(e):
+                        return 0
+                    raise
+
+    def _is_missing_table_error(self, exc: Exception) -> bool:
+        """检查是否为表/列不存在的错误（MySQL 1146/1054 等），应返回空结果而非崩溃。"""
+        code = getattr(exc, 'args', None)
+        if code and len(code) > 0:
+            err_code = code[0] if isinstance(code[0], int) else 0
+            if err_code in (1146, 1054, 1142):  # 表不存在, 列不存在, 权限不足
+                return True
+        msg = str(exc).lower()
+        return any(kw in msg for kw in ["doesn't exist", "does not exist", "no such table", "unknown column"])
 
     def commit(self) -> None:
         with self._lock:

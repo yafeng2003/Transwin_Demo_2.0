@@ -98,9 +98,11 @@ const navOption = computed(() => {
 })
 
 async function fetchData() {
-  const res = await getAccountAssets({ market_id: demoStore.marketId, account_id: demoStore.accountId, days: 30 })
-  history.value = res.data.history
-  current.value = res.data.current
+  try {
+    const res = await getAccountAssets({ market_id: demoStore.marketId, account_id: demoStore.accountId, days: 30 })
+    history.value = res.data.history
+    current.value = res.data.current
+  } catch { /* ignore */ }
 }
 
 onMounted(fetchData)

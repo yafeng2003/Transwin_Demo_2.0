@@ -95,8 +95,10 @@ const trendOption = computed(() => ({
 }))
 
 async function fetchData() {
-  const res = await getRiskOverview({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
-  data.value = res.data
+  try {
+    const res = await getRiskOverview({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
+    data.value = res.data
+  } catch { /* ignore */ }
 }
 
 onMounted(fetchData)

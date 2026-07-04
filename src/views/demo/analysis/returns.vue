@@ -23,6 +23,9 @@
         <el-card shadow="hover"><div class="stat-label">Calmar</div><div class="stat-value">{{ summary.calmarRatio?.toFixed(2) }}</div></el-card>
       </el-col>
       <el-col :span="3">
+        <el-card shadow="hover"><div class="stat-label">胜率</div><div class="stat-value" :class="summary.winRate >= 50 ? 'up' : 'down'">{{ summary.winRate?.toFixed(1) }}%</div></el-card>
+      </el-col>
+      <el-col :span="3">
         <el-card shadow="hover"><div class="stat-label">年化波动</div><div class="stat-value">{{ summary.volatility?.toFixed(2) }}%</div></el-card>
       </el-col>
       <el-col :span="3">
@@ -239,14 +242,16 @@ const returnsOption = computed(() => {
 })
 
 async function fetchData() {
-  const res = await getAnalysisReturns({ market_id: demoStore.marketId, account_id: demoStore.accountId })
-  const data = res.data
-  dailyReturns.value = data.dailyReturns
-  navSeries.value = data.navSeries
-  drawdownSeries.value = data.drawdownSeries
-  dailyReturnDist.value = data.dailyReturnDist
-  annualReturns.value = data.annualReturns
-  summary.value = data.summary
+  try {
+    const res = await getAnalysisReturns({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId, period: '1y' })
+    const data = res.data
+    dailyReturns.value = data.dailyReturns
+    navSeries.value = data.navSeries
+    drawdownSeries.value = data.drawdownSeries
+    dailyReturnDist.value = data.dailyReturnDist
+    annualReturns.value = data.annualReturns
+    summary.value = data.summary
+  } catch { /* ignore */ }
 }
 
 onMounted(fetchData)

@@ -84,6 +84,9 @@ async function fetchData() {
     const res = await getRiskNotifications({ page: page.value, size: size.value, market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
     list.value = res.data.list
     total.value = res.data.total
+  } catch {
+    list.value = []
+    total.value = 0
   } finally { loading.value = false }
 }
 

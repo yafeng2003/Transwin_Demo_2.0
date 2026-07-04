@@ -9,8 +9,8 @@ export const ACCOUNT_OVERVIEW = '_account_overview'
 
 export const useDemoStore = defineStore('demo', () => {
   const marketId = ref(2)
-  const accountId = ref(MARKET_OVERVIEW)
-  const strategyId = ref('')
+  const accountId = ref('ggt')
+  const strategyId = ref('marsi')
   const markets = ref<any[]>([])
   const accounts = ref<any[]>([])
   /** 市场/账户/策略切换完成后的版本号，页面 watch 此值来避免竞态 */
@@ -85,9 +85,13 @@ export const useDemoStore = defineStore('demo', () => {
     try {
       const aRes = await getAccounts({ market_id: mkt })
       accounts.value = aRes.data
-      // 切换市场后默认进入"市场总览"，策略下拉框禁用
-      accountId.value = MARKET_OVERVIEW
-      strategyId.value = ''
+      // 默认选第一个真实账户和第一个真实策略
+      const first = accounts.value[0]
+      if (first) {
+        accountId.value = first.id
+        const strats = first.strategies || []
+        strategyId.value = strats.length > 0 ? strats[0] : ''
+      }
     } catch { /* ignore */ }
     _bumpVersion()
   }
@@ -95,11 +99,13 @@ export const useDemoStore = defineStore('demo', () => {
   function switchAccount(accId: string) {
     accountId.value = accId
     if (accId === MARKET_OVERVIEW) {
-      // 回到市场总览：策略下拉框禁用
+      // 市场总览：策略下拉框禁用
       strategyId.value = ''
     } else {
-      // 切换到具体账户后默认进入"账户总览"
-      strategyId.value = ACCOUNT_OVERVIEW
+      // 切到真实账户：默认选第一个策略
+      const acc = accounts.value.find((a: any) => a.id === accId)
+      const strats = acc?.strategies || []
+      strategyId.value = strats.length > 0 ? strats[0] : ''
     }
     _bumpVersion()
   }

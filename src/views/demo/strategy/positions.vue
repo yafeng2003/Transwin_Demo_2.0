@@ -95,6 +95,8 @@ async function fetchData() {
   try {
     const res = await getCurrentPositions({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
     list.value = res.data
+  } catch {
+    list.value = []
   } finally { loading.value = false }
 }
 

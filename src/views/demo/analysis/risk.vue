@@ -78,8 +78,10 @@ const heatmapOption = computed(() => ({
 }))
 
 async function fetchData() {
-  const res = await getAnalysisReturns({ market_id: demoStore.marketId, account_id: demoStore.accountId })
-  summary.value = res.data.summary
+  try {
+    const res = await getAnalysisReturns({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId, period: '1y' })
+    summary.value = res.data.summary
+  } catch { /* ignore */ }
 }
 
 onMounted(fetchData)

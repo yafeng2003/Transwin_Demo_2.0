@@ -108,8 +108,10 @@ const miniNavOption = computed(() => {
 })
 
 async function fetchData() {
-  const res = await getReports({ type: reportType.value, market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
-  list.value = res.data
+  try {
+    const res = await getReports({ type: reportType.value, market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
+    list.value = res.data
+  } catch { /* ignore */ }
 }
 
 function previewReport(row: any) {

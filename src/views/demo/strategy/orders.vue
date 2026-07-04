@@ -110,6 +110,9 @@ async function fetchData() {
     const res = await getOrders(params)
     list.value = res.data.list
     total.value = res.data.total
+  } catch {
+    list.value = []
+    total.value = 0
   } finally { loading.value = false }
 }
 

@@ -83,6 +83,10 @@ const health = ref<any>({ status: 'loading', services: {} })
 
 /** 重置为非总览状态：选第一个真实市场、第一个真实账户、第一个真实策略 */
 async function resetToRealSelection() {
+  // 确保数据已加载
+  if (demoStore.markets.length === 0) {
+    await demoStore.fetchMarketsAndAccounts()
+  }
   const mkts = demoStore.markets
   if (mkts.length === 0) return
 
@@ -98,7 +102,7 @@ async function resetToRealSelection() {
     } catch { /* ignore */ }
   }
 
-  // 如果当前是虚拟账户(MARKET_OVERVIEW)或账户不在当前列表中，切到第一个真实账户
+  // 如果当前是虚拟账户或不在当前列表中，切到第一个真实账户
   const accs = demoStore.accounts
   const currentAccValid = accs.some((a: any) => a.id === demoStore.accountId)
   if (demoStore.accountId === MARKET_OVERVIEW || !currentAccValid) {
@@ -165,7 +169,11 @@ onMounted(async () => {
     if (demoStore.accountId !== MARKET_OVERVIEW) {
       demoStore.accountId = MARKET_OVERVIEW
       demoStore.strategyId = ''
+      demoStore.switchVersion++
     }
+  } else {
+    // 非 Dashboard：确保选中真实账户和策略
+    await resetToRealSelection()
   }
   try {
     const hRes = await getHealth()
