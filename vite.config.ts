@@ -5,19 +5,19 @@ import { resolve } from 'node:path'
 import type { ConfigEnv, UserConfig } from 'vite'
 import { defineConfig, loadEnv } from 'vite'
 import {
-    assetsDir,
-    base,
-    chunkSizeWarningLimit,
-    cssCodeSplit,
-    exclude,
-    https,
-    include,
-    minify,
-    open,
-    outDir,
-    outputHash,
-    port,
-    reportCompressedSize,
+  assetsDir,
+  base,
+  chunkSizeWarningLimit,
+  cssCodeSplit,
+  exclude,
+  https,
+  include,
+  minify,
+  open,
+  outDir,
+  outputHash,
+  port,
+  reportCompressedSize,
 } from '/@/config'
 import { createVitePlugin, createWatch } from '/@vab/build'
 
@@ -44,7 +44,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       proxy: {
         '/api': {
           // 本地后端 FastAPI
-          target: 'http://127.0.0.1:8000',
+          target: 'http://27.193.176.153:8000',
           changeOrigin: true,
           rewrite: (p: string) => p,
         },
