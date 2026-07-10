@@ -31,8 +31,8 @@
     <!-- 订单表格 -->
     <el-card>
       <el-table :data="list" stripe v-loading="loading" max-height="550">
-        <el-table-column prop="id" label="订单ID" width="90" />
-        <el-table-column prop="symbolCode" label="标的代码" width="100" />
+        <el-table-column prop="id" label="订单ID" width="90" sortable />
+        <el-table-column prop="symbolCode" label="标的代码" width="100" sortable />
         <el-table-column prop="symbolName" label="标的名称" width="100" />
         <el-table-column prop="operationType" label="开/平" width="70">
           <template #default="{ row }">{{ row.operationType === 1 ? '开仓' : '平仓' }}</template>
@@ -47,23 +47,17 @@
         <el-table-column prop="orderType" label="类型" width="70">
           <template #default="{ row }">{{ row.orderType === 1 ? '市价' : '限价' }}</template>
         </el-table-column>
-        <el-table-column prop="price" label="委托价" width="90">
+        <el-table-column prop="price" label="委托价" width="90" sortable>
           <template #default="{ row }">{{ row.price?.toFixed(2) }}</template>
         </el-table-column>
-        <el-table-column prop="quantity" label="数量" width="80" />
+        <el-table-column prop="quantity" label="数量" width="80" sortable />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
             <el-tag :type="statusType(row.status)" size="small">{{ row.statusLabel }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="strategyId" label="策略" width="120" />
-        <el-table-column prop="createdAt" label="生成时间" width="170" />
-        <el-table-column label="操作" width="120" fixed="right">
-          <template #default>
-            <el-button text type="primary" size="small">详情</el-button>
-            <el-button text type="warning" size="small">撤单</el-button>
-          </template>
-        </el-table-column>
+        <el-table-column prop="createdAt" label="生成时间" width="170" sortable />
       </el-table>
       <div class="pagination-wrap">
         <el-pagination
@@ -77,7 +71,7 @@
 
 <script lang="ts" setup>
 import { onMounted, reactive, ref, watch } from 'vue'
-import { getAccounts, getOrders } from '/@/api/demo/index'
+import { getOrders } from '/@/api/demo/index'
 import { useDemoStore } from '/@/store/modules/demo'
 
 defineOptions({ name: 'DemoStrategyOrders' })
@@ -85,7 +79,6 @@ const demoStore = useDemoStore()
 
 const loading = ref(false)
 const list = ref<any[]>([])
-const accounts = ref<any[]>([])
 const page = ref(1)
 const size = ref(20)
 const total = ref(0)
@@ -122,11 +115,7 @@ function resetFilter() {
   fetchData()
 }
 
-onMounted(async () => {
-  const aRes = await getAccounts({ market_id: demoStore.marketId })
-  accounts.value = aRes.data
-  fetchData()
-})
+onMounted(fetchData)
 watch(() => demoStore.switchVersion, () => { page.value = 1; fetchData() })
 </script>
 

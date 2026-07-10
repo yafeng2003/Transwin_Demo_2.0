@@ -46,6 +46,9 @@ export function getDealStats(params?: Record<string, any>) {
 export function getCurrentPositions(params?: Record<string, any>) {
   return request({ url: '/api/v1/positions/current', method: 'get', params })
 }
+export function getHistoryPositions(params?: Record<string, any>) {
+  return request({ url: '/api/v1/positions/history', method: 'get', params })
+}
 
 // ==================== 策略展示 - 账户 ====================
 export function getAccountAssets(params?: Record<string, any>) {
@@ -62,8 +65,10 @@ export function getRiskEvents(params?: Record<string, any>) {
 export function getRiskNotifications(params?: Record<string, any>) {
   return request({ url: '/api/v1/risk/notifications', method: 'get', params })
 }
-export function resolveRiskEvent(data: { id: number }) {
-  // 后端暂未提供 resolve 接口，预留对接
+export function getRiskAccountMetrics(params?: Record<string, any>) {
+  return request({ url: '/api/v1/risk/account-metrics', method: 'get', params })
+}
+export function resolveRiskEvent(data: { id: number; account_id?: string; strategy_id?: string; remark?: string }) {
   return request({ url: '/api/v1/risk/events/resolve', method: 'post', data })
 }
 
@@ -78,7 +83,18 @@ export function getAnalysisTrading(params?: Record<string, any>) {
   return request({ url: '/api/v1/analysis/trading', method: 'get', params })
 }
 export function getAnalysisStrategy(params?: Record<string, any>) {
-  return request({ url: '/api/v1/analysis/strategy', method: 'get', params })
+  const query = new URLSearchParams()
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach((item) => {
+        if (item !== undefined && item !== null && item !== '') query.append(key, String(item))
+      })
+    } else if (value !== undefined && value !== null && value !== '') {
+      query.append(key, String(value))
+    }
+  })
+  const search = query.toString()
+  return request({ url: `/api/v1/analysis/strategy${search ? `?${search}` : ''}`, method: 'get' })
 }
 
 // ==================== 报表 ====================
@@ -87,6 +103,9 @@ export function getReports(params?: Record<string, any>) {
 }
 export function exportReport(id: number, format: string = 'pdf') {
   return request({ url: `/api/v1/reports/${id}/export`, method: 'get', params: { format } })
+}
+export function getReport(id: number) {
+  return request({ url: `/api/v1/reports/${id}`, method: 'get' })
 }
 
 // ==================== 日志 ====================
@@ -104,6 +123,9 @@ export function getOrderLogs(params?: Record<string, any>) {
 }
 export function getErrorLogs(params?: Record<string, any>) {
   return request({ url: '/api/v1/logs/system', method: 'get', params: { ...params, level: 'ERROR' } })
+}
+export function getNotifications(params?: Record<string, any>) {
+  return request({ url: '/api/v1/notifications', method: 'get', params })
 }
 
 // ==================== 人工干预 ====================

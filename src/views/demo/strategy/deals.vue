@@ -24,13 +24,13 @@
     <!-- Tab 切换：实时 / 历史 -->
     <el-card>
       <el-tabs v-model="activeTab" @tab-change="fetchData">
-        <el-tab-pane label="历史成交" name="history" />
         <el-tab-pane label="实时成交" name="realtime" />
+        <el-tab-pane label="历史成交" name="history" />
       </el-tabs>
 
       <el-table :data="list" stripe v-loading="loading" max-height="500">
-        <el-table-column prop="id" label="成交ID" width="90" />
-        <el-table-column prop="symbolCode" label="代码" width="100" />
+        <el-table-column prop="id" label="成交ID" width="90" sortable />
+        <el-table-column prop="symbolCode" label="代码" width="100" sortable />
         <el-table-column prop="symbolName" label="名称" width="100" />
         <el-table-column prop="dealType" label="开/平" width="70">
           <template #default="{ row }">{{ row.dealType === 1 ? '开仓' : '平仓' }}</template>
@@ -42,11 +42,11 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="dealPrice" label="成交价" width="90">
+        <el-table-column prop="dealPrice" label="成交价" width="90" sortable>
           <template #default="{ row }">{{ row.dealPrice?.toFixed(2) }}</template>
         </el-table-column>
-        <el-table-column prop="dealQuantity" label="数量" width="80" />
-        <el-table-column prop="dealAmount" label="成交金额" width="110">
+        <el-table-column prop="dealQuantity" label="数量" width="80" sortable />
+        <el-table-column prop="dealAmount" label="成交金额" width="110" sortable>
           <template #default="{ row }">{{ formatMoney(row.dealAmount) }}</template>
         </el-table-column>
         <el-table-column prop="commission" label="手续费" width="80">
@@ -60,7 +60,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="strategyId" label="策略" width="120" />
-        <el-table-column prop="dealTime" label="成交时间" width="170" />
+        <el-table-column prop="dealTime" label="成交时间" width="170" sortable />
       </el-table>
 
       <div class="pagination-wrap">
@@ -84,7 +84,7 @@ const demoStore = useDemoStore()
 const loading = ref(false)
 const list = ref<any[]>([])
 const stats = ref<any>({})
-const activeTab = ref('history')
+const activeTab = ref('realtime')
 const page = ref(1)
 const size = ref(20)
 const total = ref(0)
@@ -94,16 +94,38 @@ const formatMoney = (v: number) => {
   return (v >= 0 ? '¥' : '-¥') + Math.abs(v).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
+function todayRange() {
+  const today = new Date()
+  const y = today.getFullYear()
+  const m = String(today.getMonth() + 1).padStart(2, '0')
+  const d = String(today.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d},${y}-${m}-${d}`
+}
+
 async function fetchData() {
   loading.value = true
   try {
+    const dateRange = activeTab.value === 'realtime' ? todayRange() : undefined
+    const params = {
+      market_id: demoStore.marketId,
+      account_id: demoStore.accountId,
+      strategy_id: demoStore.strategyId,
+      date_range: dateRange,
+      page: page.value,
+      size: size.value,
+    }
     const [dRes, sRes] = await Promise.all([
-      getDeals({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId, page: page.value, size: size.value }),
-      getDealStats({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId }),
+      getDeals(params),
+      getDealStats({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId, date_range: dateRange }),
     ])
-    list.value = dRes.data.list
-    total.value = dRes.data.total
-    stats.value = sRes.data
+    list.value = dRes.data.list || []
+    total.value = dRes.data.total || 0
+    stats.value = {
+      todayCount: sRes.data?.todayCount ?? list.value.length,
+      todayAmount: sRes.data?.todayAmount ?? list.value.reduce((sum, row) => sum + (row.dealAmount || 0), 0),
+      todayCommission: sRes.data?.todayCommission ?? list.value.reduce((sum, row) => sum + (row.commission || 0), 0),
+      monthCount: sRes.data?.monthCount ?? 0,
+    }
   } catch {
     list.value = []
     total.value = 0
@@ -113,6 +135,7 @@ async function fetchData() {
 
 onMounted(fetchData)
 watch(() => demoStore.switchVersion, () => { page.value = 1; fetchData() })
+watch(activeTab, () => { page.value = 1; fetchData() })
 </script>
 
 <style scoped>

@@ -31,6 +31,9 @@
         <el-table-column prop="strategyId" label="策略" width="130" />
         <el-table-column prop="symbolCode" label="标的" width="90" />
         <el-table-column prop="message" label="事件描述" min-width="200" />
+        <el-table-column prop="remark" label="处理备注" min-width="160" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.remark || '-' }}</template>
+        </el-table-column>
         <el-table-column prop="status" label="处理状态" width="100">
           <template #default="{ row }">
             <el-tag :type="statusTagType(row.status)" size="small">{{ statusLabel(row.status) }}</el-tag>
@@ -108,14 +111,15 @@ const statusTagType = (s: string) => ({ pending: 'danger', processing: 'warning'
 
 async function handleResolve(row: any) {
   try {
-    await ElMessageBox.confirm(
-      `确认处理事件 #${row.id}（${row.eventLabel}）？处理后状态将变更为「已处理」。`,
+    const remark = await ElMessageBox.prompt(
+      `请输入事件 #${row.id}（${row.eventLabel}）的处理备注。`,
       '处理确认',
-      { confirmButtonText: '确认处理', cancelButtonText: '取消', type: 'warning' }
+      { confirmButtonText: '确认处理', cancelButtonText: '取消', inputType: 'textarea', inputPlaceholder: '例如：已核对委托回报，手动确认风险解除', inputValidator: value => !!value?.trim() || '请填写处理备注' }
     )
     row._resolving = true
-    await resolveRiskEvent({ id: row.id })
+    await resolveRiskEvent({ id: row.id, account_id: row.accountId, strategy_id: row.strategyId, remark: remark.value.trim() })
     row.status = 'resolved'
+    row.remark = remark.value.trim()
     ElMessage.success(`事件 #${row.id} 已处理`)
   } catch (err: any) {
     if (err !== 'cancel' && err?.message !== 'cancel') {

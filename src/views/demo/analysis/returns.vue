@@ -95,10 +95,10 @@ const navDrawdownOption = computed(() => {
       axisPointer: { type: 'cross' },
       formatter: (params: any) => {
         const navItem = params.find((p: any) => p.seriesName === '净值')
-        const ddItem = params.find((p: any) => p.seriesName === '回撤')
+        const ddItem = params.find((p: any) => String(p.seriesName).startsWith('回撤'))
         return `${params[0].axisValue}<br/>
-          ${navItem ? `净值：<b>${navItem.value.toFixed(4)}</b>` : ''}
-          ${ddItem ? `<br/>回撤：<b style="color:#27ae60">${ddItem.value.toFixed(2)}%</b>` : ''}`
+          ${navItem ? `净值：<b>${Number(navItem.value).toFixed(4)}</b>` : ''}
+          ${ddItem ? `<br/>回撤：<b style="color:#27ae60">${Number(ddItem.value).toFixed(2)}%</b>` : ''}`
       },
     },
     legend: { data: ['净值', '回撤(%)'], top: 12, itemWidth: 12, itemHeight: 8, textStyle: { fontSize: 12, color: '#526071' } },
@@ -147,8 +147,8 @@ const distOption = computed(() => {
   const counts = dailyReturnDist.value.map((d: any) => d.count)
   // 计算均值和标准差来画正态曲线
   const allReturns = dailyReturns.value.map((d: any) => d.dailyReturn)
-  const mean = allReturns.reduce((s: number, v: number) => s + v, 0) / allReturns.length
-  const std = Math.sqrt(allReturns.reduce((s: number, v: number) => s + (v - mean) ** 2, 0) / allReturns.length)
+  const mean = allReturns.length ? allReturns.reduce((s: number, v: number) => s + v, 0) / allReturns.length : 0
+  const std = Math.sqrt(allReturns.length ? allReturns.reduce((s: number, v: number) => s + (v - mean) ** 2, 0) / allReturns.length : 0) || 1
   // 生成正态曲线数据
   const normalCurve = buckets.map((_: string, i: number) => {
     const x = -4.5 + i * 1
@@ -264,6 +264,8 @@ watch(() => demoStore.switchVersion, fetchData)
 .page-header h2 { margin: 0 0 4px 0; font-size: 20px; }
 .page-desc { color: #909399; font-size: 13px; margin: 0; }
 .stats-row { margin-bottom: 0; }
+.stats-row { flex-wrap: nowrap; }
+.stats-row :deep(.el-col) { flex: 1 1 0; max-width: none; }
 .stat-label { font-size: 12px; color: #909399; }
 .stat-value { font-size: 18px; font-weight: 700; margin-top: 4px; color: #303133; }
 .up { color: #e74c3c; }

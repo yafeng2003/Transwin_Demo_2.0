@@ -18,20 +18,22 @@
           <el-card class="preview-card">
             <template #header>
               <div class="preview-title">
-                <span>{{ list[0]?.title }}</span>
-                <span>{{ list[0]?.createdAt }}</span>
+                <span>{{ selectedReport?.title || '请选择报表预览' }}</span>
+                <span>{{ selectedReport?.createdAt || '' }}</span>
               </div>
             </template>
             <div class="preview-content">
               <div class="preview-section">
                 <h4>当日交易记录</h4>
-                <p>交易笔数：{{ mockDaily.tradeCount }} 笔</p>
-                <p>成交均价：¥{{ mockDaily.avgPrice }}</p>
-                <p>总成交金额：¥{{ mockDaily.totalAmount.toLocaleString() }}</p>
+                <p>报表类型：{{ reportTypeLabel(selectedReport?.type) }}</p>
+                <p>生成状态：{{ statusLabel(selectedReport?.status) }}</p>
+                <p>文件大小：{{ selectedReport?.fileSize || '-' }}</p>
               </div>
               <div class="preview-section">
-                <h4>持仓结构</h4>
-                <p v-for="h in mockDaily.holdings" :key="h.name">{{ h.name }}：{{ h.ratio }}%</p>
+                <h4>报表范围</h4>
+                <p>市场：{{ demoStore.currentMarketName }}</p>
+                <p>账户：{{ demoStore.currentAccountLabel }}</p>
+                <p>策略：{{ demoStore.strategyId || '全部策略' }}</p>
               </div>
               <div class="preview-section">
                 <h4>净值曲线</h4>
@@ -45,24 +47,24 @@
         <el-col :span="14">
           <el-table :data="list" stripe size="small" max-height="400">
             <el-table-column prop="title" label="报表标题" min-width="160" />
-            <el-table-column prop="createdAt" label="生成时间" width="112" />
+            <el-table-column prop="createdAt" label="生成时间" width="150" sortable />
             <el-table-column prop="fileSize" label="大小" width="76" />
             <el-table-column prop="status" label="状态" width="86">
               <template #default="{ row }">
-                <span class="status-badge" :class="row.status === 'generated' ? 'is-success' : 'is-warning'">
-                  {{ row.status === 'generated' ? '已生成' : '生成中' }}
+                <span class="status-badge" :class="row.status === 'saved' || row.status === 'generated' ? 'is-success' : 'is-warning'">
+                  {{ statusLabel(row.status) }}
                 </span>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="220">
+            <el-table-column label="操作" width="240">
               <template #default="{ row }">
                 <div class="report-actions">
                   <button type="button" @click="previewReport(row)">预览</button>
-                  <button type="button" v-for="f in row.availableFormats" :key="f.format"
+                  <button type="button" v-for="f in ['pdf', 'excel', 'csv']" :key="f"
                     class="active"
-                    :title="'下载 ' + (f.format === 'xlsx' ? 'Excel' : f.format.toUpperCase())"
-                    @click="downloadReportById(f.reportId, f.format)">
-                    {{ f.format === 'xlsx' ? 'Excel' : f.format.toUpperCase() }}
+                    :title="'下载 ' + (f === 'excel' ? 'Excel' : f.toUpperCase())"
+                    @click="downloadReportById(row.id, f)">
+                    {{ f === 'excel' ? 'Excel' : f.toUpperCase() }}
                   </button>
                 </div>
               </template>
@@ -76,7 +78,7 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { getReports } from '/@/api/demo/index'
+import { getReport, getReports } from '/@/api/demo/index'
 import { useDemoStore } from '/@/store/modules/demo'
 
 defineOptions({ name: 'DemoReports' })
@@ -84,21 +86,11 @@ const demoStore = useDemoStore()
 
 const reportType = ref('daily')
 const list = ref<any[]>([])
-
-const mockDaily = {
-  tradeCount: 12,
-  avgPrice: '38.52',
-  totalAmount: 4523800,
-  holdings: [
-    { name: '金融', ratio: 35 },
-    { name: '科技', ratio: 28 },
-    { name: '消费', ratio: 20 },
-    { name: '其他', ratio: 17 },
-  ],
-}
+const selectedReport = ref<any>(null)
 
 const miniNavOption = computed(() => {
-  const data = Array.from({ length: 30 }, () => 1.0 + Math.random() * 0.5)
+  const seed = selectedReport.value?.id || 1
+  const data = Array.from({ length: 30 }, (_, i) => 1 + ((seed * 7 + i * 3) % 18) / 100)
   return {
     grid: { top: 8, right: 8, bottom: 14, left: 40, containLabel: true },
     xAxis: { show: false, data: Array.from({ length: 30 }, (_, i) => i) },
@@ -111,21 +103,28 @@ async function fetchData() {
   try {
     const res = await getReports({ type: reportType.value, market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
     list.value = res.data
+    selectedReport.value = list.value[0] || null
   } catch { /* ignore */ }
 }
 
-function previewReport(row: any) {
-  const firstFormat = row.availableFormats?.[0]
-  const id = firstFormat?.reportId ?? row.id
-  window.open(`/api/v1/reports/${id}/export?format=pdf`, '_blank')
-}
-
-function downloadReport(row: any, format: string) {
-  window.open(`/api/v1/reports/${row.id}/export?format=${format}`, '_blank')
+async function previewReport(row: any) {
+  selectedReport.value = row
+  try {
+    const res = await getReport(row.id)
+    selectedReport.value = { ...row, ...(res.data || {}) }
+  } catch { /* metadata preview still works */ }
 }
 
 function downloadReportById(reportId: number, format: string) {
   window.open(`/api/v1/reports/${reportId}/export?format=${format}`, '_blank')
+}
+
+function reportTypeLabel(type?: string) {
+  return ({ daily: '日报', weekly: '周报', monthly: '月报' } as Record<string, string>)[type || ''] || '-'
+}
+
+function statusLabel(status?: string) {
+  return ({ saved: '已生成', generated: '已生成', failed: '生成失败' } as Record<string, string>)[status || ''] || '生成中'
 }
 
 onMounted(fetchData)

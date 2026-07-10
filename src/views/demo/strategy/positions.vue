@@ -23,13 +23,27 @@
 
     <!-- 持仓表格 -->
     <el-card>
-      <el-tabs v-model="activeTab">
+      <el-tabs v-model="activeTab" @tab-change="onTabChange">
         <el-tab-pane label="当前持仓" name="current" />
         <el-tab-pane label="历史持仓" name="history" />
       </el-tabs>
+      <el-form v-if="activeTab === 'history'" :inline="true" class="history-filter">
+        <el-form-item label="查询日期">
+          <el-date-picker
+            v-model="historyDate"
+            type="date"
+            value-format="YYYY-MM-DD"
+            placeholder="选择持仓日期"
+            style="width: 180px"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="fetchData">查询</el-button>
+        </el-form-item>
+      </el-form>
 
       <el-table :data="list" stripe v-loading="loading" max-height="500">
-        <el-table-column prop="symbolCode" label="代码" width="100" />
+        <el-table-column prop="symbolCode" label="代码" width="100" sortable />
         <el-table-column prop="symbolName" label="名称" width="100" />
         <el-table-column prop="direction" label="方向" width="70">
           <template #default="{ row }">
@@ -38,17 +52,17 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="openPrice" label="开仓均价" width="100">
+        <el-table-column prop="openPrice" label="开仓均价" width="100" sortable>
           <template #default="{ row }">{{ row.openPrice?.toFixed(2) }}</template>
         </el-table-column>
-        <el-table-column prop="currentPrice" label="现价" width="90">
+        <el-table-column prop="currentPrice" label="现价" width="90" sortable>
           <template #default="{ row }">{{ row.currentPrice?.toFixed(2) }}</template>
         </el-table-column>
-        <el-table-column prop="holdingQuantity" label="持仓数量" width="90" />
-        <el-table-column prop="holdingAmount" label="持仓金额" width="110">
+        <el-table-column prop="holdingQuantity" label="持仓数量" width="90" sortable />
+        <el-table-column prop="holdingAmount" label="持仓金额" width="110" sortable>
           <template #default="{ row }">{{ formatMoney(row.holdingAmount) }}</template>
         </el-table-column>
-        <el-table-column prop="unrealizedPnl" label="未实现盈亏" width="120">
+        <el-table-column prop="unrealizedPnl" label="未实现盈亏" width="120" sortable>
           <template #default="{ row }">
             <span :class="row.unrealizedPnl >= 0 ? 'up' : 'down'">
               {{ formatMoney(row.unrealizedPnl) }}
@@ -62,7 +76,7 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="openTime" label="开仓时间" width="120" />
+        <el-table-column prop="openTime" label="开仓时间" width="120" sortable />
         <el-table-column prop="strategyId" label="策略" width="120" />
       </el-table>
     </el-card>
@@ -71,7 +85,7 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { getCurrentPositions } from '/@/api/demo/index'
+import { getCurrentPositions, getHistoryPositions } from '/@/api/demo/index'
 import { useDemoStore } from '/@/store/modules/demo'
 
 defineOptions({ name: 'DemoStrategyPositions' })
@@ -80,6 +94,7 @@ const demoStore = useDemoStore()
 const loading = ref(false)
 const list = ref<any[]>([])
 const activeTab = ref('current')
+const historyDate = ref(new Date().toISOString().slice(0, 10))
 
 const formatMoney = (v: number) => {
   if (v == null) return '-'
@@ -93,15 +108,26 @@ const uniqueStrategies = computed(() => new Set(list.value.map((i: any) => i.str
 async function fetchData() {
   loading.value = true
   try {
-    const res = await getCurrentPositions({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
+    const params = { market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId }
+    const res = activeTab.value === 'history'
+      ? await getHistoryPositions({ ...params, date: historyDate.value })
+      : await getCurrentPositions(params)
     list.value = res.data
   } catch {
     list.value = []
   } finally { loading.value = false }
 }
 
+function onTabChange() {
+  if (activeTab.value === 'current') fetchData()
+  else list.value = []
+}
+
 onMounted(fetchData)
-watch(() => demoStore.switchVersion, fetchData)
+watch(() => demoStore.switchVersion, () => {
+  if (activeTab.value === 'current') fetchData()
+  else list.value = []
+})
 </script>
 
 <style scoped>
@@ -110,6 +136,7 @@ watch(() => demoStore.switchVersion, fetchData)
 .page-header h2 { margin: 0 0 4px 0; font-size: 20px; }
 .page-desc { color: #909399; font-size: 13px; margin: 0; }
 .stats-row { margin-bottom: 16px; }
+.history-filter { margin-bottom: 12px; }
 .stat-label { font-size: 13px; color: #909399; }
 .stat-value { font-size: 22px; font-weight: 700; margin-top: 4px; color: #303133; }
 .up { color: #e74c3c; }

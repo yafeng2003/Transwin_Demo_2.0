@@ -27,7 +27,7 @@
 
     <!-- 风险趋势 -->
     <el-card style="margin-top:16px">
-      <template #header><span class="section-title">风险评分趋势（近30日）</span></template>
+      <template #header><span class="section-title">事件压力评分趋势（近30日）</span></template>
       <vab-chart :option="trendOption" class="demo-chart-sm" />
     </el-card>
 
@@ -81,7 +81,13 @@ const formatMoney = (v: number) => {
 
 const trendOption = computed(() => ({
   grid: { top: 28, right: 28, bottom: 36, left: 46, containLabel: true },
-  tooltip: { trigger: 'axis' },
+  tooltip: { trigger: 'axis', formatter: (params: any) => {
+    const item = params?.[0]
+    if (!item) return ''
+    const score = Number(item.value || 0)
+    const level = score >= 70 ? '高' : score >= 35 ? '中' : '低'
+    return `${item.axisValue}<br/>事件压力评分：<b>${score}</b><br/>风险区间：${level}`
+  } },
   xAxis: { type: 'category', data: (data.value.trend || []).map((t: any) => t.date), axisLabel: { rotate: 45, fontSize: 10 } },
   yAxis: { type: 'value', name: '评分', min: 0, max: 100 },
   visualMap: { show: false, pieces: [{ lte: 30, color: '#27ae60' }, { gt: 30, lte: 60, color: '#e67e22' }, { gt: 60, color: '#e74c3c' }] },
@@ -91,6 +97,14 @@ const trendOption = computed(() => ({
     smooth: true,
     areaStyle: { opacity: 0.3 },
     lineStyle: { width: 2 },
+    markArea: {
+      silent: true,
+      data: [
+        [{ yAxis: 0, itemStyle: { color: 'rgba(39,174,96,0.06)' } }, { yAxis: 35 }],
+        [{ yAxis: 35, itemStyle: { color: 'rgba(230,126,34,0.06)' } }, { yAxis: 70 }],
+        [{ yAxis: 70, itemStyle: { color: 'rgba(231,76,60,0.06)' } }, { yAxis: 100 }],
+      ],
+    },
   }],
 }))
 

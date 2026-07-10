@@ -45,7 +45,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       proxy: {
         '/api': {
           // 与后端 FastAPI 默认启动端口保持一致
-          target: 'http://27.193.176.153:8000',
+          target: 'http://127.0.0.1:8000',
           changeOrigin: true,
           // 保持路径不变，如需去掉前缀可改写
           rewrite: (path: string) => path,

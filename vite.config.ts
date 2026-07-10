@@ -44,7 +44,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       proxy: {
         '/api': {
           // 本地后端 FastAPI
-          target: 'http://27.193.176.153:8000',
+          target: 'http://127.0.0.1:8000',
           changeOrigin: true,
           rewrite: (p: string) => p,
         },

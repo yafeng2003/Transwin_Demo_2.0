@@ -92,7 +92,7 @@
       <!-- 第二行：风险状态 + 最近交易 -->
       <el-row :gutter="16" class="main-row" style="margin-top:16px">
         <!-- 风险状态 -->
-        <el-col :span="12">
+        <el-col :span="24">
           <el-card class="section-card">
             <template #header>
               <span class="section-title">风险状态</span>
@@ -170,6 +170,7 @@
           </el-button>
         </template>
         <el-table :data="allRiskStrategies" stripe size="small" max-height="400">
+          <el-table-column prop="marketName" label="市场" width="110" />
           <el-table-column prop="strategyId" label="策略" width="140" />
           <el-table-column prop="eventLabel" label="事件类型" width="130">
             <template #default="{ row }">
@@ -208,6 +209,7 @@
           </el-button>
         </template>
         <el-table :data="recentDeals" stripe size="small" max-height="320">
+          <el-table-column prop="marketName" label="市场" width="110" />
           <el-table-column prop="symbolCode" label="代码" width="90" />
           <el-table-column prop="symbolName" label="名称" width="100" />
           <el-table-column prop="direction" label="方向" width="60">
@@ -246,6 +248,9 @@
             <div class="card-value" :class="marketOverviewAgg.todayPnl >= 0 ? 'up' : 'down'">
               {{ formatMoney(marketOverviewAgg.todayPnl) }}
             </div>
+            <div class="card-sub" :class="marketOverviewAgg.todayReturnRate >= 0 ? 'up' : 'down'">
+              {{ formatRate(marketOverviewAgg.todayReturnRate) }}
+            </div>
           </el-card>
         </el-col>
         <el-col :span="6">
@@ -260,6 +265,9 @@
             <div class="card-label">累计收益</div>
             <div class="card-value" :class="marketOverviewAgg.totalPnl >= 0 ? 'up' : 'down'">
               {{ formatMoney(marketOverviewAgg.totalPnl) }}
+            </div>
+            <div class="card-sub" :class="marketOverviewAgg.totalReturnRate >= 0 ? 'up' : 'down'">
+              {{ formatRate(marketOverviewAgg.totalReturnRate) }}
             </div>
           </el-card>
         </el-col>
@@ -507,12 +515,19 @@ const formatMoney = (v: number) => {
   if (v == null) return '-'
   return (v >= 0 ? '¥' : '-¥') + Math.abs(v).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
+const formatRate = (v: number) => {
+  if (v == null) return '-'
+  return `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`
+}
 
 function statusTagType(s: string) {
   return s === 'pending' ? 'warning' : s === 'processing' ? 'info' : s === 'resolved' ? 'success' : ''
 }
 function statusLabel(s: string) {
   return ({ pending: '待处理', processing: '处理中', resolved: '已解决', ignored: '已忽略' } as any)[s] || s
+}
+function marketNameById(id: number) {
+  return demoStore.markets.find((m: any) => m.id === id)?.name || `市场${id}`
 }
 
 // ---------- 策略总览：持仓饼图 ----------
@@ -618,41 +633,39 @@ async function refreshAllMarkets() {
   const accResults = await Promise.all(
     marketIds.map((id: number) => getAccounts({ market_id: id }))
   )
-  const marketFirstAcc: Record<number, { id: string; strategies: string[] } | null> = {}
+  const marketAccounts: Record<number, any[]> = {}
   marketIds.forEach((id: number, i: number) => {
-    const list = accResults[i]?.data || []
-    marketFirstAcc[id] = list.length > 0 ? list[0] : null
+    marketAccounts[id] = accResults[i]?.data || []
   })
 
-  const assetResults = await Promise.all(
-    marketIds.map((id: number) => {
-      const acc = marketFirstAcc[id]
-      return getAssetSummary({ market_id: id, account_id: acc?.id || '' })
-    })
-  )
-  allMarketAssets.value = marketIds.map((id: number, i: number) => {
+  allMarketAssets.value = await Promise.all(marketIds.map(async (id: number, i: number) => {
     const m = demoStore.markets[i]
-    return { id, name: m?.name || '市场' + id, ...assetResults[i].data }
-  })
+    const assets = await Promise.all(
+      (marketAccounts[id] || []).map((acc: any) => getAssetSummary({ market_id: id, account_id: acc.id }).catch(() => ({ data: {} })))
+    )
+    const summary = assets.reduce((acc: any, item: any) => {
+      const d = item.data || {}
+      acc.totalAsset += d.totalAsset || 0
+      acc.marketValue += d.marketValue || 0
+      acc.cashBalance += d.cashBalance || 0
+      return acc
+    }, { totalAsset: 0, marketValue: 0, cashBalance: 0 })
+    return { id, name: m?.name || '市场' + id, ...summary }
+  }))
 
   // 风险事件：遍历所有市场，聚合每个市场第一个账户+策略的风险事件
   try {
     const allEvents: any[] = []
     for (const mktId of marketIds) {
-      const acc = marketFirstAcc[mktId]
-      if (!acc) continue
-      const sid = acc.strategies?.[0]
-      if (!sid) continue
-      try {
-        const eventsRes = await getRiskEvents({
-          page: 1,
-          size: 50,
-          account_id: acc.id,
-          strategy_id: sid,
-        })
-        const list = eventsRes.data?.list || []
-        allEvents.push(...list)
-      } catch { /* skip this market */ }
+      for (const acc of marketAccounts[mktId] || []) {
+        for (const sid of acc.strategies || []) {
+          try {
+            const eventsRes = await getRiskEvents({ page: 1, size: 20, account_id: acc.id, strategy_id: sid })
+            const list = eventsRes.data?.list || []
+            allEvents.push(...list.map((row: any) => ({ ...row, marketId: mktId, marketName: marketNameById(mktId) })))
+          } catch { /* skip this strategy */ }
+        }
+      }
     }
     allRiskStrategies.value = allEvents
   } catch {
@@ -663,20 +676,15 @@ async function refreshAllMarkets() {
   try {
     const allDeals: any[] = []
     for (const mktId of marketIds) {
-      const acc = marketFirstAcc[mktId]
-      if (!acc) continue
-      const sid = acc.strategies?.[0]
-      if (!sid) continue
-      try {
-        const dealsRes = await getRecentDeals({
-          market_id: mktId,
-          account_id: acc.id,
-          strategy_id: sid,
-          limit: 5,
-        })
-        const list = Array.isArray(dealsRes.data) ? dealsRes.data : []
-        allDeals.push(...list)
-      } catch { /* skip this market */ }
+      for (const acc of marketAccounts[mktId] || []) {
+        for (const sid of acc.strategies || []) {
+          try {
+            const dealsRes = await getRecentDeals({ market_id: mktId, account_id: acc.id, strategy_id: sid, limit: 3 })
+            const list = Array.isArray(dealsRes.data) ? dealsRes.data : []
+            allDeals.push(...list.map((row: any) => ({ ...row, marketId: mktId, marketName: marketNameById(mktId) })))
+          } catch { /* skip this strategy */ }
+        }
+      }
     }
     recentDeals.value = allDeals.slice(0, 20)
   } catch {
@@ -687,7 +695,14 @@ async function refreshAllMarkets() {
 /** 市场总览刷新：汇总该市场下所有账户数据 */
 async function refreshMarketOverview() {
   const mktId = demoStore.marketId
-  const accList = demoStore.accounts
+  let accList = demoStore.accounts
+  try {
+    const accRes = await getAccounts({ market_id: mktId })
+    accList = accRes.data || []
+    demoStore.accounts = accList
+  } catch {
+    accList = demoStore.accounts
+  }
 
   if (accList.length === 0) {
     marketOverviewAgg.value = { totalAsset: 0, todayPnl: 0, marketValue: 0, cashBalance: 0, totalPnl: 0, accountCount: 0 }
@@ -715,49 +730,42 @@ async function refreshMarketOverview() {
     accountsData.push({ accountId: a.id, label: a.label || a.name || a.id, ...d })
   })
 
-  marketOverviewAgg.value = { totalAsset, todayPnl, marketValue, cashBalance, totalPnl, accountCount: accList.length }
+  const todayReturnRate = totalAsset ? (todayPnl / totalAsset) * 100 : 0
+  const totalReturnRate = totalAsset ? (totalPnl / totalAsset) * 100 : 0
+  marketOverviewAgg.value = { totalAsset, todayPnl, todayReturnRate, marketValue, cashBalance, totalPnl, totalReturnRate, accountCount: accList.length }
   marketOverviewAccounts.value = accountsData
 
-  // 市场风险：遍历所有账户+第一个策略，取最高风险等级并汇总事件数
+  // 市场风险：遍历所有账户+策略，取最高风险等级并汇总事件数
   try {
     let maxLevel = 1, maxScore = 0, totalToday = 0, totalUnresolved = 0
     for (const a of accList) {
-      const strats = a.strategies || []
-      if (strats.length === 0) continue
-      try {
-        const riskRes = await getRiskStatus({
-          market_id: mktId,
-          account_id: a.id,
-          strategy_id: strats[0],
-        })
-        const d = riskRes.data
-        if (d.riskLevel > maxLevel) maxLevel = d.riskLevel
-        if (d.riskScore > maxScore) maxScore = d.riskScore
-        totalToday += d.todayEvents || 0
-        totalUnresolved += d.unresolvedEvents || 0
-      } catch { /* skip this account */ }
+      for (const sid of a.strategies || []) {
+        try {
+          const riskRes = await getRiskStatus({ market_id: mktId, account_id: a.id, strategy_id: sid })
+          const d = riskRes.data
+          if (d.riskLevel > maxLevel) maxLevel = d.riskLevel
+          if (d.riskScore > maxScore) maxScore = d.riskScore
+          totalToday += d.todayEvents || 0
+          totalUnresolved += d.unresolvedEvents || 0
+        } catch { /* skip this strategy */ }
+      }
     }
     marketOverviewRisk.value = { riskLevel: maxLevel, riskScore: maxScore, todayEvents: totalToday, unresolvedEvents: totalUnresolved }
   } catch {
     marketOverviewRisk.value = {}
   }
 
-  // 最近交易：遍历所有账户聚合（每个账户取第一个策略）
+  // 最近交易：遍历所有账户+策略聚合
   try {
     const allDeals: any[] = []
     for (const a of accList) {
-      const strats = a.strategies || []
-      if (strats.length === 0) continue
-      try {
-        const dealsRes = await getRecentDeals({
-          market_id: mktId,
-          account_id: a.id,
-          strategy_id: strats[0],
-          limit: 5,
-        })
-        const list = Array.isArray(dealsRes.data) ? dealsRes.data : []
-        allDeals.push(...list)
-      } catch { /* skip this account */ }
+      for (const sid of a.strategies || []) {
+        try {
+          const dealsRes = await getRecentDeals({ market_id: mktId, account_id: a.id, strategy_id: sid, limit: 3 })
+          const list = Array.isArray(dealsRes.data) ? dealsRes.data : []
+          allDeals.push(...list)
+        } catch { /* skip this strategy */ }
+      }
     }
     recentDeals.value = allDeals.slice(0, 20)
   } catch {
@@ -859,10 +867,29 @@ onMounted(doRefresh)
 
 <style scoped>
 .demo-dashboard { padding: 16px; }
-.asset-cards { margin-bottom: 16px; }
+.asset-cards {
+  align-items: stretch;
+  margin-bottom: 16px;
+}
+.asset-cards :deep(.el-col) {
+  display: flex;
+}
+.asset-cards :deep(.el-card) {
+  width: 100%;
+}
+.asset-cards :deep(.el-card__body) {
+  display: flex;
+  min-height: 112px;
+  flex-direction: column;
+  justify-content: center;
+}
 .asset-cards .card-label { font-size: 13px; color: #909399; }
 .asset-cards .card-value { font-size: 24px; font-weight: 700; margin: 4px 0; }
-.asset-cards .card-sub { font-size: 12px; color: #909399; }
+.asset-cards .card-sub {
+  min-height: 18px;
+  font-size: 12px;
+  color: #909399;
+}
 .up { color: #e74c3c; }
 .down { color: #27ae60; }
 .section-card { margin-bottom: 0; }

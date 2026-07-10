@@ -125,9 +125,12 @@ watch(() => demoStore.switchVersion, fetchData)
 .eq-row :deep(.el-card) { flex: 1; display: flex; flex-direction: column; }
 .eq-row :deep(.el-card__body) { flex: 1; }
 .eq-row .chart-card :deep(.el-card__body) { min-height: 320px; }
-.chart-placeholder { padding: 8px 0; }
-.chart-mock { display: flex; align-items: flex-end; height: 280px; gap: 2px; }
-.chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
-.chart-bar { width: 100%; max-width: 20px; background: linear-gradient(180deg, #e74c3c 0%, #409EFF 100%); border-radius: 2px 2px 0 0; min-height: 2px; }
-.chart-label { font-size: 10px; color: #909399; margin-top: 4px; transform: rotate(-45deg); white-space: nowrap; }
+@media (max-width: 1200px) {
+  .asset-cards :deep(.el-col) { flex: 0 0 50%; max-width: 50%; margin-bottom: 12px; }
+  .eq-row :deep(.el-col) { flex: 0 0 100%; max-width: 100%; margin-bottom: 12px; }
+}
+@media (max-width: 640px) {
+  .asset-cards :deep(.el-col) { flex: 0 0 100%; max-width: 100%; }
+  .asset-cards .card-value { font-size: 20px; }
+}
 </style>

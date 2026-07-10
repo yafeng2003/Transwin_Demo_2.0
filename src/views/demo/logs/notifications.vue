@@ -7,7 +7,34 @@
 
     <!-- 复用风险通知接口 -->
     <el-card>
-      <el-table :data="list" stripe v-loading="loading" max-height="500">
+      <el-form :inline="true" class="filter-form">
+        <el-form-item label="类型">
+          <el-select v-model="filter.type" clearable placeholder="全部" style="width: 150px" @change="onFilterChange">
+            <el-option label="风险报警" value="risk_alert" />
+            <el-option label="熔断通知" value="circuit_breaker" />
+            <el-option label="异常通知" value="anomaly" />
+            <el-option label="人工干预" value="manual_intervention" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="级别">
+          <el-select v-model="filter.level" clearable placeholder="全部" style="width: 120px" @change="onFilterChange">
+            <el-option label="低" :value="1" />
+            <el-option label="中" :value="2" />
+            <el-option label="高" :value="3" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select v-model="filter.readState" clearable placeholder="全部" style="width: 120px" @change="onFilterChange">
+            <el-option label="未读" value="unread" />
+            <el-option label="已读" value="read" />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button @click="resetFilter">重置</el-button>
+        </el-form-item>
+      </el-form>
+
+      <el-table :data="pagedList" stripe v-loading="loading" max-height="500">
         <el-table-column label="状态" width="70">
           <template #default="{ row }">
             <el-icon :color="row.isRead ? '#909399' : '#e74c3c'" :size="18">
@@ -33,22 +60,22 @@
         <el-table-column prop="content" label="内容" min-width="200" show-overflow-tooltip />
         <el-table-column prop="createdAt" label="时间" width="170" />
         <el-table-column label="操作" width="100">
-          <template><el-button text type="primary" size="small">标为已读</el-button></template>
+          <template #default="{ row }"><el-button text type="primary" size="small" :disabled="row.isRead" @click="row.isRead = true">标为已读</el-button></template>
         </el-table-column>
       </el-table>
 
       <div class="pagination-wrap">
         <el-pagination
           v-model:current-page="page" v-model:page-size="size"
-          :total="total" :page-sizes="[10, 20, 50]" layout="total, sizes, prev, pager, next"
-          @size-change="fetchData" @current-change="fetchData" />
+          :total="filteredList.length" :page-sizes="[10, 20, 50]" layout="total, sizes, prev, pager, next"
+          @size-change="onPageSizeChange" />
       </div>
     </el-card>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { getRiskNotifications } from '/@/api/demo/index'
 import { useDemoStore } from '/@/store/modules/demo'
 
@@ -59,21 +86,53 @@ const loading = ref(false)
 const list = ref<any[]>([])
 const page = ref(1)
 const size = ref(20)
-const total = ref(0)
+const filter = reactive({ type: '', level: undefined as number | undefined, readState: '' })
+
+const filteredList = computed(() => list.value.filter((row: any) => {
+  if (filter.level && row.level !== filter.level) return false
+  if (filter.readState === 'read' && !row.isRead) return false
+  if (filter.readState === 'unread' && row.isRead) return false
+  return true
+}))
+const pagedList = computed(() => {
+  const start = (page.value - 1) * size.value
+  return filteredList.value.slice(start, start + size.value)
+})
 
 async function fetchData() {
   loading.value = true
   try {
-    const res = await getRiskNotifications({ page: page.value, size: size.value, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
-    list.value = res.data.list
-    total.value = res.data.total
+    const res = await getRiskNotifications({
+      page: 1,
+      size: 100,
+      type: filter.type || undefined,
+      account_id: demoStore.accountId,
+      strategy_id: demoStore.strategyId,
+    })
+    list.value = res.data.list || []
   } catch {
     list.value = []
-    total.value = 0
   } finally { loading.value = false }
 }
 
+function onFilterChange() {
+  page.value = 1
+  fetchData()
+}
+
+function onPageSizeChange() {
+  page.value = 1
+}
+
+function resetFilter() {
+  filter.type = ''
+  filter.level = undefined
+  filter.readState = ''
+  onFilterChange()
+}
+
 onMounted(fetchData)
+watch(() => demoStore.switchVersion, onFilterChange)
 </script>
 
 <style scoped>
@@ -81,5 +140,6 @@ onMounted(fetchData)
 .page-header { margin-bottom: 16px; }
 .page-header h2 { margin: 0 0 4px 0; font-size: 20px; }
 .page-desc { color: #909399; font-size: 13px; margin: 0; }
+.filter-form { margin-bottom: 12px; }
 .pagination-wrap { display: flex; justify-content: flex-end; margin-top: 16px; }
 </style>

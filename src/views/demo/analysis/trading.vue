@@ -31,7 +31,7 @@
     <div class="compact-row">
       <el-card class="fit-card">
         <template #header><span class="section-title">月度交易统计</span></template>
-        <el-table :data="data.monthlyTrades || []" stripe size="small" style="width: 360px">
+        <el-table :data="data.monthlyTrades || []" stripe size="small" style="width: 100%">
           <el-table-column prop="month" label="月份" width="120" />
           <el-table-column prop="count" label="交易次数" width="120" />
           <el-table-column prop="winRate" label="胜率" width="120">
@@ -87,10 +87,15 @@ watch(() => demoStore.switchVersion, fetchData)
 .down { color: #27ae60; }
 .section-title { font-weight: 600; font-size: 15px; }
 /* 紧凑一行：月度统计表 + 频率/滑点堆叠 */
-.compact-row { display: flex; gap: 16px; align-items: stretch; flex-wrap: wrap; margin-top: 16px; }
-.compact-row .fit-card { flex: 0 0 auto; width: fit-content; }
-.num-stack { display: flex; flex-direction: column; gap: 16px; flex: 0 0 auto; min-width: 240px; }
+.stats-row :deep(.el-col) { display: flex; }
+.stats-row :deep(.el-card) { flex: 1; }
+.compact-row { display: grid; grid-template-columns: minmax(420px, 1fr) 320px; gap: 16px; align-items: stretch; margin-top: 16px; }
+.compact-row .fit-card { min-width: 0; }
+.num-stack { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .num-stack .num-card { flex: 1; }
 .num-stack .num-card :deep(.el-card__body) { height: 100%; display: flex; align-items: center; justify-content: center; }
 .big-number { font-size: 30px; font-weight: 700; text-align: center; color: #303133; white-space: nowrap; }
+@media (max-width: 980px) {
+  .compact-row { grid-template-columns: 1fr; }
+}
 </style>

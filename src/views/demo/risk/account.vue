@@ -13,11 +13,11 @@
           <div class="metric-body">
             <div class="metric-row">
               <span>当前亏损</span>
-              <span class="metric-val" :class="dailyLossPercent > 50 ? 'danger' : ''">¥{{ mockDailyLoss.toLocaleString() }}</span>
+              <span class="metric-val" :class="dailyLossPercent > 50 ? 'danger' : ''">{{ formatMoney(metrics.dailyLoss?.current) }}</span>
             </div>
             <div class="metric-row">
               <span>亏损阈值</span>
-              <span class="metric-val">¥500,000.00</span>
+              <span class="metric-val">{{ formatMoney(metrics.dailyLoss?.threshold) }}</span>
             </div>
             <el-progress :percentage="dailyLossPercent" :color="dailyLossPercent > 80 ? '#e74c3c' : dailyLossPercent > 50 ? '#e67e22' : '#27ae60'" />
           </div>
@@ -29,11 +29,11 @@
           <div class="metric-body">
             <div class="metric-row">
               <span>当前回撤</span>
-              <span class="metric-val" :class="drawdownPercent > 50 ? 'danger' : ''">{{ mockDrawdown }}%</span>
+              <span class="metric-val" :class="drawdownPercent > 50 ? 'danger' : ''">{{ formatPercent(metrics.maxDrawdown?.current) }}</span>
             </div>
             <div class="metric-row">
               <span>回撤阈值</span>
-              <span class="metric-val">20%</span>
+              <span class="metric-val">{{ formatPercent(metrics.maxDrawdown?.threshold) }}</span>
             </div>
             <el-progress :percentage="drawdownPercent" :color="drawdownPercent > 80 ? '#e74c3c' : drawdownPercent > 50 ? '#e67e22' : '#27ae60'" />
           </div>
@@ -45,13 +45,13 @@
           <div class="metric-body">
             <div class="metric-row">
               <span>连续亏损次数</span>
-              <span class="metric-val" :class="consecutiveLosses >= 5 ? 'danger' : consecutiveLosses >= 3 ? 'warn' : ''">{{ consecutiveLosses }} 次</span>
+              <span class="metric-val" :class="consecutiveLosses >= lossThreshold ? 'danger' : consecutiveLosses >= Math.ceil(lossThreshold * 0.6) ? 'warn' : ''">{{ consecutiveLosses }} 次</span>
             </div>
             <div class="metric-row">
               <span>阈值</span>
-              <span class="metric-val">5 次</span>
+              <span class="metric-val">{{ lossThreshold }} 次</span>
             </div>
-            <el-progress :percentage="consecutiveLosses / 5 * 100" :color="consecutiveLosses > 4 ? '#e74c3c' : consecutiveLosses > 2 ? '#e67e22' : '#27ae60'" />
+            <el-progress :percentage="lossPercent" :color="lossPercent > 80 ? '#e74c3c' : lossPercent > 50 ? '#e67e22' : '#27ae60'" />
           </div>
         </el-card>
       </el-col>
@@ -78,22 +78,50 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { getRiskAccountMetrics } from '/@/api/demo/index'
+import { useDemoStore } from '/@/store/modules/demo'
 
 defineOptions({ name: 'DemoRiskAccount' })
 
-const mockDailyLoss = 20020.00
-const mockDrawdown = 15.52
-const consecutiveLosses = 2
+const demoStore = useDemoStore()
+const metrics = ref<any>({})
 
-const dailyLossPercent = computed(() => Math.min(100, Math.round((mockDailyLoss / 500000) * 10000) / 100))
-const drawdownPercent = computed(() => Math.min(100, Math.round((mockDrawdown / 20) * 10000) / 100))
+const consecutiveLosses = computed(() => Number(metrics.value.consecutiveLosses?.current || 0))
+const lossThreshold = computed(() => Number(metrics.value.consecutiveLosses?.threshold || 5))
+const dailyLossPercent = computed(() => ratio(metrics.value.dailyLoss?.current, metrics.value.dailyLoss?.threshold))
+const drawdownPercent = computed(() => ratio(metrics.value.maxDrawdown?.current, metrics.value.maxDrawdown?.threshold))
+const lossPercent = computed(() => ratio(consecutiveLosses.value, lossThreshold.value))
 
-const thresholds = [
-  { name: '单日亏损超限', threshold: '¥500,000', action: '暂停交易 + 通知', breached: false, description: '当日累计亏损超过阈值时触发' },
-  { name: '最大回撤超限', threshold: '20%', action: '熔断 + 通知', breached: false, description: '从最高点回撤超过阈值时触发' },
-  { name: '连续亏损次数', threshold: '5次', action: '暂停策略 + 通知', breached: false, description: '连续亏损交易次数超过阈值时触发' },
-]
+const thresholds = computed(() => metrics.value.thresholds || [])
+
+function ratio(current: number, threshold: number) {
+  const t = Number(threshold || 0)
+  if (!t) return 0
+  return Math.min(100, Math.round((Math.abs(Number(current || 0)) / t) * 10000) / 100)
+}
+
+function formatMoney(v: number) {
+  if (v == null) return '-'
+  return (v >= 0 ? '¥' : '-¥') + Math.abs(v).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+function formatPercent(v: number) {
+  if (v == null) return '-'
+  return `${Number(v).toFixed(2)}%`
+}
+
+async function fetchData() {
+  try {
+    const res = await getRiskAccountMetrics({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
+    metrics.value = res.data || {}
+  } catch {
+    metrics.value = {}
+  }
+}
+
+onMounted(fetchData)
+watch(() => demoStore.switchVersion, fetchData)
 </script>
 
 <style scoped>

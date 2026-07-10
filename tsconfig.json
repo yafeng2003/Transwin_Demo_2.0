@@ -26,8 +26,7 @@
     "types": [
       "element-plus/global",
       "vite/client",
-      "vite-plugin-pwa/vue",
-      "vite-plugin-svg-icons/client"
+      "vite-plugin-pwa/vue"
     ]
   },
   "include": [

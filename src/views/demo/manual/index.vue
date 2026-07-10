@@ -12,13 +12,13 @@
           <template #header><span class="section-title">买入</span></template>
           <el-form :model="buyForm" label-width="80px" size="default">
             <el-form-item label="市场">
-              <el-select v-model="buyForm.marketId" style="width:100%">
-                <el-option label="港股" :value="2" /><el-option label="沪深A股" :value="1" />
+              <el-select v-model="buyForm.marketId" style="width:100%" @change="onMarketChange">
+                <el-option v-for="m in demoStore.markets" :key="m.id" :label="m.name" :value="m.id" />
               </el-select>
             </el-form-item>
             <el-form-item label="账户">
-              <el-select v-model="buyForm.accountId" style="width:100%">
-                <el-option label="GGT主账户" value="ggt" />
+              <el-select v-model="buyForm.accountId" style="width:100%" @change="onAccountChange">
+                <el-option v-for="a in demoStore.accounts" :key="a.id" :label="a.label || a.name || a.id" :value="a.id" />
               </el-select>
             </el-form-item>
             <el-form-item label="股票代码">
@@ -49,13 +49,13 @@
           <template #header><span class="section-title">卖出</span></template>
           <el-form :model="sellForm" label-width="80px" size="default">
             <el-form-item label="市场">
-              <el-select v-model="sellForm.marketId" style="width:100%">
-                <el-option label="港股" :value="2" /><el-option label="沪深A股" :value="1" />
+              <el-select v-model="sellForm.marketId" style="width:100%" @change="onMarketChange">
+                <el-option v-for="m in demoStore.markets" :key="m.id" :label="m.name" :value="m.id" />
               </el-select>
             </el-form-item>
             <el-form-item label="账户">
-              <el-select v-model="sellForm.accountId" style="width:100%">
-                <el-option label="GGT主账户" value="ggt" />
+              <el-select v-model="sellForm.accountId" style="width:100%" @change="onAccountChange">
+                <el-option v-for="a in demoStore.accounts" :key="a.id" :label="a.label || a.name || a.id" :value="a.id" />
               </el-select>
             </el-form-item>
             <el-form-item label="持仓选择">
@@ -105,6 +105,11 @@
                   :value="o.id?.toString()" />
               </el-select>
             </el-form-item>
+            <el-form-item label="账户">
+              <el-select v-model="modifyForm.accountId" style="width:100%" @change="onAccountChange">
+                <el-option v-for="a in demoStore.accounts" :key="a.id" :label="a.label || a.name || a.id" :value="a.id" />
+              </el-select>
+            </el-form-item>
             <el-form-item label="订单ID">
               <el-input v-model="modifyForm.orderId" placeholder="或手动输入订单ID" />
             </el-form-item>
@@ -141,7 +146,7 @@
 
 <script lang="ts" setup>
 import { ElMessage } from 'element-plus'
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import { getCurrentPositions, getOrders, manualBuy, manualModifyOrder, manualSell } from '/@/api/demo/index'
 import { useDemoStore } from '/@/store/modules/demo'
 
@@ -157,6 +162,14 @@ const buyForm = reactive({ marketId: 2, accountId: 'ggt', symbolCode: '', orderT
 const sellForm = reactive({ marketId: 2, accountId: 'ggt', symbolCode: '', orderType: 1, price: '', quantity: '' })
 const modifyForm = reactive({ orderId: '', accountId: 'ggt', price: '', quantity: '' })
 
+function syncSelectionToForms() {
+  buyForm.marketId = demoStore.marketId || 2
+  sellForm.marketId = demoStore.marketId || 2
+  buyForm.accountId = demoStore.accountId || ''
+  sellForm.accountId = demoStore.accountId || ''
+  modifyForm.accountId = demoStore.accountId || ''
+}
+
 async function loadPositions() {
   try {
     const res = await getCurrentPositions({ market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
@@ -167,8 +180,24 @@ async function loadPositions() {
 async function loadOrders() {
   try {
     const res = await getOrders({ page: 1, size: 100, market_id: demoStore.marketId, account_id: demoStore.accountId, strategy_id: demoStore.strategyId })
-    orders.value = (res.data.list || []).filter((o: any) => o.status === 0 || o.status === 3)
+    orders.value = (res.data.list || []).filter((o: any) => [0, 3].includes(o.status))
   } catch { orders.value = [] }
+}
+
+async function reloadRelatedData() {
+  await Promise.all([loadPositions(), loadOrders()])
+}
+
+async function onMarketChange(marketId: number) {
+  await demoStore.switchMarket(marketId)
+  syncSelectionToForms()
+  await reloadRelatedData()
+}
+
+async function onAccountChange(accountId: string) {
+  demoStore.switchAccount(accountId)
+  syncSelectionToForms()
+  await reloadRelatedData()
 }
 
 function onSellPositionSelect(pos: any) {
@@ -214,7 +243,14 @@ async function submitModify() {
 }
 
 onMounted(async () => {
-  await Promise.all([loadPositions(), loadOrders()])
+  if (demoStore.markets.length === 0) await demoStore.fetchMarketsAndAccounts()
+  syncSelectionToForms()
+  await reloadRelatedData()
+})
+
+watch(() => demoStore.switchVersion, async () => {
+  syncSelectionToForms()
+  await reloadRelatedData()
 })
 </script>
 
